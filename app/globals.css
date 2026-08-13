@@ -29,9 +29,11 @@ button { color: inherit; }
 .kicker, .section-number { margin: 0 0 7px; color: var(--teal); font: 700 11px/1.2 var(--font-geist-mono), monospace; letter-spacing: .16em; text-transform: uppercase; }
 .topbar h1 { margin: 0; font-size: clamp(19px, 2vw, 26px); letter-spacing: -.04em; font-weight: 620; }
 .topbar h1 em { font-family: Georgia, serif; font-weight: 400; color: #92a6b1; }
+.header-credit { margin: 5px 0 0; color: #778a94; font-size: 11px; line-height: 1.25; }
 .cutoff { display: flex; align-items: flex-end; flex-direction: column; gap: 4px; text-align: right; }
 .cutoff span { color: var(--muted); text-transform: uppercase; font: 700 10px/1 var(--font-geist-mono), monospace; letter-spacing: .12em; }
 .cutoff strong { font-size: 13px; font-weight: 570; }
+.cutoff .header-credit { margin-top: 2px; }
 
 .orientation { max-width: 1480px; margin: 0 auto; padding: 42px 40px 34px; }
 .orientation-label { margin-bottom: 16px; }

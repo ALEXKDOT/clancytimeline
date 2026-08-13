@@ -912,9 +912,10 @@ export default function Home() {
           <div>
             <p className="kicker">Evidence-aware clinical chronology</p>
             <h1>Commonwealth <em>v.</em> Lindsay Clancy</h1>
+            <p className="header-credit">Arranged by Alex Krawec, MS4</p>
           </div>
         </div>
-        <div className="cutoff"><span>Evidence cutoff</span><strong>Aug 11, 2026 · Trial Day 11</strong></div>
+        <div className="cutoff"><span>Evidence cutoff</span><strong>Aug 11, 2026 · Trial Day 11</strong><p className="header-credit">Feedback: AKrawec@mednet.ucla.edu</p></div>
       </header>
 
       <section className="orientation">

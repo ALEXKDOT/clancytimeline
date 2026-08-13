@@ -36,6 +36,8 @@ test("renders evidence-aware controls and chronology boundaries", async () => {
 
   assert.match(html, /Evidence cutoff/);
   assert.match(html, /Aug 11, 2026 · Trial Day 11/);
+  assert.match(html, /Arranged by Alex Krawec, MS4/);
+  assert.match(html, /Feedback: AKrawec@mednet\.ucla\.edu/);
   assert.match(html, /May 26, 2022 – January 24, 2023/);
   assert.match(html, /Post-offense/);
   assert.match(html, /Search symptoms, medications, clinicians/);
