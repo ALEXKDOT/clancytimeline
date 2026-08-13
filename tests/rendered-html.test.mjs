@@ -75,10 +75,13 @@ test("renders a noninteractive monthly provider and medication orientation map",
   assert.match(html, /Prescribed or filled does not necessarily mean taken/);
   assert.match(page, /const orientationCareMap = \[/);
   assert.match(page, /className="section-number orientation-label"/);
+  assert.match(page, /displayDate: "Late Nov\."/);
+  assert.match(page, /displayDate: "~1 week later"/);
   assert.doesNotMatch(page, /className="orientation-copy"/);
   assert.doesNotMatch(page.slice(page.indexOf("const orientationCareMap"), page.indexOf("const events")), /Letitia Dukes|ASPIRE|Jennifer McAllister/);
   assert.doesNotMatch(page.slice(page.indexOf("const orientationCareMap"), page.indexOf("const events")), /date: "[^"]*(?:&|–)[^"]*"/);
   assert.match(css, /\.care-map \{[^}]*grid-template-columns:/);
+  assert.match(css, /\.care-group li \{[^}]*font-size: 12px/);
   assert.match(css, /\.orientation \{[^}]*padding: 42px 40px 34px;/);
   assert.doesNotMatch(page, /care-group[^\n]*onClick/);
 });
