@@ -885,7 +885,6 @@ export default function Home() {
                     <button className={`event-card ${event.certainty.toLowerCase()}`} style={{ top, left: cardOffset }} onClick={() => setSelected(event)} aria-label={`${event.displayDate}: ${event.title}. Open details.`}>
                       <span className="card-date">{event.displayDate}</span>
                       <strong>{event.title}</strong>
-                      <small>{event.short}</small>
                     </button>
                     <span className="axis-dot" />
                   </div>
@@ -962,7 +961,7 @@ export default function Home() {
                 <div className="drawer-accent" style={{ "--event": categoryMeta[selected.category].color } as React.CSSProperties}><span>{categoryMeta[selected.category].label}</span><i /></div>
                 <p className="drawer-date">{selected.displayDate}</p>
                 <h2>{selected.title}</h2>
-                <p className="drawer-summary">{selected.summary}</p>
+                <p className="drawer-summary"><span className="drawer-context">{selected.short}</span>{selected.summary}</p>
                 {(selected.clinician || selected.institution) && <div className="provider-card"><span>{selected.clinician ? "Clinician" : "Institution"}</span><strong>{selected.clinician || selected.institution}</strong>{selected.clinician && selected.institution && <small>{selected.institution}</small>}</div>}
                 {selected.medication && <div className="med-callout"><span>Medication action</span><strong>{selected.medication}</strong></div>}
                 {selected.sequence && <div className="drawer-section sequence-section"><h3>January 24 timeline</h3><div className="sequence-list">{selected.sequence.map((step) => <article key={`${step.time}-${step.title}`}><time>{step.time}</time><div><strong>{step.title}</strong><p>{step.detail}</p><small>{step.evidence}</small></div></article>)}</div></div>}

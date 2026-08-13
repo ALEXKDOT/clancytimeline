@@ -137,3 +137,16 @@ test("derives the drawer event tracker from the selected event", async () => {
   assert.match(page, /showStoryEvent\(selectedEventIndex \+ 1\)/);
   assert.doesNotMatch(page, /useState<number \| null>\(null\)/);
 });
+
+test("moves every event-card subtext into the existing drawer summary", async () => {
+  const [page, css] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+
+  assert.doesNotMatch(page, /<small>\{event\.short\}<\/small>/);
+  assert.match(page, /<p className="drawer-summary"><span className="drawer-context">\{selected\.short\}<\/span>\{selected\.summary\}<\/p>/);
+  assert.match(css, /\.drawer-context \{[^}]*display: block;/);
+  assert.doesNotMatch(css, /\.event-card small \{/);
+  assert.match(css, /\.event-card strong \{[^}]*-webkit-line-clamp: 3;/);
+});
