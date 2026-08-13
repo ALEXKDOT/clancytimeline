@@ -51,11 +51,12 @@ button { color: inherit; }
 .orientation-care-heading span { display: block; margin-bottom: 5px; color: var(--teal); font: 750 10px/1 var(--font-geist-mono), monospace; text-transform: uppercase; letter-spacing: .12em; }
 .orientation-care-heading h2 { margin: 0; font-size: 20px; line-height: 1.15; letter-spacing: -.025em; }
 .orientation-care-heading p { max-width: 450px; margin: 0; color: #899ba4; font-size: 11px; line-height: 1.5; }
-.care-map-scroll { overflow-x: auto; scrollbar-width: thin; scrollbar-color: #3e6876 #0b171e; }
-.care-map { min-width: 1200px; display: grid; grid-template-columns: 1.05fr 1.3fr 1.45fr 1.2fr; align-items: stretch; }
+.care-map-scroll { overflow-x: hidden; }
+.care-map { width: 100%; min-width: 0; display: grid; grid-template-columns: 1.12fr 1.22fr 1.43fr 1.17fr; align-items: stretch; }
 .care-month { min-width: 0; border-right: 1px solid rgba(104,143,158,.23); background: rgba(9,22,28,.72); }
 .care-month:last-child { border-right: 0; }
 .care-month > header { height: 44px; padding: 0 16px; display: flex; align-items: center; gap: 11px; border-bottom: 1px solid rgba(104,143,158,.22); color: #dbe6e9; font: 800 12px/1 var(--font-geist-mono), monospace; text-transform: uppercase; letter-spacing: .09em; }
+.care-month > header span { min-width: 0; white-space: nowrap; }
 .care-month > header i { height: 1px; flex: 1; background: linear-gradient(90deg, var(--teal), transparent); opacity: .55; }
 .care-month-groups { padding: 5px 15px 15px; }
 .care-group { position: relative; padding: 13px 0 13px 14px; border-bottom: 1px solid rgba(104,143,158,.16); }
@@ -318,6 +319,8 @@ footer p { margin: 0; max-width: 620px; }
   .story-beats span { margin-bottom: 12px; }
   .orientation-care-heading { align-items: flex-start; flex-direction: column; gap: 9px; }
   .orientation-care-heading p { max-width: none; }
+  .care-map-scroll { overflow-x: auto; scrollbar-width: thin; scrollbar-color: #3e6876 #0b171e; }
+  .care-map { width: auto; min-width: 1000px; }
   .control-deck { padding: 16px 20px; }
   .view-tabs { max-width: none; }
   .view-tabs span { display: none; }

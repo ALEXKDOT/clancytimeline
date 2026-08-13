@@ -83,7 +83,7 @@ const views: Record<ViewKey, { label: string; eyebrow: string; start: string; en
 
 const orientationCareMap = [
   {
-    month: "September–October",
+    month: "September-October",
     groups: [
       { date: "Sep 15", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Sertraline 25 mg ×30 filled; planned increase from 25 to 50 mg."] },
       { date: "Sep 28", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Sertraline had not been started; medication plan deferred after reported improvement."] },
