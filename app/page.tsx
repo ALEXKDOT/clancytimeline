@@ -81,6 +81,49 @@ const views: Record<ViewKey, { label: string; eyebrow: string; start: string; en
   post: { label: "Post-offense", eyebrow: "January 26, 2023 – September 2024", start: "2023-01-25T00:00:00", end: "2024-09-15T00:00:00", baseWidth: 2500 },
 };
 
+const orientationCareMap = [
+  {
+    month: "September",
+    groups: [
+      { date: "Sep 15", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Sertraline 25 mg ×30 filled; planned increase from 25 to 50 mg."] },
+      { date: "Sep 28", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Sertraline had not been started; medication plan deferred after reported improvement."] },
+    ],
+  },
+  {
+    month: "October",
+    groups: [
+      { date: "Oct 3 & 31", provider: "Jennifer Tufts, MD · Jennifer McAllister", organization: "Aster Mental Health", items: ["Psychiatry follow-up and separate therapy encounters."] },
+      { date: "Oct 20–21", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Sertraline stopped after reported 25→50 mg trial.", "Ativan (lorazepam) 0.5 mg ×7 filled for severe anxiety."] },
+      { date: "Oct 26", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Ativan (lorazepam) 1 mg ×30 filled.", "Buspirone 5 mg ×30 filled.", "Hydroxyzine 25 mg ×30 filled."] },
+    ],
+  },
+  {
+    month: "November",
+    groups: [
+      { date: "Nov 2 & 22", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Ativan (lorazepam) 0.5 mg ×40 filled; gradual taper planned.", "Buspirone 5 mg ×30 refilled Nov 9; later use unresolved."] },
+      { date: "Nov 16", provider: "South Shore ED · Kayvon Izadpanah, MD", organization: "South Shore Health", items: ["Desyrel (trazodone) 50 mg ×30 filled after ED evaluation."] },
+      { date: "Nov 20–28", provider: "Julie Paul, psychiatric NP", organization: "South Shore Perinatal Behavioral Health", items: ["Prozac (fluoxetine) 10 mg trial, then stopped.", "One-tablet Ambien (zolpidem) 5 mg trial prescribed.", "Remeron (mirtazapine) 7.5→15 mg and Klonopin (clonazepam) 0.5 mg used in a brief sleep regimen."] },
+      { date: "Nov 29–30", provider: "Rebecca H. Jollotta, CNP", organization: "South Shore Perinatal Behavioral Health", items: ["First assessment; Seroquel (quetiapine) 25 mg ×30 filled for sleep."] },
+    ],
+  },
+  {
+    month: "December",
+    groups: [
+      { date: "Dec 1 & 16", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Psychiatry follow-ups; lamotrigine 25 mg ×30 prescribed and filled Dec 16."] },
+      { date: "Dec 2–19", provider: "Letitia Dukes, MSW · ASPIRE", organization: "South Shore Health", items: ["Social-work visits, crisis evaluation, safety review, and program coordination."] },
+      { date: "Dec 6–22", provider: "Rebecca H. Jollotta, CNP", organization: "South Shore Perinatal Behavioral Health", items: ["Valium (diazepam) shifted from 5 mg fills to a 2 mg taper.", "Seroquel (quetiapine) titration proposed; 200 mg was reported, while 300–400 mg exposure was not established.", "Quetiapine taper supplies followed: 200→100→50 mg, then stop."] },
+      { date: "Dec 15–30", provider: "MGH · Women & Infants", organization: "Hospital and program evaluations", items: ["MGH emergency assessments Dec 15 and Dec 30; Women & Infants assessment Dec 20."] },
+    ],
+  },
+  {
+    month: "January",
+    groups: [
+      { date: "Jan 1–5", provider: "Alia Goodheart, MD", organization: "McLean Hospital", items: ["Inpatient quetiapine taper: 75→50→25 mg, then discontinued.", "Ativan (lorazepam) 1 mg and Desyrel (trazodone) 50 mg used/planned; discharge fills were 1 mg ×14 and 50 mg ×28."] },
+      { date: "Jan 6–23", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Trazodone reported at 100 mg, then 150 mg ×30 prescribed and filled.", "Valium (diazepam) 5 mg ×14, followed by 2 mg taper prescriptions/fills; some prescriber attribution remains disputed.", "Elavil (amitriptyline) 10 mg ×30 started; increase to 20 mg ordered Jan 23."] },
+    ],
+  },
+];
+
 const events: TimelineEvent[] = [
   {
     id: "birth", date: "2022-05-26T12:00:00", displayDate: "May 26", title: "Callan is born", short: "Third childbirth; postpartum clock begins", category: "clinical", evidence: "Treating testimony", certainty: "High", side: "top", tier: 0,
@@ -846,11 +889,34 @@ export default function Home() {
         <div className="orientation-copy">
           <p className="section-number">01 / ORIENTATION</p>
         </div>
-        <div className="story-beats" aria-label="Clinical arc summary">
-          <article><span>Late summer</span><strong>Anxiety emerges after 12 well weeks</strong><p>Later clinical history described the first 12 postpartum weeks as going well.</p></article>
-          <article><span>Sep–Nov</span><strong>Worsening symptoms</strong><p>Anxiety, depressed mood, insomnia, racing thoughts, and functional impairment prompt serial visits and an ED evaluation.</p></article>
-          <article><span>Nov–Dec</span><strong>Rapid treatment changes</strong><p>Sleep improves unevenly while depression and intrusive thoughts intensify.</p></article>
-          <article><span>January</span><strong>Severe depression persists, offense on January 24</strong><p>McLean admission, medication transition, outpatient follow-up, offense.</p></article>
+        <div className="orientation-content">
+          <div className="story-beats" aria-label="Clinical arc summary">
+            <article><span>Late summer</span><strong>Anxiety emerges after 12 well weeks</strong><p>Later clinical history described the first 12 postpartum weeks as going well.</p></article>
+            <article><span>Sep–Nov</span><strong>Worsening symptoms</strong><p>Anxiety, depressed mood, insomnia, racing thoughts, and functional impairment prompt serial visits and an ED evaluation.</p></article>
+            <article><span>Nov–Dec</span><strong>Rapid treatment changes</strong><p>Sleep improves unevenly while depression and intrusive thoughts intensify.</p></article>
+            <article><span>January</span><strong>Severe depression persists, offense on January 24</strong><p>McLean admission, medication transition, outpatient follow-up, offense.</p></article>
+          </div>
+          <section className="orientation-care" aria-labelledby="orientation-care-title">
+            <div className="orientation-care-heading">
+              <div><span>Care and medication map</span><h2 id="orientation-care-title">Providers seen and major medication trials</h2></div>
+              <p>Summary orientation only. Prescribed or filled does not necessarily mean taken; the interactive timeline below preserves the evidentiary distinctions.</p>
+            </div>
+            <div className="care-map-scroll">
+              <div className="care-map" role="list" aria-label="Monthly summary of providers and medication trials">
+                {orientationCareMap.map((month) => <article className="care-month" key={month.month} role="listitem">
+                  <header><span>{month.month}</span><i /></header>
+                  <div className="care-month-groups">
+                    {month.groups.map((group) => <section className="care-group" key={`${month.month}-${group.date}-${group.provider}`}>
+                      <time>{group.date}</time>
+                      <strong>{group.provider}</strong>
+                      <small>{group.organization}</small>
+                      <ul>{group.items.map((item) => <li key={item}>{item}</li>)}</ul>
+                    </section>)}
+                  </div>
+                </article>)}
+              </div>
+            </div>
+          </section>
         </div>
       </section>
 

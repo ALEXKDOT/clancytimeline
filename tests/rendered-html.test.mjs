@@ -58,6 +58,26 @@ test("compresses the inactive post-offense year and renders the revised orientat
   assert.match(css, /\.filter-chip \{[^}]*height: 38px;[^}]*font-size: 13px/);
 });
 
+test("renders a noninteractive monthly provider and medication orientation map", async () => {
+  const [response, page, css] = await Promise.all([
+    render(),
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+  const html = await response.text();
+
+  assert.match(html, /Providers seen and major medication trials/);
+  for (const month of ["September", "October", "November", "December", "January"]) assert.match(html, new RegExp(`>${month}<`));
+  assert.match(html, /Jennifer Tufts, MD/);
+  assert.match(html, /Rebecca H\. Jollotta, CNP/);
+  assert.match(html, /Alia Goodheart, MD/);
+  assert.match(html, /Ativan \(lorazepam\) 0\.5 mg ×7/);
+  assert.match(html, /Prescribed or filled does not necessarily mean taken/);
+  assert.match(page, /const orientationCareMap = \[/);
+  assert.match(css, /\.care-map \{[^}]*grid-template-columns:/);
+  assert.doesNotMatch(page, /care-group[^\n]*onClick/);
+});
+
 test("keeps the omission band behind cards and classifies the October 26 visit", async () => {
   const [page, css] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
