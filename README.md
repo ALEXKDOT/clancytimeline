@@ -2,6 +2,10 @@
 
 First-draft interactive visualization built from the existing 97-source corpus, with an evidence cutoff of August 11, 2026 after Trial Day 11.
 
+## View online
+
+[Open the hosted interactive timeline](https://alexkdot.github.io/clancytimeline/).
+
 ## Open the finished local page
 
 Open [Clancy_Interactive_Clinical_Timeline.html](standalone-dist/Clancy_Interactive_Clinical_Timeline.html) in a modern browser. It is a single self-contained file: no network connection or local server is required.

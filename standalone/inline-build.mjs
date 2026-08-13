@@ -16,4 +16,10 @@ html = html.replace(/<script type="module"[^>]+src="([^"]+)"[^>]*><\/script>/g, 
 
 const destination = path.resolve("standalone-dist");
 fs.mkdirSync(destination, { recursive: true });
-fs.writeFileSync(path.join(destination, "Clancy_Interactive_Clinical_Timeline.html"), html);
+const output = path.join(destination, "Clancy_Interactive_Clinical_Timeline.html");
+fs.writeFileSync(output, html);
+
+const docs = path.resolve("docs");
+fs.mkdirSync(docs, { recursive: true });
+fs.writeFileSync(path.join(docs, "index.html"), html);
+fs.writeFileSync(path.join(docs, ".nojekyll"), "");
