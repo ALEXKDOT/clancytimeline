@@ -254,3 +254,24 @@ test("moves every event-card subtext into the existing drawer summary", async ()
   assert.doesNotMatch(css, /\.event-card small \{/);
   assert.match(css, /\.event-card strong \{[^}]*-webkit-line-clamp: 3;/);
 });
+
+test("clusters same-day November and December events without changing their evidence records", async () => {
+  const [response, page, css] = await Promise.all([
+    render(),
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+  const html = await response.text();
+
+  assert.match(page, /function buildTimelineCards/);
+  assert.match(page, /day >= "2022-11-01"/);
+  assert.match(page, /day <= "2022-12-31"/);
+  assert.match(page, /!\/\[–~\]\|late\|after\|before\|about\/i\.test\(event\.displayDate\)/);
+  assert.match(page, /kind: "cluster"; eventIds: string\[\]/);
+  assert.match(html, /event-cluster/);
+  assert.match(page, /Local event cluster/);
+  assert.match(page, /Clustering changes only the display/);
+  assert.match(css, /\.event-field \{[^}]*height: 650px/);
+  assert.match(css, /\.main-axis \{[^}]*top: 325px/);
+  assert.match(css, /\.cluster-event-list/);
+});

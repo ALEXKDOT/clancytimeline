@@ -66,6 +66,16 @@ type PackedMedicationItem = {
   visualEnd: number;
 };
 
+type TimelineCardItem = {
+  id: string;
+  date: string;
+  displayDate: string;
+  side: "top" | "bottom";
+  color: string;
+  certainty: TimelineEvent["certainty"];
+  events: TimelineEvent[];
+};
+
 const categoryMeta: Record<Category, { label: string; color: string }> = {
   clinical: { label: "Clinician encounter", color: "#2dd4bf" },
   symptom: { label: "Symptom change", color: "#f0ad4e" },
@@ -748,26 +758,73 @@ function packMedicationContext(canvasWidth: number) {
   return rows;
 }
 
-function packTimelineEvents(eventsToPlace: TimelineEvent[], view: ViewKey, start: string, end: string, canvasWidth: number) {
+function buildTimelineCards(eventsToPlace: TimelineEvent[], view: ViewKey): TimelineCardItem[] {
+  const groupedDates = new Map<string, TimelineEvent[]>();
+  const clusterEligible = (event: TimelineEvent) => {
+    const day = event.date.slice(0, 10);
+    return view === "course"
+      && day >= "2022-11-01"
+      && day <= "2022-12-31"
+      && !/[–~]|late|after|before|about/i.test(event.displayDate);
+  };
+
+  eventsToPlace.forEach((event) => {
+    if (!clusterEligible(event)) return;
+    const day = event.date.slice(0, 10);
+    groupedDates.set(day, [...(groupedDates.get(day) ?? []), event]);
+  });
+
+  const emitted = new Set<string>();
+  return eventsToPlace.flatMap((event) => {
+    const day = event.date.slice(0, 10);
+    const group = clusterEligible(event) ? groupedDates.get(day) ?? [] : [];
+    if (group.length < 2) {
+      return [{
+        id: event.id,
+        date: event.date,
+        displayDate: event.displayDate,
+        side: event.side,
+        color: categoryMeta[event.category].color,
+        certainty: event.certainty,
+        events: [event],
+      }];
+    }
+    if (emitted.has(day)) return [];
+    emitted.add(day);
+    const categories = [...new Set(group.map((item) => item.category))];
+    const certainties = group.map((item) => item.certainty);
+    return [{
+      id: `cluster-${day}`,
+      date: group[0].date,
+      displayDate: timelineDate(`${day}T12:00:00`, { month: "long", day: "numeric" }),
+      side: group[0].side,
+      color: categories.length === 1 ? categoryMeta[categories[0]].color : "#88a6b1",
+      certainty: certainties.includes("Contested") ? "Contested" : certainties.includes("Moderate") ? "Moderate" : "High",
+      events: group,
+    }];
+  });
+}
+
+function packTimelineEvents(cardsToPlace: TimelineCardItem[], view: ViewKey, start: string, end: string, canvasWidth: number) {
   const cardWidth = 184;
   const halfCard = cardWidth / 2;
   const collisionGap = 12;
   const laneEnds = {
-    top: Array(4).fill(-Infinity) as number[],
-    bottom: Array(4).fill(-Infinity) as number[],
+    top: Array(3).fill(-Infinity) as number[],
+    bottom: Array(3).fill(-Infinity) as number[],
   };
   const laneTop = {
-    top: [101, 202, 303, 404],
-    bottom: [517, 618, 719, 820],
+    top: [25, 125, 225],
+    bottom: [340, 440, 540],
   };
 
-  return eventsToPlace.map((event) => {
-    const x = Math.min(99.2, Math.max(.8, timelinePct(event.date, view, start, end)));
+  return cardsToPlace.map((item) => {
+    const x = Math.min(99.2, Math.max(.8, timelinePct(item.date, view, start, end)));
     const eventX = canvasWidth * x / 100;
     const cardCenter = Math.min(canvasWidth - halfCard - 8, Math.max(halfCard + 8, eventX));
     const cardLeft = cardCenter - halfCard;
     const cardRight = cardCenter + halfCard;
-    const preferredSides: ("top" | "bottom")[] = [event.side, event.side === "top" ? "bottom" : "top"];
+    const preferredSides: ("top" | "bottom")[] = [item.side, item.side === "top" ? "bottom" : "top"];
     let chosenSide: "top" | "bottom" | null = null;
     let chosenLane = -1;
 
@@ -789,16 +846,16 @@ function packTimelineEvents(eventsToPlace: TimelineEvent[], view: ViewKey, start
 
     laneEnds[chosenSide][chosenLane] = Math.max(laneEnds[chosenSide][chosenLane], cardRight);
     const top = laneTop[chosenSide][chosenLane];
-    const connectorTop = chosenSide === "top" ? top + 96 : 513;
-    const connectorHeight = chosenSide === "top" ? 503 - (top + 96) : top - 513;
+    const connectorTop = chosenSide === "top" ? top + 96 : 335;
+    const connectorHeight = chosenSide === "top" ? 325 - (top + 96) : top - 335;
     return {
-      event,
+      item,
       x,
       top,
       cardOffset: cardCenter - eventX,
       connectorTop,
       connectorHeight,
-      color: categoryMeta[event.category].color,
+      color: item.color,
     };
   });
 }
@@ -820,7 +877,7 @@ export default function Home() {
   const [zoom, setZoom] = useState(1);
   const [activeCategories, setActiveCategories] = useState<Set<Category>>(new Set(Object.keys(categoryMeta) as Category[]));
   const [query, setQuery] = useState("");
-  const [selection, setSelection] = useState<{ kind: "event"; index: number } | { kind: "medication"; medication: Medication } | null>(null);
+  const [selection, setSelection] = useState<{ kind: "event"; index: number } | { kind: "cluster"; eventIds: string[] } | { kind: "medication"; medication: Medication } | null>(null);
   const [showMedicationOverlay, setShowMedicationOverlay] = useState(false);
   const [showScrollCoach, setShowScrollCoach] = useState(true);
   const scroller = useRef<HTMLDivElement>(null);
@@ -838,6 +895,9 @@ export default function Home() {
   const selectedEventIndex = selection?.kind === "event" ? selection.index : -1;
   const selectedEvent = selectedEventIndex >= 0 ? visibleEvents[selectedEventIndex] ?? null : null;
   const selectedMedication = selection?.kind === "medication" ? selection.medication : null;
+  const selectedClusterEvents = selection?.kind === "cluster"
+    ? selection.eventIds.map((id) => visibleEvents.find((event) => event.id === id)).filter((event): event is TimelineEvent => Boolean(event))
+    : [];
   const selected = selectedEvent ?? selectedMedication;
 
   const toggleCategory = (category: Category) => {
@@ -894,9 +954,10 @@ export default function Home() {
     return [...groups.entries()].sort(([a], [b]) => stamp(a) - stamp(b));
   }, []);
   const medicationContextHeight = 50 + (packedMedicationRows.length + detectedMedicationGroups.length) * 29;
+  const timelineCards = useMemo(() => buildTimelineCards(visibleEvents, view), [visibleEvents, view]);
   const positionedEvents = useMemo(
-    () => packTimelineEvents(visibleEvents, view, range.start, range.end, canvasWidth),
-    [visibleEvents, view, range.start, range.end, canvasWidth],
+    () => packTimelineEvents(timelineCards, view, range.start, range.end, canvasWidth),
+    [timelineCards, view, range.start, range.end, canvasWidth],
   );
 
   return (
@@ -1038,17 +1099,22 @@ export default function Home() {
               {view === "post" && <div className="timeline-break field-break" style={{ left: `${postBreak.breakStartPct}%`, width: `${postBreak.breakEndPct - postBreak.breakStartPct}%` }} aria-hidden="true" />}
               <div className="main-axis" />
               <div className="connector-layer" aria-hidden="true">
-                {positionedEvents.map(({ event, x, connectorTop, connectorHeight, color }) => <span className="connector" key={event.id} style={{ left: `${x}%`, top: connectorTop, height: Math.max(10, connectorHeight), "--event": color } as React.CSSProperties} />)}
+                {positionedEvents.map(({ item, x, connectorTop, connectorHeight, color }) => <span className="connector" key={item.id} style={{ left: `${x}%`, top: connectorTop, height: Math.max(10, connectorHeight), "--event": color } as React.CSSProperties} />)}
               </div>
-              {positionedEvents.map(({ event, x, top, cardOffset, color }) => (
-                  <div className="event-anchor" key={event.id} style={{ left: `${x}%`, "--event": color } as React.CSSProperties}>
-                    <button className={`event-card ${event.certainty.toLowerCase()}`} style={{ top, left: cardOffset }} onClick={() => { const index = visibleEvents.findIndex((item) => item.id === event.id); setSelection({ kind: "event", index }); }} aria-label={`${event.displayDate}: ${event.title}. Open details.`}>
-                      <span className="card-date">{event.displayDate}</span>
-                      <strong>{event.title}</strong>
+              {positionedEvents.map(({ item, x, top, cardOffset, color }) => {
+                const isCluster = item.events.length > 1;
+                const event = item.events[0];
+                const categories = [...new Set(item.events.map((member) => member.category))];
+                return (
+                  <div className="event-anchor" key={item.id} style={{ left: `${x}%`, "--event": color } as React.CSSProperties}>
+                    <button className={`event-card ${isCluster ? "event-cluster" : ""} ${item.certainty.toLowerCase()}`} style={{ top, left: cardOffset }} onClick={() => isCluster ? setSelection({ kind: "cluster", eventIds: item.events.map((member) => member.id) }) : setSelection({ kind: "event", index: visibleEvents.findIndex((member) => member.id === event.id) })} aria-label={isCluster ? `${item.displayDate}: ${item.events.length} events. Open cluster.` : `${event.displayDate}: ${event.title}. Open details.`}>
+                      <span className="card-date">{item.displayDate}</span>
+                      {isCluster ? <><strong>{item.events.length} events</strong><span className="cluster-kinds">{categories.map((category) => <i key={category} style={{ "--cluster-color": categoryMeta[category].color } as React.CSSProperties} />)}<small>Select to unpack</small></span></> : <strong>{event.title}</strong>}
                     </button>
                     <span className="axis-dot" />
                   </div>
-              ))}
+                );
+              })}
               {!visibleEvents.length && <div className="empty-state"><strong>No matching events</strong><span>Adjust the search or category filters.</span></div>}
             </div>
 
@@ -1103,6 +1169,26 @@ export default function Home() {
         <p>Educational evidence visualization · not an independent diagnosis, malpractice opinion, criminal-responsibility opinion, or verdict recommendation.</p>
         <p>Source IDs correspond to the 97-source master corpus. Update before presenting.</p>
       </footer>
+
+      {selectedClusterEvents.length > 0 && (
+        <div className="drawer-layer" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setSelection(null); }}>
+          <aside key={`cluster-${selectedClusterEvents.map((event) => event.id).join("-")}`} className="detail-drawer cluster-drawer" role="dialog" aria-modal="true" aria-label={`${selectedClusterEvents.length} events on ${selectedClusterEvents[0].displayDate}`}>
+            <button className="drawer-close" onClick={() => setSelection(null)} aria-label="Close event cluster">×</button>
+            <div className="drawer-accent cluster-accent"><span>Local event cluster</span><i /></div>
+            <p className="drawer-date">{timelineDate(selectedClusterEvents[0].date, { month: "long", day: "numeric", year: "numeric" })}</p>
+            <h2>{selectedClusterEvents.length} events</h2>
+            <p className="drawer-summary">Several separately documented events share this date. Select one to open its complete evidence panel.</p>
+            <div className="cluster-event-list">
+              {selectedClusterEvents.map((clusterEvent) => <button key={clusterEvent.id} onClick={() => setSelection({ kind: "event", index: visibleEvents.findIndex((item) => item.id === clusterEvent.id) })} style={{ "--cluster-color": categoryMeta[clusterEvent.category].color } as React.CSSProperties}>
+                <span>{categoryMeta[clusterEvent.category].label}</span>
+                <strong>{clusterEvent.title}</strong>
+                <small>{clusterEvent.short}</small>
+              </button>)}
+            </div>
+            <p className="cluster-boundary">Clustering changes only the display. Each event retains its original source posture, certainty, and chronological position.</p>
+          </aside>
+        </div>
+      )}
 
       {selected && (
         <div className="drawer-layer" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setSelection(null); }}>

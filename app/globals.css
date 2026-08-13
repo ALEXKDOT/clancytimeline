@@ -136,9 +136,9 @@ button { color: inherit; }
 .scroll-coach > div:nth-child(2) span { color: #91a4ac; font-size: 11px; }
 .scroll-coach > button { position: absolute; top: 7px; right: 8px; width: 25px; height: 25px; border: 0; border-radius: 50%; background: transparent; color: #7e939b; font-size: 18px; line-height: 1; cursor: pointer; }
 .scroll-coach > button:hover { background: #16313a; color: white; }
-.timeline-canvas { position: relative; min-width: 100%; height: 1940px; background-image: linear-gradient(90deg, rgba(87,129,145,.06) 1px, transparent 1px); background-size: 144px 100%; }
-.timeline-canvas.overlay-open { height: calc(1940px + var(--med-context-height)); }
-.timeline-canvas.compact { height: 1030px; }
+.timeline-canvas { position: relative; min-width: 100%; height: 1620px; background-image: linear-gradient(90deg, rgba(87,129,145,.06) 1px, transparent 1px); background-size: 144px 100%; }
+.timeline-canvas.overlay-open { height: calc(1620px + var(--med-context-height)); }
+.timeline-canvas.compact { height: 710px; }
 .time-ruler { height: 60px; position: relative; border-bottom: 1px solid rgba(122,159,173,.2); color: #708590; font: 650 10px/1 var(--font-geist-mono), monospace; }
 .tick { position: absolute; top: 0; height: 100%; width: 1px; background: rgba(108,148,163,.28); }
 .tick span { position: absolute; top: 21px; left: 12px; white-space: nowrap; text-transform: uppercase; letter-spacing: .08em; }
@@ -151,11 +151,11 @@ button { color: inherit; }
 .ruler-break:before { top: 17px; }
 .ruler-break:after { top: 38px; }
 .ruler-break span { position: absolute; left: 50%; bottom: 3px; transform: translateX(-50%); color: #758b94; font: 700 7px/1 var(--font-geist-mono), monospace; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
-.event-field { position: relative; z-index: 1; height: 970px; }
+.event-field { position: relative; z-index: 1; height: 650px; }
 .ruler-break { z-index: 18; }
 .field-break { z-index: 1; top: 0; bottom: 0; min-width: 82px; border-left: 1px solid rgba(109,145,159,.18); border-right: 1px solid rgba(109,145,159,.18); background: rgba(9,21,27,.94); }
-.field-break:before { top: 493px; }
-.field-break:after { top: 514px; }
+.field-break:before { top: 315px; }
+.field-break:after { top: 336px; }
 .med-overlay-section { position: relative; padding-top: 42px; border-bottom: 1px solid rgba(122,159,173,.23); background: linear-gradient(180deg, rgba(6,18,24,.98), rgba(8,21,27,.96)); }
 .med-overlay-heading { position: absolute; z-index: 4; top: 0; left: 0; right: 0; height: 42px; padding: 0 38px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid rgba(122,159,173,.18); background: rgba(9,21,27,.96); }
 .med-overlay-heading span { color: #dfe8eb; font: 750 11px/1 var(--font-geist-mono), monospace; text-transform: uppercase; letter-spacing: .12em; }
@@ -176,16 +176,21 @@ button { color: inherit; }
 .med-detected-cluster button:hover { background: #10252e; filter: brightness(1.12); }
 .med-detected-cluster button i { width: 8px; height: 8px; border: 2px solid #071217; border-radius: 50%; background: white; box-shadow: 0 0 0 1px var(--med), 0 0 8px var(--med); }
 .med-detected-cluster button span { font: 850 7px/1 var(--font-geist-mono), monospace; }
-.main-axis { position: absolute; z-index: 12; left: 0; right: 0; top: 503px; height: 7px; background: #c8d2d6; box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 10px 35px rgba(0,0,0,.25); pointer-events: none; }
+.main-axis { position: absolute; z-index: 12; left: 0; right: 0; top: 325px; height: 7px; background: #c8d2d6; box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 10px 35px rgba(0,0,0,.25); pointer-events: none; }
 .event-anchor { position: absolute; top: 0; height: 100%; width: 0; }
 .event-card { position: absolute; z-index: 6; width: 184px; height: 96px; overflow: hidden; transform: translateX(-50%); padding: 12px 13px; border: 1px solid color-mix(in srgb, var(--event) 50%, #233b46); border-top: 2px solid var(--event); border-radius: 8px; text-align: left; background: rgba(10,25,32,.99); box-shadow: 0 10px 26px rgba(0,0,0,.27); cursor: pointer; transition: transform .16s ease, background .16s ease, box-shadow .16s ease; }
 .event-card:hover, .event-card:focus-visible { transform: translateX(-50%) translateY(-3px); background: #10252e; box-shadow: 0 15px 35px rgba(0,0,0,.4), 0 0 0 1px color-mix(in srgb, var(--event) 45%, transparent); outline: none; z-index: 8; }
 .event-card.contested { border-style: dashed; }
 .card-date { display: block; color: var(--event); font: 750 10px/1 var(--font-geist-mono), monospace; letter-spacing: .045em; text-transform: uppercase; margin-bottom: 8px; }
 .event-card strong { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; color: #eef5f7; font-size: 14px; line-height: 1.16; letter-spacing: -.012em; }
+.event-cluster { background: linear-gradient(145deg, rgba(17,38,47,.99), rgba(9,24,31,.99)); }
+.event-cluster strong { font-size: 17px; -webkit-line-clamp: 1; }
+.cluster-kinds { display: flex; align-items: center; gap: 5px; margin-top: 9px; }
+.cluster-kinds i { width: 7px; height: 7px; border-radius: 50%; background: var(--cluster-color); box-shadow: 0 0 7px color-mix(in srgb, var(--cluster-color) 55%, transparent); }
+.cluster-kinds small { margin-left: 3px; color: #91a4ac; font-size: 9px; font-style: normal; }
 .connector-layer { position: absolute; z-index: 2; inset: 0; pointer-events: none; }
 .connector { position: absolute; width: 2px; transform: translateX(-1px); background: linear-gradient(var(--event), color-mix(in srgb, var(--event) 55%, transparent)); opacity: .75; pointer-events: none; }
-.axis-dot { position: absolute; z-index: 14; left: -6px; top: 500px; width: 13px; height: 13px; border: 3px solid #081218; border-radius: 50%; background: var(--event); box-shadow: 0 0 0 1px var(--event), 0 0 18px color-mix(in srgb, var(--event) 55%, transparent); pointer-events: none; }
+.axis-dot { position: absolute; z-index: 14; left: -6px; top: 322px; width: 13px; height: 13px; border: 3px solid #081218; border-radius: 50%; background: var(--event); box-shadow: 0 0 0 1px var(--event), 0 0 18px color-mix(in srgb, var(--event) 55%, transparent); pointer-events: none; }
 .empty-state { position: absolute; left: 50vw; top: 255px; transform: translateX(-50%); text-align: center; color: var(--muted); }
 .empty-state strong, .empty-state span { display: block; }
 .empty-state strong { color: var(--ink); margin-bottom: 8px; }
@@ -244,6 +249,15 @@ footer p { margin: 0; max-width: 620px; }
 @keyframes slide { from { transform: translateX(40px); opacity: .6; } }
 .drawer-close { position: absolute; top: 24px; right: 25px; width: 34px; height: 34px; border: 1px solid #afbfbe; border-radius: 50%; color: #34494e; background: transparent; font-size: 22px; cursor: pointer; }
 .drawer-close:hover { background: #d6e1df; }
+.cluster-accent i { background: #6a8992; }
+.cluster-event-list { display: grid; gap: 10px; margin-top: 27px; }
+.cluster-event-list button { position: relative; width: 100%; padding: 16px 18px 16px 21px; overflow: hidden; border: 1px solid #bdccca; border-radius: 8px; background: #dbe5e3; color: #172b31; text-align: left; cursor: pointer; }
+.cluster-event-list button:before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 4px; background: var(--cluster-color); }
+.cluster-event-list button:hover, .cluster-event-list button:focus-visible { background: #cedddb; outline: 2px solid color-mix(in srgb, var(--cluster-color) 55%, transparent); outline-offset: 1px; }
+.cluster-event-list span { display: block; margin-bottom: 8px; color: #5b7177; font: 750 9px/1 var(--font-geist-mono), monospace; text-transform: uppercase; letter-spacing: .08em; }
+.cluster-event-list strong { display: block; font-size: 15px; line-height: 1.28; }
+.cluster-event-list small { display: block; margin-top: 7px; color: #5e7277; font-size: 11px; line-height: 1.4; }
+.cluster-boundary { margin: 21px 0 0; padding: 13px 15px; border: 1px solid #c3d0ce; background: #edf2f1; color: #5a6e73; font-size: 11px; line-height: 1.5; }
 .drawer-accent { display: flex; align-items: center; gap: 10px; margin: 4px 50px 40px 0; color: #486066; font: 750 10px/1 var(--font-geist-mono), monospace; text-transform: uppercase; letter-spacing: .11em; }
 .drawer-accent i { height: 2px; flex: 1; background: var(--event); }
 .drawer-date { margin: 0 0 10px; color: #577078; font: 700 11px/1 var(--font-geist-mono), monospace; text-transform: uppercase; letter-spacing: .08em; }
