@@ -69,6 +69,9 @@ test("renders a noninteractive monthly provider and medication orientation map",
   const html = await response.text();
 
   assert.match(html, /Providers seen and major medication trials/);
+  assert.match(html, /01 \/ BACKGROUND/);
+  assert.doesNotMatch(html, /01 \/ ORIENTATION/);
+  assert.match(html, /Background summary only/);
   for (const month of ["September-October", "November", "December", "January"]) assert.match(html, new RegExp(`>${month}<`));
   assert.match(html, /Jennifer Tufts, MD/);
   assert.match(html, /Rebecca H\. Jollotta, CNP/);

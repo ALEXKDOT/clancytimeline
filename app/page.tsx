@@ -914,7 +914,7 @@ export default function Home() {
       </header>
 
       <section className="orientation">
-        <p className="section-number orientation-label">01 / ORIENTATION</p>
+        <p className="section-number orientation-label">01 / BACKGROUND</p>
         <div className="orientation-content">
           <div className="story-beats" aria-label="Clinical arc summary">
             <article><span>Late summer</span><strong>Anxiety emerges after 12 well weeks</strong><p>Later clinical history described the first 12 postpartum weeks as going well.</p></article>
@@ -925,7 +925,7 @@ export default function Home() {
           <section className="orientation-care" aria-labelledby="orientation-care-title">
             <div className="orientation-care-heading">
               <div><span>Care and medication map</span><h2 id="orientation-care-title">Providers seen and major medication trials</h2></div>
-              <p>Summary orientation only. Prescribed or filled does not necessarily mean taken; the interactive timeline below preserves the evidentiary distinctions.</p>
+              <p>Background summary only. Prescribed or filled does not necessarily mean taken; the interactive timeline below preserves the evidentiary distinctions.</p>
             </div>
             <div className="care-map-scroll">
               <div className="care-map" role="list" aria-label="Monthly summary of providers and medication trials">
