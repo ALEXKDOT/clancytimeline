@@ -23,7 +23,7 @@ test("server-renders the clinical timeline", async () => {
   assert.match(html, /<title>Clancy Case — Interactive Clinical Timeline<\/title>/i);
   assert.match(html, /Commonwealth/);
   assert.match(html, /Lindsay Clancy/);
-  assert.match(html, /78<\/strong> events shown/);
+  assert.match(html, /86<\/strong> events shown/);
   assert.match(html, /Show medication context/);
   assert.match(html, /MEDICATION TIMELINE/);
   assert.match(html, /event-card/);
@@ -124,8 +124,33 @@ test("collapses January 24 into one card with a provenance-preserving detail seq
   assert.match(page, /<h3>January 24 timeline<\/h3>/);
   assert.match(page, /time: "4:48 PM", title: "CVS telephone call"/);
   assert.match(page, /time: "5:10 PM", title: "ThreeV telephone order"/);
-  assert.match(page, /time: "Early evening", title: "Return home and discovery"/);
+  assert.match(page, /time: "5:33–5:34 PM", title: "Patrick and Lindsay speak from CVS"/);
+  assert.match(page, /time: "By ~6:09 PM", title: "Quiet house and unanswered call"/);
+  assert.match(page, /time: "~6:11 PM onward", title: "Discovery and emergency response"/);
   assert.doesNotMatch(page, /id: "jan24-day"|id: "cvs"|id: "threev"|id: "return"/);
+});
+
+test("separates civil pleading allegations from established event evidence", async () => {
+  const [page, css] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(page, /civilClaims\?:/);
+  assert.match(page, /Civil pleading allegations/);
+  assert.match(page, /not findings/);
+  assert.match(page, /id: "child-thoughts"[^]*?civilClaims:/);
+  assert.match(page, /id: "jan24-sequence"[^]*?civilClaims:/);
+  assert.match(css, /\.civil-claims-box \{/);
+});
+
+test("includes care contacts recovered in the Day 11 bounded audit", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  for (const id of ["oct3-therapy", "fluoxetine-start-report", "dec1-urgent-outreach", "dec2-dukes", "dec5-aspire", "dec12-dukes", "dec19-dukes", "jan7-party"]) {
+    assert.match(page, new RegExp(`id: "${id}"`), `${id} should be present`);
+  }
+  assert.match(page, /ASPIRE/);
+  assert.match(page, /Letitia Dukes/);
 });
 
 test("derives the drawer event tracker from the selected event", async () => {
