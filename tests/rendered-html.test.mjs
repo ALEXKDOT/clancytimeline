@@ -212,16 +212,22 @@ test("renders bulk filters, larger controls, and user-dismissed horizontal-scrol
   assert.match(css, /\.scroll-coach\.dismissed/);
 });
 
-test("places the parties' theories above the timeline", async () => {
-  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  const theories = page.indexOf("02 / THE PARTIES");
+test("places the arguments above the timeline in a full-width section", async () => {
+  const [page, css] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+  const theories = page.indexOf("02 / THE ARGUMENTS");
   const workspace = page.indexOf('<section className="workspace"');
 
   assert.ok(theories > -1 && workspace > -1 && theories < workspace);
-  assert.match(page, /Defense theory · attorney argument/);
-  assert.match(page, /Commonwealth theory · attorney argument/);
-  assert.match(page, /No retained criminal-responsibility expert had testified/);
+  assert.match(page, /<span>Defense<\/span>/);
+  assert.match(page, /<span>Prosecution<\/span>/);
+  assert.doesNotMatch(page, /THE PARTIES&apos; THEORIES|Defense theory · attorney argument|Commonwealth theory · attorney argument/);
+  assert.doesNotMatch(page, /The central dispute is mental state|No retained criminal-responsibility expert had testified/);
   assert.doesNotMatch(page, /Three evidentiary separations/);
+  assert.match(css, /\.reading-guide \{[^}]*padding: 44px 40px 48px;\s*\}/);
+  assert.match(css, /\.argument-grid article small \{[^}]*font-size: 13px/);
 });
 
 test("moves every event-card subtext into the existing drawer summary", async () => {

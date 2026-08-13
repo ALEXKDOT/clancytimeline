@@ -223,18 +223,17 @@ button { color: inherit; }
 .med-marker.detected { background: white; box-shadow: 0 0 0 2px var(--med), 0 0 15px var(--med); }
 .med-marker.prescribed { background: #09151b; border: 3px solid #09151b; box-shadow: 0 0 0 2px var(--med); }
 
-.reading-guide { max-width: 1480px; margin: 0 auto; padding: 44px 40px 48px; display: grid; grid-template-columns: .68fr 1.32fr; gap: 54px; }
-.reading-guide h2 { font-size: clamp(29px, 3vw, 45px); }
-.argument-intro { max-width: 650px; margin: 0; color: #94a6af; font-size: 13px; line-height: 1.6; }
+.reading-guide { max-width: 1480px; margin: 0 auto; padding: 44px 40px 48px; }
+.argument-label { margin-bottom: 16px; }
 .argument-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; align-self: start; overflow: hidden; border: 1px solid #29434e; border-radius: 12px; background: #29434e; }
 .argument-grid article { min-height: 275px; padding: 25px; background: #0b171e; }
-.argument-grid article span { display: block; margin-bottom: 28px; font: 800 10px/1.2 var(--font-geist-mono), monospace; text-transform: uppercase; letter-spacing: .1em; }
+.argument-grid article span { display: block; margin-bottom: 24px; font: 800 13px/1.2 var(--font-geist-mono), monospace; text-transform: uppercase; letter-spacing: .09em; }
 .defense-argument span { color: #d995f0; }
 .prosecution-argument span { color: #f1ab61; }
 .argument-grid h3 { margin: 0 0 14px; max-width: 390px; font-size: 20px; line-height: 1.12; letter-spacing: -.025em; }
 .argument-grid article p { margin: 0 0 17px; color: #bac7cc; font-size: 13px; line-height: 1.55; }
-.argument-grid article small { display: block; color: #7f929a; font-size: 11px; line-height: 1.55; }
-.argument-boundary { grid-column: 1 / -1; margin: 0; padding: 14px 18px; background: #10242c; color: #9eb0b7; font-size: 11px; line-height: 1.55; }
+.argument-grid article small { display: block; color: #91a3aa; font-size: 13px; line-height: 1.55; }
+.argument-boundary { grid-column: 1 / -1; margin: 0; padding: 15px 18px; background: #10242c; color: #a3b3b9; font-size: 13px; line-height: 1.55; }
 footer { min-height: 90px; padding: 28px 40px; display: flex; align-items: center; justify-content: space-between; gap: 30px; border-top: 1px solid rgba(112,151,166,.2); color: #667984; font-size: 10px; }
 footer p { margin: 0; max-width: 620px; }
 
