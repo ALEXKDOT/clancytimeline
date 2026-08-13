@@ -55,7 +55,7 @@ test("compresses the inactive post-offense year and renders the revised orientat
   assert.match(page, /Sep–Nov/);
   assert.match(page, /Severe depression persists, offense on January 24/);
   assert.match(css, /.story-beats \{[^}]*grid-template-columns: repeat\(4, 1fr\)/);
-  assert.match(css, /\.filter-chip \{[^}]*height: 38px;[^}]*font-size: 13px/);
+  assert.match(css, /\.filter-chip \{[^}]*height: 44px;[^}]*font-size: 16px/);
 });
 
 test("keeps the omission band behind cards and classifies the October 26 visit", async () => {
@@ -113,7 +113,7 @@ test("renders a larger medication legend and a month ruler inside the medication
   assert.match(html, /Medication timeline months/);
   assert.match(page, /className="med-month-ruler"/);
   assert.match(page, /medicationTicks\.map/);
-  assert.match(css, /\.status-key \{[^}]*font-size: 11px/);
+  assert.match(css, /\.status-key \{[^}]*font-size: 16px/);
   assert.match(css, /\.key \{[^}]*width: 24px; height: 9px/);
 });
 
@@ -178,7 +178,7 @@ test("renders bulk filters, larger controls, and user-dismissed horizontal-scrol
   assert.match(page, /event\.shiftKey/);
   assert.match(page, /Math\.abs\(event\.deltaX\)/);
   assert.match(css, /\.view-tabs strong \{[^}]*font-size: 16px/);
-  assert.match(css, /\.filter-chip \{[^}]*height: 38px;[^}]*font-size: 13px/);
+  assert.match(css, /\.filter-chip \{[^}]*height: 44px;[^}]*font-size: 16px/);
   assert.match(css, /\.scroll-coach\.dismissed/);
 });
 
@@ -205,4 +205,17 @@ test("moves every event-card subtext into the existing drawer summary", async ()
   assert.match(css, /\.drawer-context \{[^}]*display: block;/);
   assert.doesNotMatch(css, /\.event-card small \{/);
   assert.match(css, /\.event-card strong \{[^}]*-webkit-line-clamp: 3;/);
+});
+
+test("keeps every explicitly sized text style at or above 16 pixels", async () => {
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const declarations = [...css.matchAll(/(?:font-size\s*:\s*|font\s*:\s*[^;{}]*?)(\d+(?:\.\d+)?)px/g)];
+  const undersized = declarations
+    .map((match) => ({ value: Number(match[1]), declaration: match[0] }))
+    .filter(({ value }) => value < 16);
+
+  assert.deepEqual(undersized, []);
+  assert.match(css, /\.event-card \{[^}]*width: 220px;[^}]*height: 128px/);
+  assert.match(css, /\.med-row \{[^}]*height: 92px/);
+  assert.match(css, /\.argument-grid article small \{[^}]*font-size: 16px/);
 });
