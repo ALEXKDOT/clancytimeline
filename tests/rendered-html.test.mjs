@@ -57,7 +57,7 @@ test("compresses the inactive post-offense year and renders the revised orientat
   assert.match(page, /Sep–Nov/);
   assert.match(page, /Severe depression persists, offense on January 24/);
   assert.match(css, /.story-beats \{[^}]*grid-template-columns: repeat\(4, 1fr\)/);
-  assert.match(css, /\.filter-chip \{[^}]*height: 38px;[^}]*font-size: 13px/);
+  assert.match(css, /\.filter-chip \{[^}]*height: 34px;[^}]*font-size: 11\.5px/);
 });
 
 test("renders a noninteractive monthly provider and medication orientation map", async () => {
@@ -215,7 +215,9 @@ test("renders bulk filters, larger controls, and user-dismissed horizontal-scrol
   assert.match(page, /event\.shiftKey/);
   assert.match(page, /Math\.abs\(event\.deltaX\)/);
   assert.match(css, /\.view-tabs strong \{[^}]*font-size: 16px/);
-  assert.match(css, /\.filter-chip \{[^}]*height: 38px;[^}]*font-size: 13px/);
+  assert.match(css, /\.filter-row \{[^}]*flex-wrap: wrap;[^}]*overflow: visible/);
+  assert.match(css, /\.filter-chip \{[^}]*height: 34px;[^}]*padding: 0 10px;[^}]*font-size: 11\.5px/);
+  assert.match(css, /\.filter-actions button \{[^}]*height: 32px;[^}]*padding: 0 9px;[^}]*font-size: 11px/);
   assert.match(css, /\.scroll-coach\.dismissed/);
 });
 
