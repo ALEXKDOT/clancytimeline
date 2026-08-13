@@ -92,34 +92,66 @@ const orientationCareMap = [
   {
     month: "October",
     groups: [
-      { date: "Oct 3 & 31", provider: "Jennifer Tufts, MD · Jennifer McAllister", organization: "Aster Mental Health", items: ["Psychiatry follow-up and separate therapy encounters."] },
-      { date: "Oct 20–21", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Sertraline stopped after reported 25→50 mg trial.", "Ativan (lorazepam) 0.5 mg ×7 filled for severe anxiety."] },
+      { date: "Oct 3", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Psychiatry follow-up focused on symptoms and leave paperwork."] },
+      { date: "Oct 20", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Sertraline stopped after reported 25→50 mg trial."] },
+      { date: "Oct 21", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Ativan (lorazepam) 0.5 mg ×7 filled for severe anxiety."] },
       { date: "Oct 26", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Ativan (lorazepam) 1 mg ×30 filled.", "Buspirone 5 mg ×30 filled.", "Hydroxyzine 25 mg ×30 filled."] },
     ],
   },
   {
     month: "November",
     groups: [
-      { date: "Nov 2 & 22", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Ativan (lorazepam) 0.5 mg ×40 filled; gradual taper planned.", "Buspirone 5 mg ×30 refilled Nov 9; later use unresolved."] },
+      { date: "Nov 2", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Ativan (lorazepam) 0.5 mg ×40 filled; gradual taper planned.", "Buspirone had reportedly not been started."] },
+      { date: "Nov 9", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Buspirone 5 mg ×30 refilled; later use remains unresolved."] },
       { date: "Nov 16", provider: "South Shore ED · Kayvon Izadpanah, MD", organization: "South Shore Health", items: ["Desyrel (trazodone) 50 mg ×30 filled after ED evaluation."] },
-      { date: "Nov 20–28", provider: "Julie Paul, psychiatric NP", organization: "South Shore Perinatal Behavioral Health", items: ["Prozac (fluoxetine) 10 mg trial, then stopped.", "One-tablet Ambien (zolpidem) 5 mg trial prescribed.", "Remeron (mirtazapine) 7.5→15 mg and Klonopin (clonazepam) 0.5 mg used in a brief sleep regimen."] },
-      { date: "Nov 29–30", provider: "Rebecca H. Jollotta, CNP", organization: "South Shore Perinatal Behavioral Health", items: ["First assessment; Seroquel (quetiapine) 25 mg ×30 filled for sleep."] },
+      { date: "Nov 20", provider: "Julie Paul, psychiatric NP", organization: "South Shore Perinatal Behavioral Health", items: ["Initial telephone contact and sleep-history review."] },
+      { date: "Nov 21", provider: "Julie Paul, psychiatric NP", organization: "South Shore Perinatal Behavioral Health", items: ["In-person intake.", "Prozac (fluoxetine) 10 mg ×56 filled."] },
+      { date: "Nov 22", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Psychiatry follow-up reviewed transfer of care and the new medication plan."] },
+      { date: "Nov 22", provider: "Julie Paul, psychiatric NP", organization: "South Shore Perinatal Behavioral Health", items: ["Message or telephone exchange addressed nervousness about starting fluoxetine."] },
+      { date: "Nov 23", provider: "Julie Paul, psychiatric NP", organization: "South Shore Perinatal Behavioral Health", items: ["Clancy reported that fluoxetine had been started."] },
+      { date: "Nov 25", provider: "Julie Paul, psychiatric NP", organization: "South Shore Perinatal Behavioral Health", items: ["Fluoxetine stopped.", "One-tablet Ambien (zolpidem) 5 mg trial prescribed.", "Remeron (mirtazapine) 7.5 mg and Klonopin (clonazepam) 0.5 mg prescribed as a revised sleep regimen."] },
+      { date: "Nov 26", provider: "Julie Paul, psychiatric NP", organization: "South Shore Perinatal Behavioral Health", items: ["Mirtazapine 7.5 mg plus clonazepam 0.5 mg reportedly taken."] },
+      { date: "Nov 28", provider: "Julie Paul, psychiatric NP", organization: "South Shore Perinatal Behavioral Health", items: ["Follow-up contact after panic symptoms; higher level of care discussed."] },
+      { date: "Nov 29", provider: "Rebecca H. Jollotta, CNP", organization: "South Shore Perinatal Behavioral Health", items: ["First psychiatric assessment.", "Mirtazapine 15 mg plus CBD reportedly used for sleep."] },
+      { date: "Nov 30", provider: "Rebecca H. Jollotta, CNP", organization: "South Shore Perinatal Behavioral Health", items: ["Seroquel (quetiapine) 25 mg ×30 filled for sleep.", "Mirtazapine discontinuation requested."] },
     ],
   },
   {
     month: "December",
     groups: [
-      { date: "Dec 1 & 16", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Psychiatry follow-ups; lamotrigine 25 mg ×30 prescribed and filled Dec 16."] },
-      { date: "Dec 2–19", provider: "Letitia Dukes, MSW · ASPIRE", organization: "South Shore Health", items: ["Social-work visits, crisis evaluation, safety review, and program coordination."] },
-      { date: "Dec 6–22", provider: "Rebecca H. Jollotta, CNP", organization: "South Shore Perinatal Behavioral Health", items: ["Valium (diazepam) shifted from 5 mg fills to a 2 mg taper.", "Seroquel (quetiapine) titration proposed; 200 mg was reported, while 300–400 mg exposure was not established.", "Quetiapine taper supplies followed: 200→100→50 mg, then stop."] },
-      { date: "Dec 15–30", provider: "MGH · Women & Infants", organization: "Hospital and program evaluations", items: ["MGH emergency assessments Dec 15 and Dec 30; Women & Infants assessment Dec 20."] },
+      { date: "Dec 1", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Psychiatry follow-up for worsening depression and concern about approaching suicidal thoughts."] },
+      { date: "Dec 1", provider: "Rebecca H. Jollotta, CNP", organization: "South Shore Perinatal Behavioral Health", items: ["MyChart medication exchange; mirtazapine was skipped and quetiapine 25 mg was part of the reported regimen."] },
+      { date: "Dec 3", provider: "Rebecca H. Jollotta, CNP", organization: "South Shore Perinatal Behavioral Health", items: ["Ativan (lorazepam) 0.5 mg reportedly brought short-term relief."] },
+      { date: "Dec 6", provider: "Rebecca H. Jollotta, CNP", organization: "South Shore Perinatal Behavioral Health", items: ["In-person assessment with Patrick present.", "Valium (diazepam) 5 mg filled; quantity remains unclear."] },
+      { date: "Dec 7", provider: "Rebecca H. Jollotta, CNP", organization: "South Shore Perinatal Behavioral Health", items: ["Fluoxetine held.", "Quetiapine 100→200→300→400 mg titration proposed; 400 mg use was not established.", "Quetiapine 100 mg and diazepam 5 mg ×2 filled."] },
+      { date: "Dec 8", provider: "Rebecca H. Jollotta, CNP", organization: "South Shore Perinatal Behavioral Health", items: ["Diazepam plus quetiapine reportedly improved sleep; doses were not specified in the message."] },
+      { date: "Dec 9", provider: "Rebecca H. Jollotta, CNP", organization: "South Shore Perinatal Behavioral Health", items: ["Telephone follow-up reviewed sleep, panic, numbness, and suicidal thoughts without a plan.", "Diazepam 5 mg ×8 filled."] },
+      { date: "Dec 12", provider: "Rebecca H. Jollotta, CNP", organization: "South Shore Perinatal Behavioral Health", items: ["Quetiapine 200 mg was reported for the prior three nights; 400 mg use was not established.", "Diazepam 2.5 mg nightly was reported."] },
+      { date: "Dec 13", provider: "Rebecca H. Jollotta, CNP", organization: "South Shore Perinatal Behavioral Health", items: ["Telehealth follow-up.", "Diazepam 2 mg ×7 filled as part of the taper."] },
+      { date: "Dec 15", provider: "Rebecca H. Jollotta, CNP", organization: "South Shore Perinatal Behavioral Health", items: ["Telephone call prompted recommendation for a higher level of care."] },
+      { date: "Dec 15", provider: "Massachusetts General Hospital", organization: "Emergency psychiatric evaluation", items: ["Hospital assessment followed the higher-care discussion."] },
+      { date: "Dec 16", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Psychiatry follow-up after MGH.", "Lamotrigine 25 mg ×30 prescribed and filled."] },
+      { date: "Dec 16", provider: "Rebecca H. Jollotta, CNP", organization: "South Shore Perinatal Behavioral Health", items: ["MyChart medication plan addressed persistent depression despite restored sleep.", "Quetiapine 300 mg was recommended; ingestion at that dose was not established."] },
+      { date: "Dec 19", provider: "Rebecca H. Jollotta, CNP", organization: "South Shore Perinatal Behavioral Health", items: ["Diazepam 2 mg every other night was reported.", "Quetiapine ER 300 mg ×30 and diazepam 2 mg ×14 filled; use of quetiapine 300 mg remains unestablished."] },
+      { date: "Dec 20", provider: "Women & Infants", organization: "Perinatal program assessment", items: ["Same-day assessment and discharge; a general partial-hospital program was recommended."] },
+      { date: "Dec 21", provider: "Rebecca H. Jollotta, CNP", organization: "South Shore Perinatal Behavioral Health", items: ["Quetiapine taper plan sent: 200→100→50 mg, then stop.", "Quetiapine 100 mg ×14 filled."] },
+      { date: "Dec 22", provider: "Rebecca H. Jollotta, CNP", organization: "South Shore Perinatal Behavioral Health", items: ["Quetiapine 25 mg ×14 filled for the taper."] },
+      { date: "Dec 30", provider: "Massachusetts General Hospital", organization: "Emergency psychiatric evaluation", items: ["Voluntary hospital presentation on the pathway to McLean admission."] },
     ],
   },
   {
     month: "January",
     groups: [
-      { date: "Jan 1–5", provider: "Alia Goodheart, MD", organization: "McLean Hospital", items: ["Inpatient quetiapine taper: 75→50→25 mg, then discontinued.", "Ativan (lorazepam) 1 mg and Desyrel (trazodone) 50 mg used/planned; discharge fills were 1 mg ×14 and 50 mg ×28."] },
-      { date: "Jan 6–23", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Trazodone reported at 100 mg, then 150 mg ×30 prescribed and filled.", "Valium (diazepam) 5 mg ×14, followed by 2 mg taper prescriptions/fills; some prescriber attribution remains disputed.", "Elavil (amitriptyline) 10 mg ×30 started; increase to 20 mg ordered Jan 23."] },
+      { date: "Jan 1", provider: "Alia Goodheart, MD", organization: "McLean Hospital", items: ["Voluntary inpatient admission.", "Quetiapine taper began at 75 mg, with 50 mg and 25 mg steps recorded before discontinuation.", "Ativan (lorazepam) 1 mg and Desyrel (trazodone) 50 mg were used or planned during the admission."] },
+      { date: "Jan 5", provider: "Alia Goodheart, MD", organization: "McLean Hospital", items: ["Discharged with next-day psychiatry follow-up required.", "Trazodone 50 mg ×28 and lorazepam 1 mg ×14 filled; melatonin was planned."] },
+      { date: "Jan 6", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Post-discharge telehealth follow-up.", "Trazodone 100 mg and lorazepam 1 mg were reportedly being taken."] },
+      { date: "Jan 9", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Lorazepam changed to Valium (diazepam) as a longer-half-life taper strategy.", "Diazepam 5 mg ×14 filled."] },
+      { date: "Jan 11", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["MyChart message asked about ketamine because of persistently low mood."] },
+      { date: "Jan 12", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Trazodone increased to 150 mg; 150 mg ×30 filled."] },
+      { date: "Jan 13", provider: "Prescriber unresolved", organization: "Pharmacy record", items: ["Diazepam 2 mg ×7 filled; the public record contains a prescriber-attribution conflict."] },
+      { date: "Jan 16", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Telehealth follow-up.", "Elavil (amitriptyline) 10 mg ×30 and diazepam 2 mg ×3 filled."] },
+      { date: "Jan 19", provider: "Prescriber unresolved", organization: "Pharmacy record", items: ["Diazepam 2 mg ×14 filled; prescriber attribution remains disputed."] },
+      { date: "Jan 23", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Final pre-offense telehealth follow-up.", "Amitriptyline increase from 10 to 20 mg ordered; whether 20 mg was taken is not established.", "Diazepam 2 mg fill shown with an unclear quantity."] },
     ],
   },
 ];
@@ -886,9 +918,7 @@ export default function Home() {
       </header>
 
       <section className="orientation">
-        <div className="orientation-copy">
-          <p className="section-number">01 / ORIENTATION</p>
-        </div>
+        <p className="section-number orientation-label">01 / ORIENTATION</p>
         <div className="orientation-content">
           <div className="story-beats" aria-label="Clinical arc summary">
             <article><span>Late summer</span><strong>Anxiety emerges after 12 well weeks</strong><p>Later clinical history described the first 12 postpartum weeks as going well.</p></article>
