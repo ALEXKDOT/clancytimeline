@@ -69,13 +69,13 @@ test("renders a noninteractive monthly provider and medication orientation map",
   const html = await response.text();
 
   assert.match(html, /Providers seen and major medication trials/);
-  for (const month of ["September–October", "November", "December", "January"]) assert.match(html, new RegExp(`>${month}<`));
+  for (const month of ["September", "October", "November", "December", "January"]) assert.match(html, new RegExp(`>${month}<`));
   assert.match(html, /Jennifer Tufts, MD/);
   assert.match(html, /Rebecca H\. Jollotta, CNP/);
   assert.match(html, /Alia Goodheart, MD/);
   assert.match(html, /Ativan \(lorazepam\) 0\.5 mg ×7/);
   assert.match(html, /Prescribed or filled does not necessarily mean taken/);
-  assert.match(page, /const orientationCareMap = \[/);
+  assert.match(page, /const orientationCareMap(?:: OrientationCareColumn\[\])? = \[/);
   assert.match(page, /className="section-number orientation-label"/);
   assert.match(page, /displayDate: "Late Nov\."/);
   assert.match(page, /displayDate: "~1 week later"/);
@@ -83,8 +83,10 @@ test("renders a noninteractive monthly provider and medication orientation map",
   assert.doesNotMatch(page.slice(page.indexOf("const orientationCareMap"), page.indexOf("const events")), /Letitia Dukes|ASPIRE|Jennifer McAllister/);
   assert.doesNotMatch(page.slice(page.indexOf("const orientationCareMap"), page.indexOf("const events")), /date: "[^"]*(?:&|–)[^"]*"/);
   const careMapSource = page.slice(page.indexOf("const orientationCareMap"), page.indexOf("const events"));
-  assert.equal((careMapSource.match(/month: "/g) ?? []).length, 4);
-  assert.doesNotMatch(careMapSource, /month: "September"|month: "October"/);
+  assert.match(careMapSource, /month: "September"[\s\S]*continuation: \{[\s\S]*month: "October"/);
+  assert.doesNotMatch(careMapSource, /September–October/);
+  assert.equal((html.match(/class="care-month"/g) ?? []).length, 4);
+  assert.match(html, /class="care-month-continuation"><span>October/);
   assert.match(css, /\.care-map \{[^}]*grid-template-columns: 1\.05fr 1\.3fr 1\.45fr 1\.2fr/);
   assert.match(css, /\.care-group li \{[^}]*font-size: 12px/);
   assert.match(css, /\.orientation \{[^}]*padding: 42px 40px 34px;/);
