@@ -55,3 +55,13 @@ test("keeps the omission band behind cards and classifies the October 26 visit",
   assert.match(css, /\.field-break \{ z-index: 1;/);
   assert.match(css, /\.event-card \{[^}]*z-index: 6;/);
 });
+
+test("derives the drawer event tracker from the selected event", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+
+  assert.match(page, /const selectedEventIndex = selected && "title" in selected/);
+  assert.match(page, /selectedEventIndex \+ 1} \/ \$\{visibleEvents\.length}/);
+  assert.match(page, /showStoryEvent\(selectedEventIndex - 1\)/);
+  assert.match(page, /showStoryEvent\(selectedEventIndex \+ 1\)/);
+  assert.doesNotMatch(page, /useState<number \| null>\(null\)/);
+});

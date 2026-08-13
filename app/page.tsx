@@ -669,7 +669,6 @@ export default function Home() {
   const [activeCategories, setActiveCategories] = useState<Set<Category>>(new Set(Object.keys(categoryMeta) as Category[]));
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<TimelineEvent | Medication | null>(null);
-  const [storyIndex, setStoryIndex] = useState<number | null>(null);
   const [showMedicationOverlay, setShowMedicationOverlay] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
   const range = views[view];
@@ -682,6 +681,9 @@ export default function Home() {
       .filter((event) => !q || [event.title, event.short, event.summary, event.clinician, event.institution, event.medication, event.source].filter(Boolean).join(" ").toLowerCase().includes(q))
       .sort((a, b) => stamp(a.date) - stamp(b.date));
   }, [view, activeCategories, query]);
+  const selectedEventIndex = selected && "title" in selected
+    ? visibleEvents.findIndex((event) => event.id === selected.id)
+    : -1;
 
   const toggleCategory = (category: Category) => {
     const next = new Set(activeCategories);
@@ -693,7 +695,6 @@ export default function Home() {
     if (!visibleEvents.length) return;
     const normalized = (index + visibleEvents.length) % visibleEvents.length;
     const event = visibleEvents[normalized];
-    setStoryIndex(normalized);
     setSelected(event);
     const position = timelinePct(event.date, view, range.start, range.end) / 100;
     scroller.current?.scrollTo({ left: Math.max(0, canvasWidth * position - window.innerWidth * 0.43), behavior: "smooth" });
@@ -701,15 +702,14 @@ export default function Home() {
 
   useEffect(() => {
     setSelected(null);
-    setStoryIndex(null);
     requestAnimationFrame(() => scroller.current?.scrollTo({ left: 0, behavior: "smooth" }));
   }, [view]);
 
   useEffect(() => {
     const escape = (event: KeyboardEvent) => {
       if (event.key === "Escape") setSelected(null);
-      if (event.key === "ArrowRight" && storyIndex !== null) showStoryEvent(storyIndex + 1);
-      if (event.key === "ArrowLeft" && storyIndex !== null) showStoryEvent(storyIndex - 1);
+      if (event.key === "ArrowRight" && selectedEventIndex !== -1) showStoryEvent(selectedEventIndex + 1);
+      if (event.key === "ArrowLeft" && selectedEventIndex !== -1) showStoryEvent(selectedEventIndex - 1);
     };
     window.addEventListener("keydown", escape);
     return () => window.removeEventListener("keydown", escape);
@@ -779,8 +779,8 @@ export default function Home() {
               <button onClick={() => setZoom(Math.min(2.1, +(zoom + .14).toFixed(2)))} aria-label="Zoom in">+</button>
             </div>
             {view === "course" && <button className={`overlay-toggle ${showMedicationOverlay ? "active" : ""}`} aria-pressed={showMedicationOverlay} onClick={() => setShowMedicationOverlay((shown) => !shown)}><span aria-hidden="true" />{showMedicationOverlay ? "Hide medication context" : "Show medication context"}</button>}
-            <button className="story-button" onClick={() => showStoryEvent(storyIndex === null ? 0 : storyIndex + 1)}>
-              <span className="play" aria-hidden="true">▶</span>{storyIndex === null ? "Walk the story" : "Next event"}
+            <button className="story-button" onClick={() => showStoryEvent(selectedEventIndex === -1 ? 0 : selectedEventIndex + 1)}>
+              <span className="play" aria-hidden="true">▶</span>{selectedEventIndex === -1 ? "Walk the story" : "Next event"}
             </button>
           </div>
           <div className="filter-row">
@@ -834,7 +834,7 @@ export default function Home() {
               </div>
               {positionedEvents.map(({ event, x, top, cardOffset, color }) => (
                   <div className="event-anchor" key={event.id} style={{ left: `${x}%`, "--event": color } as React.CSSProperties}>
-                    <button className={`event-card ${event.certainty.toLowerCase()}`} style={{ top, left: cardOffset }} onClick={() => { setSelected(event); setStoryIndex(visibleEvents.findIndex((item) => item.id === event.id)); }} aria-label={`${event.displayDate}: ${event.title}. Open details.`}>
+                    <button className={`event-card ${event.certainty.toLowerCase()}`} style={{ top, left: cardOffset }} onClick={() => setSelected(event)} aria-label={`${event.displayDate}: ${event.title}. Open details.`}>
                       <span className="card-date">{event.displayDate}</span>
                       <strong>{event.title}</strong>
                       <small>{event.short}</small>
@@ -918,9 +918,9 @@ export default function Home() {
                 {selected.caution && <div className="caution-box"><span>Interpretive boundary</span><p>{selected.caution}</p></div>}
                 <div className="source-box"><span>Corpus source</span><p>{selected.source}</p></div>
                 <div className="drawer-nav">
-                  <button onClick={() => showStoryEvent((storyIndex ?? 0) - 1)}>← Previous</button>
-                  <span>{storyIndex !== null ? `${storyIndex + 1} / ${visibleEvents.length}` : "Selected event"}</span>
-                  <button onClick={() => showStoryEvent((storyIndex ?? -1) + 1)}>Next →</button>
+                  <button onClick={() => showStoryEvent(selectedEventIndex - 1)}>← Previous</button>
+                  <span aria-live="polite">{selectedEventIndex !== -1 ? `${selectedEventIndex + 1} / ${visibleEvents.length}` : "Selected event"}</span>
+                  <button onClick={() => showStoryEvent(selectedEventIndex + 1)}>Next →</button>
                 </div>
               </>
             ) : (
