@@ -23,7 +23,7 @@ test("server-renders the clinical timeline", async () => {
   assert.match(html, /<title>Clancy Case — Interactive Clinical Timeline<\/title>/i);
   assert.match(html, /Commonwealth/);
   assert.match(html, /Lindsay Clancy/);
-  assert.match(html, /81<\/strong> events shown/);
+  assert.match(html, /78<\/strong> events shown/);
   assert.match(html, /Show medication context/);
   assert.match(html, /MEDICATION TIMELINE/);
   assert.match(html, /event-card/);
@@ -84,6 +84,32 @@ test("labels the complete Tufts appointment series as video telehealth", async (
     assert.match(eventLine, /title: "Telehealth (evaluation|visit|follow-up):/, `${id} should identify telehealth`);
     assert.match(eventLine, /category: "clinical"/, `${id} should remain a clinical encounter`);
   }
+});
+
+test("renders a larger medication legend and a month ruler inside the medication timeline", async () => {
+  const [response, page, css] = await Promise.all([
+    render(),
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+  const html = await response.text();
+
+  assert.match(html, /Medication timeline months/);
+  assert.match(page, /className="med-month-ruler"/);
+  assert.match(page, /medicationTicks\.map/);
+  assert.match(css, /\.status-key \{[^}]*font-size: 11px/);
+  assert.match(css, /\.key \{[^}]*width: 24px; height: 9px/);
+});
+
+test("collapses January 24 into one card with a provenance-preserving detail sequence", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+
+  assert.match(page, /id: "jan24-sequence"/);
+  assert.match(page, /<h3>January 24 timeline<\/h3>/);
+  assert.match(page, /time: "4:48 PM", title: "CVS telephone call"/);
+  assert.match(page, /time: "5:10 PM", title: "ThreeV telephone order"/);
+  assert.match(page, /time: "Early evening", title: "Return home and discovery"/);
+  assert.doesNotMatch(page, /id: "jan24-day"|id: "cvs"|id: "threev"|id: "return"/);
 });
 
 test("derives the drawer event tracker from the selected event", async () => {

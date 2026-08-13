@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type Category = "clinical" | "symptom" | "hospital" | "medication" | "collateral" | "event" | "post";
-type Evidence = "Contemporaneous record" | "Treating testimony" | "Reported to clinician" | "Collateral testimony" | "Objective record" | "Retrospective report" | "Civil allegation";
+type Evidence = "Contemporaneous record" | "Treating testimony" | "Reported to clinician" | "Collateral testimony" | "Objective record" | "Mixed evidence" | "Retrospective report" | "Civil allegation";
 type ViewKey = "course" | "post";
 
 type TimelineEvent = {
@@ -21,6 +21,12 @@ type TimelineEvent = {
   tier: number;
   summary: string;
   details: string[];
+  sequence?: {
+    time: string;
+    title: string;
+    detail: string;
+    evidence: string;
+  }[];
   medication?: string;
   source: string;
   caution?: string;
@@ -264,24 +270,18 @@ const events: TimelineEvent[] = [
     details: ["She remained depressed, flat, and poorly motivated, although sleep was reportedly okay.", "Clancy denied SI and HI; Tufts observed appropriate appearance, speech, thought process, cognition, and psychomotor activity, with no mania or psychosis.", "The dose changes appear in a separate same-day medication card."], source: "SRC-0087, Trial Day 9, pp. 126–128, 06:53:15–06:58:17; SRC-0091, Trial Day 10, pp. 67–68", caution: "These findings describe the video encounter and cannot establish her mental state at every later moment.", views: ["course"]
   },
   {
-    id: "jan24-day", date: "2023-01-24T11:00:00", displayDate: "January 24 · daytime", title: "Family observation: normal-appearing interaction", short: "Happy and playful, according to Patrick", category: "collateral", evidence: "Collateral testimony", certainty: "Moderate", side: "top", tier: 0,
-    summary: "Patrick later testified that Clancy appeared happy and playful with the children and did not disclose suicidal thoughts, child-harm thoughts, or a request for urgent help.",
-    details: ["This supports apparent functioning during the observed period.", "It cannot reveal symptoms she did not disclose."], source: "SRC-0065, Trial Day 1, 2:44:50–2:45:37", views: ["course"]
-  },
-  {
-    id: "cvs", date: "2023-01-24T16:48:00", displayDate: "January 24 · 4:48 PM", title: "CVS telephone call", short: "Coherent product question; no slurring noted", category: "event", evidence: "Objective record", certainty: "High", side: "bottom", tier: 0,
-    summary: "A female caller asked CVS about a constipation product for a child, clarified the product, and appeared to understand the location or substitution.",
-    details: ["The manager heard no slurring or impairment and described a normal interaction.", "This was a brief retail interaction—not a mental-status examination."], source: "SRC-0068, Trial Day 2, 45:02–47:31", views: ["course"]
-  },
-  {
-    id: "threev", date: "2023-01-24T17:10:00", displayDate: "January 24 · 5:10 PM", title: "Phone call: ThreeV food order", short: "Organized call; nothing unusual heard", category: "event", evidence: "Objective record", certainty: "High", side: "top", tier: 1,
-    summary: "A female caller placed a coherent food order, discussed items, and supplied pickup information. The hostess heard nothing unusual.",
-    details: ["Objective records also place Patrick at CVS around 5:32–5:37 and ThreeV at approximately 5:54.", "The Commonwealth interprets the errands as creating an opportunity; that interpretation is contested."], source: "SRC-0068; SRC-0010, pp. 166–171", caution: "Organized behavior neither proves nor excludes psychosis or legal capacity.", views: ["course"]
-  },
-  {
-    id: "return", date: "2023-01-24T18:20:00", displayDate: "January 24 · early evening", title: "Patrick returns", short: "Locked room, open window, suicide-attempt statement", category: "event", evidence: "Collateral testimony", certainty: "High", side: "bottom", tier: 1,
-    summary: "Patrick found a locked bedroom, blood, and an open window. Outside, he found Clancy injured and heard her say, ‘I tried to kill myself.’",
-    details: ["She directed him toward the children in the basement.", "The suicide attempt is evidence of acute distress but does not by itself establish diagnosis, psychosis, or legal insanity.", "A later civil pleading alleges an unspecified medication ingestion during the attempt; drug, dose, and timing remain unresolved."], source: "SRC-0068, 22:01–22:49 and 28:19–29:43; compare SRC-0032 ¶80", views: ["course"]
+    id: "jan24-sequence", date: "2023-01-24T17:10:00", displayDate: "January 24", title: "January 24: observed sequence", short: "Family observations · CVS and ThreeV calls · discovery", category: "event", evidence: "Mixed evidence", certainty: "High", side: "bottom", tier: 1,
+    summary: "The day-of evidence combines family collateral, two independent retail-witness calls, objective errand timestamps, and Patrick's account of returning home and finding Clancy injured.",
+    sequence: [
+      { time: "Daytime", title: "Family interaction", detail: "Patrick later described Clancy as happy and playful with the children. He recalled no disclosure of suicidal thoughts, child-harm thoughts, or a request for urgent help.", evidence: "Patrick collateral testimony · SRC-0065, 02:44:50–02:45:37" },
+      { time: "4:48 PM", title: "CVS telephone call", detail: "CVS manager Angela Krause described a mutually understood question about a child constipation product. She heard no slurring, impairment, or comprehension problem.", evidence: "Independent sworn retail-witness testimony · SRC-0068, 45:02–47:31" },
+      { time: "5:10 PM", title: "ThreeV telephone order", detail: "Hostess Saria Sweeney recalled a routine order for risotto and a Mediterranean power bowl; the caller answered a protein question and supplied the pickup name and phone number.", evidence: "Independent sworn retail-witness testimony · SRC-0068, 49:57–52:40" },
+      { time: "5:32–5:37 PM", title: "Patrick at CVS", detail: "The warrant affidavit records Patrick entering CVS at 5:32:32 and leaving at 5:37:08.", evidence: "Investigator chronology / objective timestamp described in warrant · SRC-0010, pp. 168–169" },
+      { time: "5:54 PM", title: "Patrick at ThreeV", detail: "The warrant affidavit records Patrick entering ThreeV at 5:54:14 to collect the food order.", evidence: "Investigator chronology / objective timestamp described in warrant · SRC-0010, pp. 168–169" },
+      { time: "Early evening", title: "Return home and discovery", detail: "Patrick found a locked bedroom, blood, and an open window. Outside, he found Clancy injured; he testified that she said, ‘I tried to kill myself,’ and directed him toward the children in the basement.", evidence: "Patrick collateral testimony and contemporaneous statement · SRC-0068, 22:01–22:49 and 28:19–29:43" },
+    ],
+    details: ["The coherent calls and completed errands demonstrate organized capacities during specific moments; they do not exclude psychosis or establish criminal responsibility.", "The suicide attempt is evidence of acute distress but does not by itself establish diagnosis, psychosis, or legal insanity.", "The investigator's claim that the errands created an opportunity is a probable-cause allegation, not a judicial finding.", "A later civil pleading alleges an unspecified medication ingestion during the attempt; drug, dose, and timing remain unresolved."],
+    source: "SRC-0065; SRC-0068; SRC-0010; compare SRC-0032 ¶80", caution: "This combined card preserves the provenance of each component. Do not treat family collateral, retail observations, warrant allegations, and later civil allegations as interchangeable evidence.", views: ["course"]
   },
   {
     id: "jan26", date: "2023-01-26T12:00:00", displayDate: "January 26", title: "Brigham psychiatric consultation", short: "Horrified but linear; no psychosis in snapshot", category: "post", evidence: "Treating testimony", certainty: "High", clinician: "Jhilam Biswas, MD", institution: "Brigham and Women’s Hospital", side: "top", tier: 0,
@@ -702,7 +702,7 @@ export default function Home() {
     const q = query.trim().toLowerCase();
     return allEvents
       .filter((event) => event.views.includes(view) && activeCategories.has(event.category))
-      .filter((event) => !q || [event.title, event.short, event.summary, event.clinician, event.institution, event.medication, event.source].filter(Boolean).join(" ").toLowerCase().includes(q))
+      .filter((event) => !q || [event.title, event.short, event.summary, event.clinician, event.institution, event.medication, event.source, event.sequence?.map((step) => `${step.time} ${step.title} ${step.detail} ${step.evidence}`).join(" ")].filter(Boolean).join(" ").toLowerCase().includes(q))
       .sort((a, b) => stamp(a.date) - stamp(b.date));
   }, [view, activeCategories, query]);
   const selectedEventIndex = selected && "title" in selected
@@ -740,6 +740,7 @@ export default function Home() {
   });
 
   const ticks = monthTicks(view === "course" ? courseBreak.onsetStart : range.start, range.end);
+  const medicationTicks = monthTicks(courseBreak.onsetStart, range.end);
   const medicationVisible = view === "course";
   const packedMedicationRows = useMemo(() => packMedicationContext(canvasWidth), [canvasWidth]);
   const detectedMedicationGroups = useMemo(() => {
@@ -881,6 +882,10 @@ export default function Home() {
                     <span><i className="key detected" /> later detected</span>
                   </div>
                 </div>
+                <div className="med-month-ruler" aria-label="Medication timeline months">
+                  <div className="med-month-label">Months</div>
+                  <div className="med-month-track">{medicationTicks.map((tick) => <div className="med-month-tick" key={tick.date} style={{ left: `${timelinePct(tick.date, "course", range.start, range.end)}%` }}><span>{tick.label}</span></div>)}</div>
+                </div>
                 <div className="med-grid">
                   {medications.map((medication) => (
                     <div className="med-row" key={medication.generic}>
@@ -937,6 +942,7 @@ export default function Home() {
                 <p className="drawer-summary">{selected.summary}</p>
                 {(selected.clinician || selected.institution) && <div className="provider-card"><span>{selected.clinician ? "Clinician" : "Institution"}</span><strong>{selected.clinician || selected.institution}</strong>{selected.clinician && selected.institution && <small>{selected.institution}</small>}</div>}
                 {selected.medication && <div className="med-callout"><span>Medication action</span><strong>{selected.medication}</strong></div>}
+                {selected.sequence && <div className="drawer-section sequence-section"><h3>January 24 timeline</h3><div className="sequence-list">{selected.sequence.map((step) => <article key={`${step.time}-${step.title}`}><time>{step.time}</time><div><strong>{step.title}</strong><p>{step.detail}</p><small>{step.evidence}</small></div></article>)}</div></div>}
                 <div className="drawer-section"><h3>What the evidence supports</h3><ul>{selected.details.map((detail) => <li key={detail}>{detail}</li>)}</ul></div>
                 <div className="evidence-card"><div><span>Evidence posture</span><strong>{selected.evidence}</strong></div><div><span>Certainty</span><strong className={`certainty ${selected.certainty.toLowerCase()}`}>{selected.certainty}</strong></div></div>
                 {selected.caution && <div className="caution-box"><span>Interpretive boundary</span><p>{selected.caution}</p></div>}
