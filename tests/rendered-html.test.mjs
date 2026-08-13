@@ -23,7 +23,7 @@ test("server-renders the clinical timeline", async () => {
   assert.match(html, /<title>Clancy Case — Interactive Clinical Timeline<\/title>/i);
   assert.match(html, /Commonwealth/);
   assert.match(html, /Lindsay Clancy/);
-  assert.match(html, /75<\/strong> events shown/);
+  assert.match(html, /81<\/strong> events shown/);
   assert.match(html, /Show medication context/);
   assert.match(html, /MEDICATION TIMELINE/);
   assert.match(html, /event-card/);
@@ -54,6 +54,36 @@ test("keeps the omission band behind cards and classifies the October 26 visit",
   assert.match(prescriptions, /category: "medication"/);
   assert.match(css, /\.field-break \{ z-index: 1;/);
   assert.match(css, /\.event-card \{[^}]*z-index: 6;/);
+});
+
+test("separates the October 20 encounter from its medication decision and identifies contact modalities", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+
+  const oct20Visit = page.match(/id: "sertraline-stop"[^\n]+/)?.[0] ?? "";
+  const oct20Medication = page.match(/id: "med-oct20"[^\n]+/)?.[0] ?? "";
+  const oct21Visit = page.match(/id: "oct21"[^\n]+/)?.[0] ?? "";
+  const nov2Visit = page.match(/id: "nov2"[^\n]+/)?.[0] ?? "";
+
+  assert.match(oct20Visit, /title: "Telehealth visit:/);
+  assert.match(oct20Visit, /category: "clinical"/);
+  assert.match(oct20Medication, /title: "Medication decision:/);
+  assert.match(oct20Medication, /category: "medication"/);
+  assert.match(oct21Visit, /title: "Telehealth follow-up:/);
+  assert.match(nov2Visit, /title: "Telehealth follow-up:/);
+});
+
+test("labels the complete Tufts appointment series as video telehealth", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const tuftsVisitIds = [
+    "tufts-intake", "sep28-visit", "oct3-visit", "sertraline-stop", "oct21", "oct26", "nov2",
+    "tufts-nov22", "tufts-dec1", "tufts-dec16", "jan6", "tufts-jan9", "jan16", "jan23",
+  ];
+
+  for (const id of tuftsVisitIds) {
+    const eventLine = page.match(new RegExp(`id: "${id}"[^\\n]+`))?.[0] ?? "";
+    assert.match(eventLine, /title: "Telehealth (evaluation|visit|follow-up):/, `${id} should identify telehealth`);
+    assert.match(eventLine, /category: "clinical"/, `${id} should remain a clinical encounter`);
+  }
 });
 
 test("derives the drawer event tracker from the selected event", async () => {
