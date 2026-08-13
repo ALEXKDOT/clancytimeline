@@ -83,15 +83,10 @@ const views: Record<ViewKey, { label: string; eyebrow: string; start: string; en
 
 const orientationCareMap = [
   {
-    month: "September",
+    month: "September–October",
     groups: [
       { date: "Sep 15", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Sertraline 25 mg ×30 filled; planned increase from 25 to 50 mg."] },
       { date: "Sep 28", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Sertraline had not been started; medication plan deferred after reported improvement."] },
-    ],
-  },
-  {
-    month: "October",
-    groups: [
       { date: "Oct 3", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Psychiatry follow-up focused on symptoms and leave paperwork."] },
       { date: "Oct 20", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Sertraline stopped after reported 25→50 mg trial."] },
       { date: "Oct 21", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Ativan (lorazepam) 0.5 mg ×7 filled for severe anxiety."] },

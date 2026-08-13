@@ -52,7 +52,7 @@ button { color: inherit; }
 .orientation-care-heading h2 { margin: 0; font-size: 20px; line-height: 1.15; letter-spacing: -.025em; }
 .orientation-care-heading p { max-width: 450px; margin: 0; color: #899ba4; font-size: 11px; line-height: 1.5; }
 .care-map-scroll { overflow-x: auto; scrollbar-width: thin; scrollbar-color: #3e6876 #0b171e; }
-.care-map { min-width: 1200px; display: grid; grid-template-columns: .85fr 1fr 1.28fr 1.42fr 1.18fr; align-items: stretch; }
+.care-map { min-width: 1200px; display: grid; grid-template-columns: 1.05fr 1.3fr 1.45fr 1.2fr; align-items: stretch; }
 .care-month { min-width: 0; border-right: 1px solid rgba(104,143,158,.23); background: rgba(9,22,28,.72); }
 .care-month:last-child { border-right: 0; }
 .care-month > header { height: 44px; padding: 0 16px; display: flex; align-items: center; gap: 11px; border-bottom: 1px solid rgba(104,143,158,.22); color: #dbe6e9; font: 800 12px/1 var(--font-geist-mono), monospace; text-transform: uppercase; letter-spacing: .09em; }
