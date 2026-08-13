@@ -42,6 +42,22 @@ test("renders evidence-aware controls and chronology boundaries", async () => {
   assert.match(html, /Fit chronology at default zoom/);
 });
 
+test("compresses the inactive post-offense year and renders the revised orientation arc", async () => {
+  const [page, css] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(page, /earlyEnd: "2023-05-01T00:00:00"/);
+  assert.match(page, /lateStart: "2024-05-01T00:00:00"/);
+  assert.match(page, /~12 months omitted/);
+  assert.match(page, /Anxiety emerges after 12 well weeks/);
+  assert.match(page, /Sep–Nov/);
+  assert.match(page, /Severe depression persists, offense on January 24/);
+  assert.match(css, /.story-beats \{[^}]*grid-template-columns: repeat\(4, 1fr\)/);
+  assert.match(css, /\.filter-chip \{[^}]*height: 32px;[^}]*font-size: 11px/);
+});
+
 test("keeps the omission band behind cards and classifies the October 26 visit", async () => {
   const [page, css] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),

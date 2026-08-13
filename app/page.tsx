@@ -73,7 +73,7 @@ const categoryMeta: Record<Category, { label: string; color: string }> = {
 
 const views: Record<ViewKey, { label: string; eyebrow: string; start: string; end: string; baseWidth: number }> = {
   course: { label: "Clinical course", eyebrow: "May 26, 2022 – January 24, 2023", start: "2022-05-26T00:00:00", end: "2023-01-25T00:00:00", baseWidth: 9000 },
-  post: { label: "Post-offense", eyebrow: "January 26, 2023 – September 2024", start: "2023-01-25T00:00:00", end: "2024-09-15T00:00:00", baseWidth: 3000 },
+  post: { label: "Post-offense", eyebrow: "January 26, 2023 – September 2024", start: "2023-01-25T00:00:00", end: "2024-09-15T00:00:00", baseWidth: 2500 },
 };
 
 const events: TimelineEvent[] = [
@@ -577,14 +577,28 @@ const courseBreak = {
   breakEndPct: 2.3,
 };
 
+const postBreak = {
+  earlyEnd: "2023-05-01T00:00:00",
+  lateStart: "2024-05-01T00:00:00",
+  breakStartPct: 59,
+  breakEndPct: 63,
+};
+
 function timelinePct(value: string, view: ViewKey, start: string, end: string) {
-  if (view !== "course") return pct(value, start, end);
   const time = stamp(value);
-  const birthEnd = stamp(courseBreak.birthEnd);
-  const onsetStart = stamp(courseBreak.onsetStart);
-  if (time <= birthEnd) return ((time - stamp(start)) / (birthEnd - stamp(start))) * courseBreak.breakStartPct;
-  if (time < onsetStart) return (courseBreak.breakStartPct + courseBreak.breakEndPct) / 2;
-  return courseBreak.breakEndPct + ((time - onsetStart) / (stamp(end) - onsetStart)) * (100 - courseBreak.breakEndPct);
+  if (view === "course") {
+    const birthEnd = stamp(courseBreak.birthEnd);
+    const onsetStart = stamp(courseBreak.onsetStart);
+    if (time <= birthEnd) return ((time - stamp(start)) / (birthEnd - stamp(start))) * courseBreak.breakStartPct;
+    if (time < onsetStart) return (courseBreak.breakStartPct + courseBreak.breakEndPct) / 2;
+    return courseBreak.breakEndPct + ((time - onsetStart) / (stamp(end) - onsetStart)) * (100 - courseBreak.breakEndPct);
+  }
+
+  const earlyEnd = stamp(postBreak.earlyEnd);
+  const lateStart = stamp(postBreak.lateStart);
+  if (time <= earlyEnd) return ((time - stamp(start)) / (earlyEnd - stamp(start))) * postBreak.breakStartPct;
+  if (time < lateStart) return (postBreak.breakStartPct + postBreak.breakEndPct) / 2;
+  return postBreak.breakEndPct + ((time - lateStart) / (stamp(end) - lateStart)) * (100 - postBreak.breakEndPct);
 }
 
 function packMedicationContext(canvasWidth: number) {
@@ -739,7 +753,13 @@ export default function Home() {
     return () => window.removeEventListener("keydown", escape);
   });
 
-  const ticks = monthTicks(view === "course" ? courseBreak.onsetStart : range.start, range.end);
+  const ticks = view === "course"
+    ? monthTicks(courseBreak.onsetStart, range.end)
+    : [
+        ...monthTicks(range.start, postBreak.earlyEnd),
+        { date: postBreak.lateStart, label: "May 2024" },
+        ...monthTicks(postBreak.lateStart, range.end),
+      ];
   const medicationTicks = monthTicks(courseBreak.onsetStart, range.end);
   const medicationVisible = view === "course";
   const packedMedicationRows = useMemo(() => packMedicationContext(canvasWidth), [canvasWidth]);
@@ -777,9 +797,10 @@ export default function Home() {
           <p className="section-number">01 / ORIENTATION</p>
         </div>
         <div className="story-beats" aria-label="Clinical arc summary">
-          <article><span>Late summer</span><strong>Anxiety + insomnia</strong><p>Symptoms emerge after an initially well postpartum period.</p></article>
+          <article><span>Late summer</span><strong>Anxiety emerges after 12 well weeks</strong><p>Later clinical history described the first 12 postpartum weeks as going well.</p></article>
+          <article><span>Sep–Nov</span><strong>Worsening symptoms</strong><p>Anxiety, depressed mood, insomnia, racing thoughts, and functional impairment prompt serial visits and an ED evaluation.</p></article>
           <article><span>Nov–Dec</span><strong>Rapid treatment changes</strong><p>Sleep improves unevenly while depression and intrusive thoughts intensify.</p></article>
-          <article><span>January</span><strong>Severe depression persists</strong><p>McLean admission, medication transition, then outpatient follow-up.</p></article>
+          <article><span>January</span><strong>Severe depression persists, offense on January 24</strong><p>McLean admission, medication transition, outpatient follow-up, offense.</p></article>
         </div>
       </section>
 
@@ -830,6 +851,7 @@ export default function Home() {
             <div className="time-ruler">
               <span className="range-start">{timelineDate(range.start, { month: "short", day: "numeric", year: "numeric" })}</span>
               {view === "course" && <div className="timeline-break ruler-break" style={{ left: `${courseBreak.breakStartPct}%`, width: `${courseBreak.breakEndPct - courseBreak.breakStartPct}%` }}><span>~11 weeks omitted</span></div>}
+              {view === "post" && <div className="timeline-break ruler-break" style={{ left: `${postBreak.breakStartPct}%`, width: `${postBreak.breakEndPct - postBreak.breakStartPct}%` }}><span>~12 months omitted</span></div>}
               {ticks.map((tick) => <div className="tick" key={tick.date} style={{ left: `${timelinePct(tick.date, view, range.start, range.end)}%` }}><span>{tick.label}</span></div>)}
               <span className="range-end">{timelineDate(range.end, { month: "short", day: "numeric", year: "numeric" })}</span>
             </div>
@@ -853,6 +875,7 @@ export default function Home() {
 
             <div className="event-field">
               {view === "course" && <div className="timeline-break field-break" style={{ left: `${courseBreak.breakStartPct}%`, width: `${courseBreak.breakEndPct - courseBreak.breakStartPct}%` }} aria-hidden="true" />}
+              {view === "post" && <div className="timeline-break field-break" style={{ left: `${postBreak.breakStartPct}%`, width: `${postBreak.breakEndPct - postBreak.breakStartPct}%` }} aria-hidden="true" />}
               <div className="main-axis" />
               <div className="connector-layer" aria-hidden="true">
                 {positionedEvents.map(({ event, x, connectorTop, connectorHeight, color }) => <span className="connector" key={event.id} style={{ left: `${x}%`, top: connectorTop, height: Math.max(10, connectorHeight), "--event": color } as React.CSSProperties} />)}
