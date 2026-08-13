@@ -652,7 +652,7 @@ function packMedicationContext(canvasWidth: number) {
     const start = Math.min(99.5, Math.max(0, timelinePct(segment.start, "course", range.start, range.end)));
     const end = Math.min(100, Math.max(start, timelinePct(segment.end, "course", range.start, range.end)));
     const label = `${medication.name} · ${segment.label}`;
-    const labelWidth = Math.min(250, Math.max(110, 28 + label.length * 8.4));
+    const labelWidth = Math.min(145, Math.max(62, 20 + label.length * 5.25));
     const labelPct = (labelWidth / canvasWidth) * 100;
     const visualStart = start;
     const visualEnd = Math.min(100, Math.max(end, start + labelPct));
@@ -662,7 +662,7 @@ function packMedicationContext(canvasWidth: number) {
   items.sort((a, b) => a.visualStart - b.visualStart || a.visualEnd - b.visualEnd);
   const rows: PackedMedicationItem[][] = [];
   const rowEnds: number[] = [];
-  const gutterPct = (12 / canvasWidth) * 100;
+  const gutterPct = (8 / canvasWidth) * 100;
 
   items.forEach((item) => {
     let rowIndex = rowEnds.findIndex((rowEnd) => rowEnd + gutterPct <= item.visualStart);
@@ -679,17 +679,16 @@ function packMedicationContext(canvasWidth: number) {
 }
 
 function packTimelineEvents(eventsToPlace: TimelineEvent[], view: ViewKey, start: string, end: string, canvasWidth: number) {
-  const cardWidth = 220;
-  const cardHeight = 128;
+  const cardWidth = 184;
   const halfCard = cardWidth / 2;
-  const collisionGap = 16;
+  const collisionGap = 12;
   const laneEnds = {
     top: Array(4).fill(-Infinity) as number[],
     bottom: Array(4).fill(-Infinity) as number[],
   };
   const laneTop = {
-    top: [60, 190, 320, 450],
-    bottom: [610, 740, 870, 1000],
+    top: [101, 202, 303, 404],
+    bottom: [517, 618, 719, 820],
   };
 
   return eventsToPlace.map((event) => {
@@ -720,8 +719,8 @@ function packTimelineEvents(eventsToPlace: TimelineEvent[], view: ViewKey, start
 
     laneEnds[chosenSide][chosenLane] = Math.max(laneEnds[chosenSide][chosenLane], cardRight);
     const top = laneTop[chosenSide][chosenLane];
-    const connectorTop = chosenSide === "top" ? top + cardHeight : 600;
-    const connectorHeight = chosenSide === "top" ? 590 - (top + cardHeight) : top - 600;
+    const connectorTop = chosenSide === "top" ? top + 96 : 513;
+    const connectorHeight = chosenSide === "top" ? 503 - (top + 96) : top - 513;
     return {
       event,
       x,
@@ -824,7 +823,7 @@ export default function Home() {
     }));
     return [...groups.entries()].sort(([a], [b]) => stamp(a) - stamp(b));
   }, []);
-  const medicationContextHeight = 68 + (packedMedicationRows.length + detectedMedicationGroups.length) * 44;
+  const medicationContextHeight = 50 + (packedMedicationRows.length + detectedMedicationGroups.length) * 29;
   const positionedEvents = useMemo(
     () => packTimelineEvents(visibleEvents, view, range.start, range.end, canvasWidth),
     [visibleEvents, view, range.start, range.end, canvasWidth],
@@ -990,11 +989,11 @@ export default function Home() {
                           const width = segment.end ? Math.max(.4, end - start) : 0;
                           const level = segment.level ?? 0;
                           return segment.end ? (
-                            <button key={index} className={`med-segment ${segment.status}`} style={{ left: `${start}%`, width: `calc(${width}% - 2px)`, top: `${8 + level * 40}px`, "--med": medication.color } as React.CSSProperties} onClick={() => setSelection({ kind: "medication", medication })} title={`${medication.name}: ${segment.label}. ${segment.note}`}>
+                            <button key={index} className={`med-segment ${segment.status}`} style={{ left: `${start}%`, width: `calc(${width}% - 2px)`, top: `${5 + level * 26}px`, "--med": medication.color } as React.CSSProperties} onClick={() => setSelection({ kind: "medication", medication })} title={`${medication.name}: ${segment.label}. ${segment.note}`}>
                               <span>{segment.label}</span>
                             </button>
                           ) : (
-                            <button key={index} className={`med-marker ${segment.status}`} style={{ left: `${start}%`, top: `${17 + level * 40}px`, "--med": medication.color } as React.CSSProperties} onClick={() => setSelection({ kind: "medication", medication })} title={`${medication.name}: ${segment.label}. ${segment.note}`} aria-label={`${medication.name}: ${segment.label}`} />
+                            <button key={index} className={`med-marker ${segment.status}`} style={{ left: `${start}%`, top: `${11 + level * 26}px`, "--med": medication.color } as React.CSSProperties} onClick={() => setSelection({ kind: "medication", medication })} title={`${medication.name}: ${segment.label}. ${segment.note}`} aria-label={`${medication.name}: ${segment.label}`} />
                           );
                         })}
                       </div>
