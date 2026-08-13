@@ -55,7 +55,7 @@ test("compresses the inactive post-offense year and renders the revised orientat
   assert.match(page, /Sep–Nov/);
   assert.match(page, /Severe depression persists, offense on January 24/);
   assert.match(css, /.story-beats \{[^}]*grid-template-columns: repeat\(4, 1fr\)/);
-  assert.match(css, /\.filter-chip \{[^}]*height: 32px;[^}]*font-size: 11px/);
+  assert.match(css, /\.filter-chip \{[^}]*height: 38px;[^}]*font-size: 13px/);
 });
 
 test("keeps the omission band behind cards and classifies the October 26 visit", async () => {
@@ -156,11 +156,42 @@ test("includes care contacts recovered in the Day 11 bounded audit", async () =>
 test("derives the drawer event tracker from the selected event", async () => {
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
 
-  assert.match(page, /const selectedEventIndex = selected && "title" in selected/);
+  assert.match(page, /selection\?\.kind === "event" \? selection\.index : -1/);
+  assert.match(page, /const selectedEvent = selectedEventIndex >= 0/);
   assert.match(page, /selectedEventIndex \+ 1} \/ \$\{visibleEvents\.length}/);
   assert.match(page, /showStoryEvent\(selectedEventIndex - 1\)/);
   assert.match(page, /showStoryEvent\(selectedEventIndex \+ 1\)/);
+  assert.match(page, /key=\{selectedEvent \? selectedEvent\.id/);
   assert.doesNotMatch(page, /useState<number \| null>\(null\)/);
+});
+
+test("renders bulk filters, larger controls, and user-dismissed horizontal-scroll coaching", async () => {
+  const [page, css] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(page, />Hide all<\/button>/);
+  assert.match(page, />Show all<\/button>/);
+  assert.doesNotMatch(page, />Reset<\/button>/);
+  assert.match(page, /Hold Shift while scrolling/);
+  assert.match(page, /event\.shiftKey/);
+  assert.match(page, /Math\.abs\(event\.deltaX\)/);
+  assert.match(css, /\.view-tabs strong \{[^}]*font-size: 16px/);
+  assert.match(css, /\.filter-chip \{[^}]*height: 38px;[^}]*font-size: 13px/);
+  assert.match(css, /\.scroll-coach\.dismissed/);
+});
+
+test("places the parties' theories above the timeline", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const theories = page.indexOf("02 / THE PARTIES");
+  const workspace = page.indexOf('<section className="workspace"');
+
+  assert.ok(theories > -1 && workspace > -1 && theories < workspace);
+  assert.match(page, /Defense theory · attorney argument/);
+  assert.match(page, /Commonwealth theory · attorney argument/);
+  assert.match(page, /No retained criminal-responsibility expert had testified/);
+  assert.doesNotMatch(page, /Three evidentiary separations/);
 });
 
 test("moves every event-card subtext into the existing drawer summary", async () => {

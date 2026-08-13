@@ -750,9 +750,11 @@ export default function Home() {
   const [zoom, setZoom] = useState(1);
   const [activeCategories, setActiveCategories] = useState<Set<Category>>(new Set(Object.keys(categoryMeta) as Category[]));
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<TimelineEvent | Medication | null>(null);
+  const [selection, setSelection] = useState<{ kind: "event"; index: number } | { kind: "medication"; medication: Medication } | null>(null);
   const [showMedicationOverlay, setShowMedicationOverlay] = useState(false);
+  const [showScrollCoach, setShowScrollCoach] = useState(true);
   const scroller = useRef<HTMLDivElement>(null);
+  const lastUserScrollLeft = useRef(0);
   const range = views[view];
   const canvasWidth = Math.round(range.baseWidth * zoom);
 
@@ -763,13 +765,15 @@ export default function Home() {
       .filter((event) => !q || [event.title, event.short, event.summary, event.clinician, event.institution, event.medication, event.source, event.sequence?.map((step) => `${step.time} ${step.title} ${step.detail} ${step.evidence}`).join(" "), event.civilClaims?.map((item) => `${item.claim} ${item.context ?? ""} ${item.source}`).join(" ")].filter(Boolean).join(" ").toLowerCase().includes(q))
       .sort((a, b) => stamp(a.date) - stamp(b.date));
   }, [view, activeCategories, query]);
-  const selectedEventIndex = selected && "title" in selected
-    ? visibleEvents.findIndex((event) => event.id === selected.id)
-    : -1;
+  const selectedEventIndex = selection?.kind === "event" ? selection.index : -1;
+  const selectedEvent = selectedEventIndex >= 0 ? visibleEvents[selectedEventIndex] ?? null : null;
+  const selectedMedication = selection?.kind === "medication" ? selection.medication : null;
+  const selected = selectedEvent ?? selectedMedication;
 
   const toggleCategory = (category: Category) => {
     const next = new Set(activeCategories);
     if (next.has(category)) next.delete(category); else next.add(category);
+    setSelection(null);
     setActiveCategories(next);
   };
 
@@ -777,19 +781,21 @@ export default function Home() {
     if (!visibleEvents.length) return;
     const normalized = (index + visibleEvents.length) % visibleEvents.length;
     const event = visibleEvents[normalized];
-    setSelected(event);
+    setSelection({ kind: "event", index: normalized });
     const position = timelinePct(event.date, view, range.start, range.end) / 100;
     scroller.current?.scrollTo({ left: Math.max(0, canvasWidth * position - window.innerWidth * 0.43), behavior: "smooth" });
   };
 
   useEffect(() => {
-    setSelected(null);
+    setSelection(null);
+    setShowScrollCoach(true);
+    lastUserScrollLeft.current = 0;
     requestAnimationFrame(() => scroller.current?.scrollTo({ left: 0, behavior: "smooth" }));
   }, [view]);
 
   useEffect(() => {
     const escape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setSelected(null);
+      if (event.key === "Escape") setSelection(null);
       if (event.key === "ArrowRight" && selectedEventIndex !== -1) showStoryEvent(selectedEventIndex + 1);
       if (event.key === "ArrowLeft" && selectedEventIndex !== -1) showStoryEvent(selectedEventIndex - 1);
     };
@@ -848,6 +854,15 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="reading-guide case-arguments">
+        <div><p className="section-number">02 / THE PARTIES&apos; THEORIES</p><h2>The central dispute is mental state and criminal responsibility at the time of the acts.</h2><p className="argument-intro">This summarizes counsel&apos;s opening theories and evidence introduced through August 11—not findings or expert conclusions. No retained criminal-responsibility expert had testified by this cutoff.</p></div>
+        <div className="argument-grid">
+          <article className="defense-argument"><span>Defense theory · attorney argument</span><h3>Psychotic illness overwhelmed legal capacity.</h3><p>The defense argues that severe perinatal mental illness—framed as postpartum or bipolar psychosis, intensified by insomnia and medication exposure—culminated in a command voice and a genuine suicide attempt, leaving Clancy without criminal responsibility.</p><small>Evidence introduced by Day 11 included months of documented depression, anxiety, and sleep disruption; repeated help-seeking and hospital care; Patrick&apos;s account of earlier distressing child-harm thoughts; and his report that about a week later she described a male “last chance” voice.</small></article>
+          <article className="prosecution-argument"><span>Commonwealth theory · attorney argument</span><h3>Deliberate conduct with retained capacity.</h3><p>The Commonwealth argues that Clancy experienced depression and anxiety but was not psychotic, deliberately created an errand window, and retained the ability to understand and control her conduct.</p><small>Evidence introduced by Day 11 included ordinary-seeming same-day calls and messages; route, CVS, and restaurant timing; a structured sequence and locked bedroom; repeated pre-offense clinical encounters that did not document hallucinations, delusions, mania, or disorganization; and the retrospective timing of the command-voice account.</small></article>
+          <p className="argument-boundary">Both formulations remain advocacy at this stage. Organized behavior can coexist with psychosis, and psychosis alone does not establish lack of criminal responsibility. Once the issue is raised, Massachusetts requires the Commonwealth to prove criminal responsibility beyond a reasonable doubt.</p>
+        </div>
+      </section>
+
       <section className="workspace" aria-label="Interactive evidence timeline">
         <div className="control-deck">
           <div className="view-tabs" role="tablist" aria-label="Timeline views">
@@ -860,8 +875,8 @@ export default function Home() {
           <div className="tools-row">
             <label className="search-control">
               <span className="search-icon" aria-hidden="true" />
-              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search symptoms, medications, clinicians…" aria-label="Search timeline" />
-              {query && <button onClick={() => setQuery("")} aria-label="Clear search">×</button>}
+              <input value={query} onChange={(event) => { setSelection(null); setQuery(event.target.value); }} placeholder="Search symptoms, medications, clinicians…" aria-label="Search timeline" />
+              {query && <button onClick={() => { setSelection(null); setQuery(""); }} aria-label="Clear search">×</button>}
             </label>
             <div className="zoom-control" aria-label="Timeline zoom">
               <button onClick={() => setZoom(Math.max(.72, +(zoom - .14).toFixed(2)))} aria-label="Zoom out">−</button>
@@ -880,7 +895,10 @@ export default function Home() {
                 <span />{categoryMeta[category].label}
               </button>
             ))}
-            <button className="reset-filter" onClick={() => setActiveCategories(new Set(Object.keys(categoryMeta) as Category[]))}>Reset</button>
+            <div className="filter-actions" aria-label="Bulk event-filter controls">
+              <button disabled={activeCategories.size === 0} onClick={() => { setActiveCategories(new Set()); setSelection(null); }}>Hide all</button>
+              <button disabled={activeCategories.size === Object.keys(categoryMeta).length} onClick={() => { setActiveCategories(new Set(Object.keys(categoryMeta) as Category[])); setSelection(null); }}>Show all</button>
+            </div>
           </div>
         </div>
 
@@ -890,7 +908,13 @@ export default function Home() {
           <div className="evidence-mini"><span className="solid" /> documented <span className="dash" /> reported / uncertain</div>
         </div>
 
-        <div className="timeline-scroll" ref={scroller} tabIndex={0} aria-label={`Scrollable ${range.label} timeline`}>
+        <div className="timeline-viewport">
+          <div className={`scroll-coach ${showScrollCoach ? "visible" : "dismissed"}`} aria-hidden={!showScrollCoach}>
+            <div className="scroll-coach-visual" aria-hidden="true"><kbd>Shift</kbd><span>+</span><i className="mouse-icon"><b /></i></div>
+            <div><strong>Move through the timeline</strong><span>Hold Shift while scrolling</span></div>
+            <button onClick={() => setShowScrollCoach(false)} aria-label="Dismiss timeline scrolling instruction">×</button>
+          </div>
+          <div className="timeline-scroll" ref={scroller} tabIndex={0} aria-label={`Scrollable ${range.label} timeline`} onWheel={(event) => { if ((event.shiftKey && Math.abs(event.deltaY) > 1) || Math.abs(event.deltaX) > 1) setShowScrollCoach(false); }} onPointerDown={() => { lastUserScrollLeft.current = scroller.current?.scrollLeft ?? 0; }} onPointerUp={() => { const left = scroller.current?.scrollLeft ?? 0; if (Math.abs(left - lastUserScrollLeft.current) > 4) setShowScrollCoach(false); }}>
           <div className={`timeline-canvas ${medicationVisible ? "with-meds" : "compact"} ${medicationVisible && showMedicationOverlay ? "overlay-open" : ""}`} style={{ width: canvasWidth, "--med-context-height": `${medicationContextHeight}px` } as React.CSSProperties}>
             <div className="time-ruler">
               <span className="range-start">{timelineDate(range.start, { month: "short", day: "numeric", year: "numeric" })}</span>
@@ -906,12 +930,12 @@ export default function Home() {
                 {detectedMedicationGroups.map(([date, group]) => <div className="med-overlay-row detected-row" key={date}>
                   <div className="med-detected-cluster" style={{ left: `${Math.min(99.5, Math.max(0, timelinePct(date, "course", views.course.start, views.course.end)))}%` }}>
                     <small>Detected {timelineDate(date, { month: "short", day: "numeric" })}</small>
-                    {group.map(({ medication, segment, segmentIndex }) => <button key={`${medication.generic}-${segmentIndex}`} style={{ "--med": medication.color } as React.CSSProperties} onClick={() => setSelected(medication)} title={`${medication.name} (${medication.generic}): ${segment.label}. ${segment.note}`}><i /><span>{medication.name}</span></button>)}
+                    {group.map(({ medication, segment, segmentIndex }) => <button key={`${medication.generic}-${segmentIndex}`} style={{ "--med": medication.color } as React.CSSProperties} onClick={() => setSelection({ kind: "medication", medication })} title={`${medication.name} (${medication.generic}): ${segment.label}. ${segment.note}`}><i /><span>{medication.name}</span></button>)}
                   </div>
                 </div>)}
                 {packedMedicationRows.map((row, rowIndex) => <div className="med-overlay-row" key={rowIndex}>
                   {row.map(({ medication, segment, segmentIndex, start, end }) => (
-                    <button key={`${medication.generic}-${segmentIndex}`} className={`med-overlay-segment ${segment.status}`} style={{ left: `${start}%`, width: `calc(${Math.max(.4, end - start)}% - 1px)`, "--med": medication.color } as React.CSSProperties} onClick={() => setSelected(medication)} title={`${medication.name} (${medication.generic}): ${segment.label}. ${segment.note}`}><span>{medication.name} · {segment.label}</span></button>
+                    <button key={`${medication.generic}-${segmentIndex}`} className={`med-overlay-segment ${segment.status}`} style={{ left: `${start}%`, width: `calc(${Math.max(.4, end - start)}% - 1px)`, "--med": medication.color } as React.CSSProperties} onClick={() => setSelection({ kind: "medication", medication })} title={`${medication.name} (${medication.generic}): ${segment.label}. ${segment.note}`}><span>{medication.name} · {segment.label}</span></button>
                   ))}
                 </div>)}
               </div>
@@ -926,7 +950,7 @@ export default function Home() {
               </div>
               {positionedEvents.map(({ event, x, top, cardOffset, color }) => (
                   <div className="event-anchor" key={event.id} style={{ left: `${x}%`, "--event": color } as React.CSSProperties}>
-                    <button className={`event-card ${event.certainty.toLowerCase()}`} style={{ top, left: cardOffset }} onClick={() => setSelected(event)} aria-label={`${event.displayDate}: ${event.title}. Open details.`}>
+                    <button className={`event-card ${event.certainty.toLowerCase()}`} style={{ top, left: cardOffset }} onClick={() => { const index = visibleEvents.findIndex((item) => item.id === event.id); setSelection({ kind: "event", index }); }} aria-label={`${event.displayDate}: ${event.title}. Open details.`}>
                       <span className="card-date">{event.displayDate}</span>
                       <strong>{event.title}</strong>
                     </button>
@@ -955,7 +979,7 @@ export default function Home() {
                 <div className="med-grid">
                   {medications.map((medication) => (
                     <div className="med-row" key={medication.generic}>
-                      <button className="med-name" onClick={() => setSelected(medication)} style={{ "--med": medication.color } as React.CSSProperties}>
+                      <button className="med-name" onClick={() => setSelection({ kind: "medication", medication })} style={{ "--med": medication.color } as React.CSSProperties}>
                         <strong>{medication.name}</strong><span>{medication.generic}</span><small>{medication.className}</small>
                       </button>
                       <div className="med-track">
@@ -965,11 +989,11 @@ export default function Home() {
                           const width = segment.end ? Math.max(.4, end - start) : 0;
                           const level = segment.level ?? 0;
                           return segment.end ? (
-                            <button key={index} className={`med-segment ${segment.status}`} style={{ left: `${start}%`, width: `calc(${width}% - 2px)`, top: `${5 + level * 26}px`, "--med": medication.color } as React.CSSProperties} onClick={() => setSelected(medication)} title={`${medication.name}: ${segment.label}. ${segment.note}`}>
+                            <button key={index} className={`med-segment ${segment.status}`} style={{ left: `${start}%`, width: `calc(${width}% - 2px)`, top: `${5 + level * 26}px`, "--med": medication.color } as React.CSSProperties} onClick={() => setSelection({ kind: "medication", medication })} title={`${medication.name}: ${segment.label}. ${segment.note}`}>
                               <span>{segment.label}</span>
                             </button>
                           ) : (
-                            <button key={index} className={`med-marker ${segment.status}`} style={{ left: `${start}%`, top: `${11 + level * 26}px`, "--med": medication.color } as React.CSSProperties} onClick={() => setSelected(medication)} title={`${medication.name}: ${segment.label}. ${segment.note}`} aria-label={`${medication.name}: ${segment.label}`} />
+                            <button key={index} className={`med-marker ${segment.status}`} style={{ left: `${start}%`, top: `${11 + level * 26}px`, "--med": medication.color } as React.CSSProperties} onClick={() => setSelection({ kind: "medication", medication })} title={`${medication.name}: ${segment.label}. ${segment.note}`} aria-label={`${medication.name}: ${segment.label}`} />
                           );
                         })}
                       </div>
@@ -979,15 +1003,7 @@ export default function Home() {
               </section>
             )}
           </div>
-        </div>
-      </section>
-
-      <section className="reading-guide">
-        <div><p className="section-number">02 / HOW TO READ THIS</p><h2>Three evidentiary separations do most of the work.</h2></div>
-        <div className="guide-grid">
-          <article><span>01</span><h3>Insomnia ≠ decreased need</h3><p>Most sleep loss was unwanted and distressing. Two “not tired” reports legitimately raised activation concern but did not establish mania.</p></article>
-          <article><span>02</span><h3>Intrusive thought ≠ intent</h3><p>Clinician messages described death or suicide. Patrick separately recalled child-harm thoughts without plan, intent, or external voice.</p></article>
-          <article><span>03</span><h3>Organized behavior ≠ diagnostic exclusion</h3><p>Normal-appearing calls and encounters demonstrate retained capacities at those moments; they do not globally rule psychosis in or out.</p></article>
+          </div>
         </div>
       </section>
 
@@ -997,9 +1013,9 @@ export default function Home() {
       </footer>
 
       {selected && (
-        <div className="drawer-layer" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setSelected(null); }}>
-          <aside className="detail-drawer" role="dialog" aria-modal="true" aria-label={"title" in selected ? selected.title : `${selected.name} medication details`}>
-            <button className="drawer-close" onClick={() => setSelected(null)} aria-label="Close details">×</button>
+        <div className="drawer-layer" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setSelection(null); }}>
+          <aside key={selectedEvent ? selectedEvent.id : `med-${selectedMedication?.generic}`} className="detail-drawer" role="dialog" aria-modal="true" aria-label={"title" in selected ? selected.title : `${selected.name} medication details`}>
+            <button className="drawer-close" onClick={() => setSelection(null)} aria-label="Close details">×</button>
             {"title" in selected ? (
               <>
                 <div className="drawer-accent" style={{ "--event": categoryMeta[selected.category].color } as React.CSSProperties}><span>{categoryMeta[selected.category].label}</span><i /></div>
@@ -1016,7 +1032,7 @@ export default function Home() {
                 <div className="source-box"><span>Corpus source</span><p>{selected.source}</p></div>
                 <div className="drawer-nav">
                   <button onClick={() => showStoryEvent(selectedEventIndex - 1)}>← Previous</button>
-                  <span aria-live="polite">{selectedEventIndex !== -1 ? `${selectedEventIndex + 1} / ${visibleEvents.length}` : "Selected event"}</span>
+                  <output key={selected && "title" in selected ? selected.id : "no-event"} aria-live="polite" aria-atomic="true">{selectedEventIndex !== -1 ? `${selectedEventIndex + 1} / ${visibleEvents.length}` : "Selected event"}</output>
                   <button onClick={() => showStoryEvent(selectedEventIndex + 1)}>Next →</button>
                 </div>
               </>
