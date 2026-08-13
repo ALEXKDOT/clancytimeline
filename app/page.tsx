@@ -56,22 +56,6 @@ type Medication = {
   segments: MedSegment[];
 };
 
-type OrientationCareGroup = {
-  date: string;
-  provider: string;
-  organization: string;
-  items: string[];
-};
-
-type OrientationCareColumn = {
-  month: string;
-  groups: OrientationCareGroup[];
-  continuation?: {
-    month: string;
-    groups: OrientationCareGroup[];
-  };
-};
-
 type PackedMedicationItem = {
   medication: Medication;
   segment: MedSegment;
@@ -97,22 +81,17 @@ const views: Record<ViewKey, { label: string; eyebrow: string; start: string; en
   post: { label: "Post-offense", eyebrow: "January 26, 2023 – September 2024", start: "2023-01-25T00:00:00", end: "2024-09-15T00:00:00", baseWidth: 2500 },
 };
 
-const orientationCareMap: OrientationCareColumn[] = [
+const orientationCareMap = [
   {
-    month: "September",
+    month: "September–October",
     groups: [
       { date: "Sep 15", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Sertraline 25 mg ×30 filled; planned increase from 25 to 50 mg."] },
       { date: "Sep 28", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Sertraline had not been started; medication plan deferred after reported improvement."] },
+      { date: "Oct 3", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Psychiatry follow-up focused on symptoms and leave paperwork."] },
+      { date: "Oct 20", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Sertraline stopped after reported 25→50 mg trial."] },
+      { date: "Oct 21", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Ativan (lorazepam) 0.5 mg ×7 filled for severe anxiety."] },
+      { date: "Oct 26", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Ativan (lorazepam) 1 mg ×30 filled.", "Buspirone 5 mg ×30 filled.", "Hydroxyzine 25 mg ×30 filled."] },
     ],
-    continuation: {
-      month: "October",
-      groups: [
-        { date: "Oct 3", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Psychiatry follow-up focused on symptoms and leave paperwork."] },
-        { date: "Oct 20", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Sertraline stopped after reported 25→50 mg trial."] },
-        { date: "Oct 21", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Ativan (lorazepam) 0.5 mg ×7 filled for severe anxiety."] },
-        { date: "Oct 26", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Ativan (lorazepam) 1 mg ×30 filled.", "Buspirone 5 mg ×30 filled.", "Hydroxyzine 25 mg ×30 filled."] },
-      ],
-    },
   },
   {
     month: "November",
@@ -952,7 +931,7 @@ export default function Home() {
               <div className="care-map" role="list" aria-label="Monthly summary of providers and medication trials">
                 {orientationCareMap.map((month) => <article className="care-month" key={month.month} role="listitem">
                   <header><span>{month.month}</span><i /></header>
-                  <div className={`care-month-groups${month.continuation ? " has-continuation" : ""}`}>
+                  <div className="care-month-groups">
                     {month.groups.map((group) => <section className="care-group" key={`${month.month}-${group.date}-${group.provider}`}>
                       <time>{group.date}</time>
                       <strong>{group.provider}</strong>
@@ -960,17 +939,6 @@ export default function Home() {
                       <ul>{group.items.map((item) => <li key={item}>{item}</li>)}</ul>
                     </section>)}
                   </div>
-                  {month.continuation && <>
-                    <header className="care-month-continuation"><span>{month.continuation.month}</span><i /></header>
-                    <div className="care-month-groups">
-                      {month.continuation.groups.map((group) => <section className="care-group" key={`${month.continuation?.month}-${group.date}-${group.provider}`}>
-                        <time>{group.date}</time>
-                        <strong>{group.provider}</strong>
-                        <small>{group.organization}</small>
-                        <ul>{group.items.map((item) => <li key={item}>{item}</li>)}</ul>
-                      </section>)}
-                    </div>
-                  </>}
                 </article>)}
               </div>
             </div>

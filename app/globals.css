@@ -58,8 +58,6 @@ button { color: inherit; }
 .care-month > header { height: 44px; padding: 0 16px; display: flex; align-items: center; gap: 11px; border-bottom: 1px solid rgba(104,143,158,.22); color: #dbe6e9; font: 800 12px/1 var(--font-geist-mono), monospace; text-transform: uppercase; letter-spacing: .09em; }
 .care-month > header i { height: 1px; flex: 1; background: linear-gradient(90deg, var(--teal), transparent); opacity: .55; }
 .care-month-groups { padding: 5px 15px 15px; }
-.care-month-groups.has-continuation { padding-bottom: 0; }
-.care-month > header.care-month-continuation { border-top: 1px solid rgba(104,143,158,.3); }
 .care-group { position: relative; padding: 13px 0 13px 14px; border-bottom: 1px solid rgba(104,143,158,.16); }
 .care-group:last-child { border-bottom: 0; }
 .care-group:before { content: ""; position: absolute; top: 17px; left: -1px; width: 7px; height: 7px; border: 2px solid #08151b; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 1px var(--teal); }
