@@ -109,7 +109,7 @@ const events: TimelineEvent[] = [
     details: ["She described yawning without feeling drowsy.", "Tufts did not observe pressured speech, hyperactivity, mania, psychosis, suicidal ideation, homicidal ideation, or hallucinations.", "Lorazepam 0.5 mg ×7 was prescribed and filled for severe anxiety."], medication: "Lorazepam 0.5 mg PRN", source: "SRC-0087, pp. 105–108; SRC-0048", caution: "‘Not drowsy’ is ambiguous within a broader picture of distressed insomnia.", views: ["course"]
   },
   {
-    id: "oct26", date: "2022-10-26T12:00:00", displayDate: "October 26", title: "Telehealth visit: anxiety regimen broadens", short: "25–30 minute visit · buspirone and hydroxyzine added", category: "medication", evidence: "Contemporaneous record", certainty: "High", clinician: "Jennifer Tufts, MD", institution: "Aster Mental Health", side: "bottom", tier: 2,
+    id: "oct26", date: "2022-10-26T12:00:00", displayDate: "October 26", title: "Telehealth visit: anxiety regimen broadens", short: "25–30 minute visit · buspirone and hydroxyzine added", category: "clinical", evidence: "Contemporaneous record", certainty: "High", clinician: "Jennifer Tufts, MD", institution: "Aster Mental Health", side: "bottom", tier: 2,
     summary: "Tufts added daily buspirone and PRN hydroxyzine as non-benzodiazepine alternatives while continuing lorazepam.",
     details: ["Fills: lorazepam 1 mg ×30, buspirone 5 mg ×30, and hydroxyzine 25 mg ×30.", "Clancy later reported that she had not started buspirone because she feared a new medication.", "Actual hydroxyzine use remains unclear."], medication: "Lorazepam 1 mg; buspirone 5 mg; hydroxyzine 25 mg", source: "SRC-0091; SRC-0087; SRC-0048", caution: "Multiple fills do not establish simultaneous use.", views: ["course"]
   },

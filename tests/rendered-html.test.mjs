@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 async function render() {
@@ -39,4 +40,18 @@ test("renders evidence-aware controls and chronology boundaries", async () => {
   assert.match(html, /Post-offense/);
   assert.match(html, /Search symptoms, medications, clinicians/);
   assert.match(html, /Fit chronology at default zoom/);
+});
+
+test("keeps the omission band behind cards and classifies the October 26 visit", async () => {
+  const [page, css] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+
+  const visit = page.match(/id: "oct26"[^\n]+/)?.[0] ?? "";
+  const prescriptions = page.match(/id: "rx-oct26"[^\n]+/)?.[0] ?? "";
+  assert.match(visit, /category: "clinical"/);
+  assert.match(prescriptions, /category: "medication"/);
+  assert.match(css, /\.field-break \{ z-index: 1;/);
+  assert.match(css, /\.event-card \{[^}]*z-index: 6;/);
 });
