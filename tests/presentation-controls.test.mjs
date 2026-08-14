@@ -19,6 +19,7 @@ register(`data:text/javascript,${encodeURIComponent(cssLoader)}`, import.meta.ur
 const {
   AudienceFollowControl,
   PresentationInteractionShield,
+  PresenterPanel,
 } = await import("../app/presentation/PresentationControls.tsx");
 
 let jsdom;
@@ -60,6 +61,73 @@ function followingView(active, extraControl = null) {
     React.createElement(PresentationInteractionShield, { active }),
   );
 }
+
+function presenterView(overrides = {}) {
+  return React.createElement(PresenterPanel, {
+    visible: true,
+    connection: "online",
+    auth: "authorized",
+    isLive: true,
+    audienceUrl: "https://alexkdot.github.io/clancytimeline/",
+    laserEnabled: false,
+    laserAvailable: true,
+    onSignIn: () => undefined,
+    onSignOut: () => undefined,
+    onStart: () => undefined,
+    onStop: () => undefined,
+    onToggleLaser: () => undefined,
+    ...overrides,
+  });
+}
+
+test("live presenter exposes an accessible laser toggle with visible state", () => {
+  let toggles = 0;
+  const view = render(presenterView({ onToggleLaser: () => { toggles += 1; } }));
+  const toggle = view.getByRole("button", { name: "Turn laser pointer on" });
+
+  assert.equal(toggle.getAttribute("aria-pressed"), "false");
+  assert.equal(toggle.getAttribute("aria-keyshortcuts"), "L");
+  assert.match(toggle.textContent, /Laser pointer/);
+  assert.match(toggle.textContent, /Off/);
+  fireEvent.click(toggle);
+  assert.equal(toggles, 1);
+
+  view.rerender(presenterView({ laserEnabled: true }));
+  const enabledToggle = view.getByRole("button", { name: "Turn laser pointer off" });
+  assert.equal(enabledToggle.getAttribute("aria-pressed"), "true");
+  assert.match(enabledToggle.textContent, /On/);
+});
+
+test("L toggles the live laser but never hijacks typing or browser shortcuts", () => {
+  let toggles = 0;
+  const view = render(presenterView({ onToggleLaser: () => { toggles += 1; } }));
+
+  fireEvent.keyDown(window, { key: "l" });
+  assert.equal(toggles, 1);
+  fireEvent.keyDown(window, { key: "L", repeat: true });
+  fireEvent.keyDown(window, { key: "l", ctrlKey: true });
+  fireEvent.keyDown(window, { key: "l", metaKey: true });
+  fireEvent.keyDown(window, { key: "l", altKey: true });
+  assert.equal(toggles, 1);
+
+  const input = document.createElement("input");
+  document.body.appendChild(input);
+  fireEvent.keyDown(input, { key: "l" });
+  assert.equal(toggles, 1);
+
+  const editor = document.createElement("div");
+  editor.setAttribute("contenteditable", "");
+  document.body.appendChild(editor);
+  fireEvent.keyDown(editor, { key: "l" });
+  assert.equal(toggles, 1);
+
+  view.rerender(presenterView({
+    isLive: false,
+    onToggleLaser: () => { toggles += 1; },
+  }));
+  fireEvent.keyDown(window, { key: "l" });
+  assert.equal(toggles, 1);
+});
 
 test("following moves focus to Explore locally and restores prior focus on cleanup", () => {
   const priorControl = document.createElement("button");

@@ -3,6 +3,7 @@ export {
   PresentationInteractionShield,
   PresenterPanel,
 } from "./PresentationControls";
+export { PresentationLaserPointer } from "./PresentationLaserPointer";
 
 export type {
   AudienceFollowControlProps,
@@ -12,3 +13,4 @@ export type {
   PresenterAuthState,
   PresenterPanelProps,
 } from "./PresentationControls";
+export type { PresentationLaserPointerProps } from "./PresentationLaserPointer";

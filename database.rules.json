@@ -133,6 +133,35 @@
             ".validate": false
           }
         },
+        "pointer": {
+          ".read": true,
+          ".write": "auth != null && auth.token.email_verified == true && auth.token.email == 'akrawec1@gmail.com'",
+          ".validate": "newData.hasChildren(['schemaVersion', 'clientId', 'sequence', 'xRatio', 'yRatio', 'visible', 'updatedAt'])",
+          "schemaVersion": {
+            ".validate": "newData.isNumber() && newData.val() == 1"
+          },
+          "clientId": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 128"
+          },
+          "sequence": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 9007199254740991 && newData.val() % 1 == 0"
+          },
+          "xRatio": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1"
+          },
+          "yRatio": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1"
+          },
+          "visible": {
+            ".validate": "newData.isBoolean()"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
         "authChecks": {
           ".read": false,
           ".write": false,

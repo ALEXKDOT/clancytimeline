@@ -4,8 +4,12 @@ import test from "node:test";
 import {
   clampRatio,
   heartbeatIsStale,
+  nextPointerSequence,
   normalizeMeta,
+  normalizePointerRatios,
+  normalizePointerState,
   normalizeSnapshot,
+  pointerIsFresh,
   presentationIsLive,
   snapshotsMeaningfullyEqual,
 } from "../app/presentation/state";
@@ -138,6 +142,34 @@ test("detects active, stopped, and stale heartbeat states using server-relative 
   assert.equal(presentationIsLive(meta, 20_000, 18_000), true);
   assert.equal(heartbeatIsStale(meta, 28_001, 18_000), true);
   assert.equal(presentationIsLive({ ...meta!, active: false }, 10_001), false);
+});
+
+test("normalizes responsive laser coordinates, ordering, and stale visibility", () => {
+  const pointer = {
+    schemaVersion: 1 as const,
+    clientId: "presenter-tab-a",
+    sequence: 1_000,
+    xRatio: 0.25,
+    yRatio: 0.75,
+    visible: true,
+    updatedAt: 10_000,
+  };
+  assert.deepEqual(normalizePointerState(pointer), pointer);
+  assert.equal(normalizePointerState({ ...pointer, sequence: 1.5 }), null);
+  assert.equal(normalizePointerState({ ...pointer, xRatio: 1.01 }), null);
+  assert.equal(normalizePointerState({ ...pointer, yRatio: -0.01 }), null);
+  assert.deepEqual(normalizePointerRatios(250, 450, 1_000, 600), {
+    xRatio: 0.25,
+    yRatio: 0.75,
+  });
+  assert.deepEqual(normalizePointerRatios(-20, 900, 1_000, 600), {
+    xRatio: 0,
+    yRatio: 1,
+  });
+  assert.equal(nextPointerSequence(1_000, 900), 1_001);
+  assert.equal(pointerIsFresh(pointer, 12_500), true);
+  assert.equal(pointerIsFresh(pointer, 12_501), false);
+  assert.equal(pointerIsFresh({ ...pointer, visible: false }, 10_100), false);
 });
 
 test("meaningful snapshot equality ignores transport metadata and tiny scroll noise", () => {

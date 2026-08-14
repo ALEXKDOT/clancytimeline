@@ -29,21 +29,22 @@ test("Realtime Database rules deny root access and never grant a public write", 
   assert.ok(!collectRuleValues(rules, ".write").includes(true), "no path may contain .write: true");
 });
 
-test("only presentation metadata and state are publicly readable", async () => {
+test("only presentation metadata, state, and pointer are publicly readable", async () => {
   const rules = (await readJson("database.rules.json")).rules;
   const main = rules.presentations.main;
 
   assert.equal(main.meta[".read"], true);
   assert.equal(main.state[".read"], true);
+  assert.equal(main.pointer[".read"], true);
   assert.equal(main.authChecks[".read"], false);
   assert.equal(main.authChecks[".write"], false);
-  assert.equal(collectRuleValues(rules, ".read").filter((value) => value === true).length, 2);
+  assert.equal(collectRuleValues(rules, ".read").filter((value) => value === true).length, 3);
 });
 
 test("presentation writes require a verified exact presenter identity", async () => {
   const main = (await readJson("database.rules.json")).rules.presentations.main;
 
-  for (const writeRule of [main.meta[".write"], main.state[".write"], main.authChecks.$uid[".write"]]) {
+  for (const writeRule of [main.meta[".write"], main.state[".write"], main.pointer[".write"], main.authChecks.$uid[".write"]]) {
     assert.equal(typeof writeRule, "string");
     assert.match(writeRule, /auth\s*!=\s*null/);
     assert.match(writeRule, /email_verified\s*==\s*true/);
@@ -55,6 +56,28 @@ test("presentation writes require a verified exact presenter identity", async ()
   assert.match(main.authChecks.$uid[".validate"], /checkedAt/);
   assert.match(main.authChecks.$uid.clientId[".validate"], /isString\(\)/);
   assert.match(main.authChecks.$uid.checkedAt[".validate"], /isNumber\(\)/);
+});
+
+test("laser pointer schema is bounded, versioned, and rejects additional fields", async () => {
+  const pointer = (await readJson("database.rules.json")).rules.presentations.main.pointer;
+
+  assert.match(pointer[".validate"], /schemaVersion/);
+  assert.match(pointer[".validate"], /clientId/);
+  assert.match(pointer[".validate"], /sequence/);
+  assert.match(pointer[".validate"], /xRatio/);
+  assert.match(pointer[".validate"], /yRatio/);
+  assert.match(pointer[".validate"], /visible/);
+  assert.match(pointer[".validate"], /updatedAt/);
+  assert.match(pointer.schemaVersion[".validate"], /==\s*1/);
+  assert.match(pointer.clientId[".validate"], /isString\(\).*length\s*<=\s*128/);
+  assert.match(pointer.sequence[".validate"], /%\s*1\s*==\s*0/);
+  for (const ratio of [pointer.xRatio[".validate"], pointer.yRatio[".validate"]]) {
+    assert.match(ratio, />=\s*0/);
+    assert.match(ratio, /<=\s*1/);
+  }
+  assert.match(pointer.visible[".validate"], /isBoolean\(\)/);
+  assert.match(pointer.updatedAt[".validate"], /isNumber\(\).*>=\s*0/);
+  assert.equal(pointer.$other[".validate"], false);
 });
 
 test("state schema validates enums, booleans, bounded text, maps, and normalized ratios", async () => {
@@ -181,6 +204,7 @@ test("generated GitHub Pages artifact is self-contained and includes presenter m
   assert.match(docsHtml, /Start presenting/);
   assert.match(docsHtml, /Following presenter/);
   assert.match(docsHtml, /Explore locally/);
+  assert.match(docsHtml, /Laser pointer/);
   assert.match(docsHtml, /<style>[\s\S]+<\/style>/);
   assert.match(docsHtml, /<script type="module">[\s\S]+<\/script>/);
   assert.doesNotMatch(docsHtml, /<(?:script|link)\b[^>]+(?:src|href)="(?!data:|#)/i);

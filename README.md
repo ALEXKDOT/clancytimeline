@@ -41,6 +41,8 @@ Live Presenter Mode is an optional, state-based synchronization layer. The ordin
 
 Opening the presenter URL does not begin a broadcast. The presenter must sign in with Google, pass a rules-enforced authorization check, and deliberately select **Start presenting**. Audience clients read only the latest complete snapshot and never receive write access.
 
+While a session is live, the presenter can switch on **Laser pointer** in the presenter panel or press **L**. The normal mouse cursor remains available, while a red visual pointer is mirrored to audience screens that are actively following. The pointer hides automatically when it is idle, leaves the page, crosses the presenter panel, loses the connection, or the session stops; audience members who select **Explore locally** do not see it until they rejoin.
+
 ### Firebase Console setup
 
 Only the Firebase browser configuration and one presenter identity are needed. Never create or share a service-account key, private key, database password, refresh token, or administrative credential.
@@ -100,12 +102,12 @@ These browser values identify a public web app; they are not authorization crede
 ### Security model
 
 - Database root read and write are denied.
-- Unauthenticated audience clients may read only `/presentations/main/meta` and `/presentations/main/state`.
+- Unauthenticated audience clients may read only `/presentations/main/meta`, `/presentations/main/state`, and the transient `/presentations/main/pointer` position.
 - `/presentations/main/authChecks/$uid` is private and accepts only a short-lived probe from the exact verified presenter.
-- Presentation state and metadata writes require that same identity.
-- Rules validate the state schema, view, filter booleans, bounded text, stable selection shape, and normalized `0–1` scroll ratios.
+- Presentation state, metadata, and laser-pointer writes require that same identity.
+- Rules validate the state schema, view, filter booleans, bounded text, stable selection shape, normalized `0–1` scroll ratios, and normalized pointer coordinates.
 - Client-side buttons, query parameters, Firebase browser keys, and email text in React are not authorization controls.
 
 ### Release verification
 
-Run dependency installation from the lockfile, lint, all tests, the production build, and `npm run build:standalone`. The standalone command regenerates both deployment files and `docs/.nojekyll`. Before reporting production success, verify with two browser profiles or devices that explicit start/stop, unauthorized denial, late joining, view/filter/search/selection/scroll synchronization, Explore/Rejoin, stale-session unlocking, and offline fallback all behave correctly. Mock tests are not a substitute for that configured production check.
+Run dependency installation from the lockfile, lint, all tests, the production build, and `npm run build:standalone`. The standalone command regenerates both deployment files and `docs/.nojekyll`. Before reporting production success, verify with two browser profiles or devices that explicit start/stop, unauthorized denial, late joining, view/filter/search/selection/scroll synchronization, laser-pointer mirroring and automatic hiding, Explore/Rejoin, stale-session unlocking, and offline fallback all behave correctly. Mock tests are not a substitute for that configured production check.

@@ -356,6 +356,72 @@
   gap: 8px;
 }
 
+.presentation-laser-tools {
+  margin-top: 10px;
+  padding-top: 10px;
+  display: grid;
+  gap: 6px;
+  border-top: 1px solid var(--presentation-line);
+}
+
+.presentation-button.is-laser {
+  width: 100%;
+  justify-content: flex-start;
+  border-color: rgba(255, 130, 125, 0.32);
+  background: rgba(255, 130, 125, 0.055);
+}
+
+.presentation-button.is-laser > svg {
+  color: var(--presentation-red);
+}
+
+.presentation-button.is-laser > span {
+  margin-right: auto;
+}
+
+.presentation-button.is-laser > strong {
+  min-width: 25px;
+  color: var(--presentation-muted);
+  font-size: 10px;
+  text-align: right;
+}
+
+.presentation-button.is-laser[aria-pressed="true"] {
+  border-color: rgba(255, 130, 125, 0.72);
+  background: rgba(255, 75, 69, 0.18);
+  color: #fff3f2;
+  box-shadow: 0 0 22px rgba(255, 49, 49, 0.09) inset;
+}
+
+.presentation-button.is-laser[aria-pressed="true"] > strong {
+  color: #ffc0bc;
+}
+
+.presentation-button.is-laser kbd {
+  min-width: 23px;
+  padding: 3px 6px;
+  border: 1px solid rgba(237, 246, 248, 0.22);
+  border-bottom-color: rgba(237, 246, 248, 0.42);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--presentation-muted);
+  font: 750 10px/1 var(--font-geist-mono), ui-monospace, monospace;
+  text-align: center;
+}
+
+.presentation-laser-tools > span {
+  color: var(--presentation-muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.presentation-laser-error {
+  margin: 9px 0 0;
+  color: var(--presentation-red);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
 .presentation-session-meta,
 .presentation-inline-error {
   margin: 10px 0 0;
@@ -477,6 +543,33 @@
   touch-action: none;
 }
 
+.presentation-laser-layer {
+  position: fixed;
+  z-index: 2147482999;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.presentation-laser-dot {
+  position: absolute;
+  left: var(--presentation-laser-x, 50%);
+  top: var(--presentation-laser-y, 50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  background: #ff3434;
+  box-shadow:
+    0 0 4px rgba(255, 255, 255, 0.92),
+    0 0 11px 4px rgba(255, 40, 35, 0.78),
+    0 0 30px 11px rgba(255, 30, 30, 0.28);
+  transform: translate3d(-50%, -50%, 0);
+  transition: left 80ms linear, top 80ms linear, opacity 120ms ease;
+  will-change: left, top;
+}
+
 @keyframes presentation-spin {
   to { transform: rotate(360deg); }
 }
@@ -532,6 +625,10 @@
   }
 
   .presentation-button {
+    transition: none;
+  }
+
+  .presentation-laser-dot {
     transition: none;
   }
 }

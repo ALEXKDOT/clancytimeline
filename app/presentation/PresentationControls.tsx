@@ -36,11 +36,17 @@ export interface PresenterPanelProps {
   statusMessage?: string | null;
   errorMessage?: string | null;
   lastPublishedLabel?: string | null;
+  /** Whether the presenter's synchronized visual pointer is switched on. */
+  laserEnabled?: boolean;
+  /** Laser movement is accepted only while the live session is writable. */
+  laserAvailable?: boolean;
+  laserErrorMessage?: string | null;
   isBusy?: boolean;
   onSignIn: () => void | Promise<void>;
   onSignOut: () => void | Promise<void>;
   onStart: () => void | Promise<void>;
   onStop: () => void | Promise<void>;
+  onToggleLaser?: () => void;
   onCopyAudienceLink?: () => void | Promise<void>;
 }
 
@@ -142,6 +148,23 @@ function GoogleIcon() {
   );
 }
 
+function LaserIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 20 20" width="18" height="18">
+      <circle cx="10" cy="10" r="3" fill="currentColor" />
+      <circle cx="10" cy="10" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.25" opacity=".62" />
+      <path d="M10 1.5V4M10 16v2.5M1.5 10H4M16 10h2.5" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.25" opacity=".78" />
+    </svg>
+  );
+}
+
+function isEditableShortcutTarget(target: EventTarget | null) {
+  if (!(target instanceof Element)) return false;
+  return Boolean(
+    target.closest("input, textarea, select, [contenteditable]:not([contenteditable='false'])"),
+  );
+}
+
 async function writeClipboard(value: string) {
   if (navigator.clipboard?.writeText) {
     await navigator.clipboard.writeText(value);
@@ -175,11 +198,15 @@ export function PresenterPanel({
   statusMessage,
   errorMessage,
   lastPublishedLabel,
+  laserEnabled = false,
+  laserAvailable = false,
+  laserErrorMessage,
   isBusy = false,
   onSignIn,
   onSignOut,
   onStart,
   onStop,
+  onToggleLaser,
   onCopyAudienceLink,
 }: PresenterPanelProps) {
   const headingId = useId();
@@ -192,6 +219,27 @@ export function PresenterPanel({
     },
     [],
   );
+
+  useEffect(() => {
+    if (!visible || !isLive || !laserAvailable || !onToggleLaser) return;
+
+    const toggleWithShortcut = (event: KeyboardEvent) => {
+      if (
+        event.key.toLowerCase() !== "l"
+        || event.repeat
+        || event.ctrlKey
+        || event.metaKey
+        || event.altKey
+        || isEditableShortcutTarget(event.target)
+      ) return;
+
+      event.preventDefault();
+      onToggleLaser();
+    };
+
+    window.addEventListener("keydown", toggleWithShortcut);
+    return () => window.removeEventListener("keydown", toggleWithShortcut);
+  }, [isLive, laserAvailable, onToggleLaser, visible]);
 
   if (!visible) return null;
 
@@ -388,6 +436,32 @@ export function PresenterPanel({
                 </button>
               </div>
 
+              {isLive && (
+                <div className="presentation-laser-tools">
+                  <button
+                    className="presentation-button is-laser"
+                    type="button"
+                    aria-label={laserEnabled ? "Turn laser pointer off" : "Turn laser pointer on"}
+                    aria-keyshortcuts="L"
+                    aria-pressed={laserEnabled}
+                    onClick={onToggleLaser}
+                    disabled={!laserAvailable || isBusy || !onToggleLaser}
+                  >
+                    <LaserIcon />
+                    <span>Laser pointer</span>
+                    <strong>{laserEnabled ? "On" : "Off"}</strong>
+                    <kbd aria-hidden="true">L</kbd>
+                  </button>
+                  <span>Move the pointer over the page to guide the audience.</span>
+                </div>
+              )}
+
+              {laserErrorMessage && (
+                <p className="presentation-laser-error" role="alert">
+                  {laserErrorMessage}
+                </p>
+              )}
+
               {(lastPublishedLabel || statusMessage) && (
                 <p className="presentation-session-meta">
                   {statusMessage || (isLive ? `Last update ${lastPublishedLabel}` : lastPublishedLabel)}
@@ -407,6 +481,7 @@ export function PresenterPanel({
           {copyState === "copied" && "Audience link copied to clipboard."}
           {copyState === "failed" && "Audience link could not be copied."}
           {isLive && "Presentation is live."}
+          {isLive && ` Laser pointer ${laserEnabled ? "on" : "off"}.`}
         </p>
       </div>
     </aside>

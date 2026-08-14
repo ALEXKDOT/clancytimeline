@@ -2,6 +2,7 @@ import {
   PRESENTATION_MAX_FAQ_IDS_LENGTH,
   PRESENTATION_MAX_SEARCH_LENGTH,
   PRESENTATION_MAX_SELECTION_ID_LENGTH,
+  PRESENTATION_POINTER_STALE_AFTER_MS,
   PRESENTATION_STALE_AFTER_MS,
 } from "./config";
 import {
@@ -10,6 +11,7 @@ import {
   type PresentationCategoryState,
   type PresentationControlState,
   type PresentationMeta,
+  type PresentationPointerState,
   type PresentationSelection,
   type PresentationSnapshot,
   type PresentationVerticalPosition,
@@ -133,6 +135,61 @@ export function normalizeMeta(value: unknown): PresentationMeta | null {
     endedAt: value.endedAt as number,
     disconnectedAt: value.disconnectedAt as number,
   };
+}
+
+export function normalizePointerState(value: unknown): PresentationPointerState | null {
+  if (!isRecord(value) || value.schemaVersion !== PRESENTATION_SCHEMA_VERSION) return null;
+  if (!boundedString(value.clientId, 100) || value.clientId.length === 0) return null;
+  if (
+    !Number.isSafeInteger(value.sequence) ||
+    (value.sequence as number) < 0
+  ) return null;
+  if (
+    !finiteNumber(value.xRatio) ||
+    !finiteNumber(value.yRatio) ||
+    value.xRatio < 0 ||
+    value.xRatio > 1 ||
+    value.yRatio < 0 ||
+    value.yRatio > 1
+  ) return null;
+  if (typeof value.visible !== "boolean") return null;
+  if (!finiteNumber(value.updatedAt) || value.updatedAt < 0) return null;
+  return {
+    schemaVersion: PRESENTATION_SCHEMA_VERSION,
+    clientId: value.clientId,
+    sequence: value.sequence as number,
+    xRatio: value.xRatio,
+    yRatio: value.yRatio,
+    visible: value.visible,
+    updatedAt: value.updatedAt,
+  };
+}
+
+export function normalizePointerRatios(
+  clientX: number,
+  clientY: number,
+  viewportWidth: number,
+  viewportHeight: number,
+) {
+  return {
+    xRatio: viewportWidth > 0 ? clampRatio(clientX / viewportWidth) : 0,
+    yRatio: viewportHeight > 0 ? clampRatio(clientY / viewportHeight) : 0,
+  };
+}
+
+export function nextPointerSequence(previous: number, now = Date.now()) {
+  const safePrevious = Number.isSafeInteger(previous) && previous >= 0 ? previous : 0;
+  const safeNow = Number.isSafeInteger(now) && now >= 0 ? now : 0;
+  return Math.min(Number.MAX_SAFE_INTEGER, Math.max(safePrevious + 1, safeNow));
+}
+
+export function pointerIsFresh(
+  pointer: PresentationPointerState | null,
+  serverNow: number,
+  staleAfterMs = PRESENTATION_POINTER_STALE_AFTER_MS,
+) {
+  if (!pointer?.visible || pointer.updatedAt <= 0) return false;
+  return serverNow - pointer.updatedAt <= staleAfterMs;
 }
 
 export function snapshotContentKey(snapshot: PresentationSnapshot) {

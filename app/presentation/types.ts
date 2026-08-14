@@ -67,6 +67,18 @@ export type PresentationMeta = {
   disconnectedAt: number;
 };
 
+/** High-frequency laser state stored separately at /presentations/main/pointer. */
+export type PresentationPointerState = {
+  schemaVersion: typeof PRESENTATION_SCHEMA_VERSION;
+  clientId: string;
+  /** Monotonic within one presenter-client lifetime. */
+  sequence: number;
+  xRatio: number;
+  yRatio: number;
+  visible: boolean;
+  updatedAt: number;
+};
+
 export type PresentationUser = {
   uid: string;
   email: string | null;
@@ -117,6 +129,11 @@ export interface PresentationTransport {
     onError: (error: PresentationTransportError) => void,
   ): Unsubscribe;
 
+  subscribePointer(
+    onValue: (pointer: PresentationPointerState | null) => void,
+    onError: (error: PresentationTransportError) => void,
+  ): Unsubscribe;
+
   subscribeConnection(onValue: (connected: boolean) => void): Unsubscribe;
   subscribeServerTimeOffset(onValue: (offsetMs: number) => void): Unsubscribe;
   subscribeAuth(onValue: (user: PresentationUser | null) => void): Unsubscribe;
@@ -127,6 +144,8 @@ export interface PresentationTransport {
 
   start(snapshot: PresentationSnapshot): Promise<void>;
   publish(snapshot: PresentationSnapshot): Promise<void>;
+  publishPointer(pointer: PresentationPointerState): Promise<void>;
+  hidePointer(clientId: string, sequence: number): Promise<void>;
   heartbeat(clientId: string): Promise<void>;
   stop(clientId: string): Promise<void>;
   releasePresenterConnection(): Promise<void>;
@@ -168,6 +187,7 @@ export type UsePresentationSyncResult = {
   user: PresentationUser | null;
   authorization: PresentationAuthorizationStatus;
   isPresenting: boolean;
+  activePresenterClientId: string | null;
   liveSessionActive: boolean;
   isFollowing: boolean;
   isExploring: boolean;

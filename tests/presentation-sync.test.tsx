@@ -10,6 +10,7 @@ import type {
   PresentationControlState,
   PresentationDomAdapter,
   PresentationMeta,
+  PresentationPointerState,
   PresentationSnapshot,
   PresentationTransport,
   PresentationTransportError,
@@ -104,6 +105,11 @@ class MockTransport implements PresentationTransport {
     return () => this.stateListeners.delete(onValue);
   }
 
+  subscribePointer(onValue: (pointer: PresentationPointerState | null) => void): Unsubscribe {
+    onValue(null);
+    return () => undefined;
+  }
+
   subscribeConnection(onValue: (connected: boolean) => void): Unsubscribe {
     this.connectionListeners.add(onValue);
     onValue(this.connected);
@@ -165,6 +171,10 @@ class MockTransport implements PresentationTransport {
     this.state = snapshot;
     this.emitState(snapshot);
   }
+
+  async publishPointer() {}
+
+  async hidePointer() {}
 
   async heartbeat() { this.heartbeats += 1; }
 
@@ -288,6 +298,7 @@ test("authorized presenter explicitly starts, publishes a complete snapshot, and
 
   await act(() => hook.result.current.startPresenting());
   await waitFor(() => assert.equal(hook.result.current.isPresenting, true));
+  assert.equal(hook.result.current.activePresenterClientId, hook.result.current.clientId);
   assert.equal(transport.starts.length, 1);
   assert.equal(transport.starts[0].view, "course");
   assert.deepEqual(transport.starts[0].selection, { kind: "none", id: "" });
@@ -295,6 +306,7 @@ test("authorized presenter explicitly starts, publishes a complete snapshot, and
 
   await act(() => hook.result.current.stopPresenting());
   await waitFor(() => assert.equal(hook.result.current.isPresenting, false));
+  assert.equal(hook.result.current.activePresenterClientId, null);
   assert.equal(transport.stops, 1);
 });
 

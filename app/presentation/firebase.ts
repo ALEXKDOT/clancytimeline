@@ -29,10 +29,16 @@ import {
   PRESENTATION_FIREBASE_CONFIG,
   PRESENTATION_ROOM_PATH,
 } from "./config";
-import { normalizeMeta, normalizeSnapshot } from "./state";
+import {
+  nextPointerSequence,
+  normalizeMeta,
+  normalizePointerState,
+  normalizeSnapshot,
+} from "./state";
 import {
   PRESENTATION_SCHEMA_VERSION,
   type PresentationMeta,
+  type PresentationPointerState,
   type PresentationSnapshot,
   type PresentationTransport,
   type PresentationTransportError,
@@ -102,6 +108,11 @@ class DisabledPresentationTransport implements PresentationTransport {
     return () => undefined;
   }
 
+  subscribePointer(onValueCallback: (pointer: PresentationPointerState | null) => void): Unsubscribe {
+    onValueCallback(null);
+    return () => undefined;
+  }
+
   subscribeConnection(onValueCallback: (connected: boolean) => void): Unsubscribe {
     onValueCallback(false);
     return () => undefined;
@@ -129,6 +140,8 @@ class DisabledPresentationTransport implements PresentationTransport {
   async probeAuthorization(): Promise<void> { return this.unavailable(); }
   async start(): Promise<void> { return this.unavailable(); }
   async publish(): Promise<void> { return this.unavailable(); }
+  async publishPointer(): Promise<void> { return this.unavailable(); }
+  async hidePointer(): Promise<void> { return this.unavailable(); }
   async heartbeat(): Promise<void> { return this.unavailable(); }
   async stop(): Promise<void> { return this.unavailable(); }
   async releasePresenterConnection(): Promise<void> { return undefined; }
@@ -137,6 +150,8 @@ class DisabledPresentationTransport implements PresentationTransport {
 class FirebasePresentationTransport implements PresentationTransport {
   readonly configured = true;
   private pendingDisconnect: OnDisconnect | null = null;
+  private pendingPointerDisconnect: OnDisconnect | null = null;
+  private readonly pointerSequences = new Map<string, number>();
 
   constructor(private readonly firebase: FirebaseContext) {}
 
@@ -187,6 +202,32 @@ class FirebasePresentationTransport implements PresentationTransport {
           return;
         }
         onValueCallback(state);
+      },
+      (error) => onErrorCallback(normalizeError(error)),
+    );
+  }
+
+  subscribePointer(
+    onValueCallback: (pointer: PresentationPointerState | null) => void,
+    onErrorCallback: (error: PresentationTransportError) => void,
+  ): Unsubscribe {
+    return onValue(
+      ref(this.firebase.database, `${PRESENTATION_ROOM_PATH}/pointer`),
+      (snapshot) => {
+        if (!snapshot.exists()) {
+          onValueCallback(null);
+          return;
+        }
+        const pointer = normalizePointerState(snapshot.val());
+        if (!pointer) {
+          onErrorCallback({
+            code: "presentation/invalid-pointer",
+            message: "The presenter pointer did not match the supported schema.",
+          });
+          onValueCallback(null);
+          return;
+        }
+        onValueCallback(pointer);
       },
       (error) => onErrorCallback(normalizeError(error)),
     );
@@ -259,21 +300,35 @@ class FirebasePresentationTransport implements PresentationTransport {
         "Another presenter tab still owns the live session.",
       );
     }
-    this.pendingDisconnect = onDisconnect(metaReference);
-    // Register a complete, Rules-valid meta object. A partial update would be
-    // rejected on the room's very first presentation, when no prior meta node
-    // exists yet.
-    await this.pendingDisconnect.set({
-      schemaVersion: PRESENTATION_SCHEMA_VERSION,
-      active: false,
-      presenterClientId: snapshot.clientId,
-      startedAt: snapshot.updatedAt,
-      heartbeatAt: serverTimestamp(),
-      endedAt: serverTimestamp(),
-      disconnectedAt: serverTimestamp(),
-    });
+    const pointerReference = ref(this.firebase.database, `${PRESENTATION_ROOM_PATH}/pointer`);
+    const metaDisconnect = onDisconnect(metaReference);
+    const pointerDisconnect = onDisconnect(pointerReference);
+    this.pendingDisconnect = metaDisconnect;
+    this.pendingPointerDisconnect = pointerDisconnect;
 
     try {
+      // Register complete, Rules-valid objects before making the session live.
+      await metaDisconnect.set({
+        schemaVersion: PRESENTATION_SCHEMA_VERSION,
+        active: false,
+        presenterClientId: snapshot.clientId,
+        startedAt: snapshot.updatedAt,
+        heartbeatAt: serverTimestamp(),
+        endedAt: serverTimestamp(),
+        disconnectedAt: serverTimestamp(),
+      });
+      // This client id cannot be reused after a disconnected page is gone, so
+      // MAX_SAFE_INTEGER is an authoritative terminal hide for that client.
+      await pointerDisconnect.set({
+        schemaVersion: PRESENTATION_SCHEMA_VERSION,
+        clientId: snapshot.clientId,
+        sequence: Number.MAX_SAFE_INTEGER,
+        xRatio: 0,
+        yRatio: 0,
+        visible: false,
+        updatedAt: serverTimestamp(),
+      });
+      await this.hidePointer(snapshot.clientId, Date.now());
       // Publish the complete snapshot before making the room discoverably live.
       await set(ref(this.firebase.database, `${PRESENTATION_ROOM_PATH}/state`), {
         ...snapshot,
@@ -301,6 +356,39 @@ class FirebasePresentationTransport implements PresentationTransport {
     });
   }
 
+  async publishPointer(pointer: PresentationPointerState) {
+    const normalized = normalizePointerState(pointer);
+    if (!normalized) {
+      throw transportFailure(
+        "presentation/invalid-pointer",
+        "The local laser pointer state is invalid.",
+      );
+    }
+    const previous = this.pointerSequences.get(normalized.clientId) ?? 0;
+    const sequence = nextPointerSequence(previous, normalized.sequence);
+    this.pointerSequences.set(normalized.clientId, sequence);
+    await set(ref(this.firebase.database, `${PRESENTATION_ROOM_PATH}/pointer`), {
+      ...normalized,
+      sequence,
+      updatedAt: serverTimestamp(),
+    });
+  }
+
+  async hidePointer(clientId: string, sequence: number) {
+    const previous = this.pointerSequences.get(clientId) ?? 0;
+    const nextSequence = nextPointerSequence(previous, sequence);
+    this.pointerSequences.set(clientId, nextSequence);
+    await set(ref(this.firebase.database, `${PRESENTATION_ROOM_PATH}/pointer`), {
+      schemaVersion: PRESENTATION_SCHEMA_VERSION,
+      clientId,
+      sequence: nextSequence,
+      xRatio: 0,
+      yRatio: 0,
+      visible: false,
+      updatedAt: serverTimestamp(),
+    });
+  }
+
   async heartbeat(clientId: string) {
     const metaReference = ref(this.firebase.database, `${PRESENTATION_ROOM_PATH}/meta`);
     const result = await runTransaction(
@@ -322,6 +410,9 @@ class FirebasePresentationTransport implements PresentationTransport {
 
   async stop(clientId: string) {
     const metaReference = ref(this.firebase.database, `${PRESENTATION_ROOM_PATH}/meta`);
+    // Hiding is best effort: session retirement must still proceed if the
+    // pointer write is blocked or the network drops between these operations.
+    await this.hidePointer(clientId, Date.now()).catch(() => undefined);
     const result = await runTransaction(
       metaReference,
       (current) => {
@@ -347,9 +438,12 @@ class FirebasePresentationTransport implements PresentationTransport {
   }
 
   async releasePresenterConnection() {
-    const operation = this.pendingDisconnect;
+    const operations = [this.pendingDisconnect, this.pendingPointerDisconnect];
     this.pendingDisconnect = null;
-    if (operation) await operation.cancel().catch(() => undefined);
+    this.pendingPointerDisconnect = null;
+    await Promise.all(
+      operations.map((operation) => operation?.cancel().catch(() => undefined)),
+    );
   }
 }
 

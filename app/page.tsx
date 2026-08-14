@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import {
   AudienceFollowControl,
   PresentationInteractionShield,
+  PresentationLaserPointer,
   PresenterPanel,
   type AudienceFollowState,
   type PresentationConnectionState,
@@ -1013,6 +1014,8 @@ export default function Home() {
   const [showMedicationOverlay, setShowMedicationOverlay] = useState(false);
   const [showScrollCoach, setShowScrollCoach] = useState(true);
   const [openFaqIds, setOpenFaqIds] = useState<Set<string>>(new Set([commonQuestions[0].id]));
+  const [laserEnabled, setLaserEnabled] = useState(false);
+  const [laserErrorMessage, setLaserErrorMessage] = useState<string | null>(null);
   const presentationMounted = useClientReady();
   const scroller = useRef<HTMLDivElement>(null);
   const lastUserScrollLeft = useRef(0);
@@ -1109,6 +1112,28 @@ export default function Home() {
     applyRemoteControls,
     applyRemoteSelection,
   });
+  const { startPresenting, stopPresenting } = presentation;
+
+  const laserAvailable = presentation.isPresenting
+    && presentation.connection === "connected"
+    && presentation.authorization === "authorized"
+    && presentation.activePresenterClientId === presentation.clientId
+    && !presentation.isBusy;
+  const toggleLaser = useCallback(() => {
+    if (!laserAvailable) return;
+    setLaserErrorMessage(null);
+    setLaserEnabled((current) => !current);
+  }, [laserAvailable]);
+  const disableLaser = useCallback(() => setLaserEnabled(false), []);
+  const startPresentation = useCallback(async () => {
+    setLaserEnabled(false);
+    setLaserErrorMessage(null);
+    await startPresenting();
+  }, [startPresenting]);
+  const stopPresentation = useCallback(async () => {
+    setLaserEnabled(false);
+    await stopPresenting();
+  }, [stopPresenting]);
 
   const toggleCategory = (category: Category) => {
     const next = new Set(activeCategories);
@@ -1552,11 +1577,15 @@ export default function Home() {
         statusMessage={presentation.isPresenting ? "Presentation is live and publishing this complete view." : null}
         errorMessage={presentation.error?.message}
         lastPublishedLabel={lastPublishedLabel}
+        laserEnabled={laserEnabled}
+        laserAvailable={laserAvailable}
+        laserErrorMessage={laserErrorMessage}
         isBusy={presentation.isBusy}
         onSignIn={presentation.signIn}
         onSignOut={presentation.signOut}
-        onStart={presentation.startPresenting}
-        onStop={presentation.stopPresenting}
+        onStart={startPresentation}
+        onStop={stopPresentation}
+        onToggleLaser={toggleLaser}
       />
       <AudienceFollowControl
         visible={audienceControlVisible}
@@ -1570,6 +1599,19 @@ export default function Home() {
       <PresentationInteractionShield
         active={presentationMounted && !presenterMode && presentation.isFollowing}
       />
+      {presentationMounted && (
+        <PresentationLaserPointer
+          presenterMode={presenterMode}
+          enabled={laserEnabled}
+          connection={presentation.connection}
+          isPresenting={presentation.isPresenting}
+          isFollowing={presentation.isFollowing}
+          clientId={presentation.clientId}
+          activePresenterClientId={presentation.activePresenterClientId}
+          onDisable={disableLaser}
+          onError={setLaserErrorMessage}
+        />
+      )}
     </main>
   );
 }

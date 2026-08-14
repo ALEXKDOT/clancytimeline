@@ -302,7 +302,7 @@ export function usePresentationSync({
       };
     }
     let cancelled = false;
-    let retryTimeout: ReturnType<typeof setTimeout> | null = null;
+    let retryTimeout: number | null = null;
     setAuthorization("checking");
     authorizationProbeRef.current.promise.then(
       () => {
@@ -340,6 +340,9 @@ export function usePresentationSync({
 
   const serverNow = clockNow + serverTimeOffset;
   const liveSession = presentationIsLive(remoteMeta, serverNow);
+  const activePresenterClientId = liveSession
+    ? remoteMeta?.presenterClientId ?? null
+    : null;
   const matchingRemoteState = Boolean(
     liveSession &&
       latestRemoteState &&
@@ -605,6 +608,7 @@ export function usePresentationSync({
     user,
     authorization,
     isPresenting,
+    activePresenterClientId,
     liveSessionActive: liveSession,
     isFollowing,
     isExploring,
