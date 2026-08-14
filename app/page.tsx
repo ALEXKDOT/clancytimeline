@@ -1060,9 +1060,46 @@ export default function Home() {
       <section className="reading-guide case-arguments">
         <p className="section-number argument-label">02 / THE ARGUMENTS</p>
         <div className="argument-grid">
-          <article className="defense-argument"><span>Defense</span><h3>Psychotic illness overwhelmed legal capacity.</h3><p>The defense argues that severe perinatal mental illness—framed as postpartum or bipolar psychosis, intensified by insomnia and medication exposure—culminated in a command voice and a genuine suicide attempt, leaving Clancy without criminal responsibility.</p><small>Evidence introduced through Day 13 included months of documented depression, anxiety, and sleep disruption; repeated help-seeking and hospital care; Patrick&apos;s account of earlier distressing child-harm thoughts; a contemporaneous phone note describing depression, impaired bonding and severe sleep deprivation; mental-health searches; and his later report of a male “last chance” voice. The note and searches do not themselves establish psychosis.</small></article>
-          <article className="prosecution-argument"><span>Prosecution</span><h3>Deliberate conduct with retained capacity.</h3><p>The Commonwealth argues that Clancy experienced depression and anxiety but was not psychotic, deliberately created an errand window, and retained the ability to understand and control her conduct.</p><small>Evidence introduced through Day 13 included ordinary-seeming same-day calls and messages; phone artifacts documenting the restaurant route, constipation-product activity, food-order sequence, and calls; a structured sequence and locked bedroom; repeated pre-offense clinical encounters without documented hallucinations, delusions, mania, or disorganization; and the retrospective timing of the command-voice account.</small></article>
-          <p className="argument-boundary">Both formulations remain advocacy at this stage. Organized behavior can coexist with psychosis, and psychosis alone does not establish lack of criminal responsibility. Once the issue is raised, Massachusetts requires the Commonwealth to prove criminal responsibility beyond a reasonable doubt.</p>
+          <article className="defense-argument">
+            <span>Defense</span>
+            <h3>Psychotic illness overwhelmed legal capacity.</h3>
+            <p>The defense argues that severe perinatal mental illness—characterized as postpartum or bipolar psychosis and exacerbated by profound insomnia and medication exposure—culminated in a command hallucination and a genuine suicide attempt, leaving Clancy without criminal responsibility for her actions.</p>
+            <div className="argument-evidence">
+              <strong>Evidence introduced through Day 13:</strong>
+              <ul>
+                <li>Months of documented depression, anxiety, and sleep disturbance</li>
+                <li>Repeated efforts to seek treatment, including hospitalization</li>
+                <li>Patrick&apos;s testimony regarding earlier thoughts of harming the children and severe sleep deprivation, together with Clancy&apos;s contemporaneous reports of impaired maternal bonding</li>
+                <li>Clancy&apos;s mental-health-related internet searches</li>
+                <li>Patrick&apos;s later account that Clancy described hearing a male voice tell her this was her “last chance”</li>
+              </ul>
+            </div>
+          </article>
+          <article className="prosecution-argument">
+            <span>Prosecution</span>
+            <h3>Deliberate conduct with retained capacity.</h3>
+            <p>The Commonwealth argues that Clancy experienced depression and anxiety but was not psychotic, deliberately created an opportunity to kill her children, and retained the capacity to understand and control her actions.</p>
+            <div className="argument-evidence">
+              <strong>Evidence introduced through Day 13:</strong>
+              <ul>
+                <li>Apparently ordinary calls and messages on the day of the killings</li>
+                <li>Phone data documenting Clancy&apos;s search for a restaurant route</li>
+                <li>An inquiry and discussion about a constipation product</li>
+                <li>Sequence of food-ordering communications</li>
+                <li>What prosecutors characterize as a deliberate sequence of killings followed by locking of a bedroom door</li>
+                <li>Repeated clinical encounters before the killings without documented hallucinations, delusions, mania, or disorganization</li>
+                <li>The fact that the command-voice account was reported retrospectively</li>
+              </ul>
+            </div>
+          </article>
+          <div className="argument-boundary">
+            <strong>Important points:</strong>
+            <ul>
+              <li>Organized behavior can coexist with psychosis.</li>
+              <li>Psychosis alone does not establish lack of criminal responsibility.</li>
+              <li>Once the issue of potential insanity/lack of capacity is raised, Massachusetts requires the Commonwealth to prove criminal responsibility beyond a reasonable doubt.</li>
+            </ul>
+          </div>
         </div>
       </section>
 

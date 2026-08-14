@@ -274,6 +274,7 @@ test("places the arguments above the timeline in a full-width section", async ()
   ]);
   const theories = page.indexOf("02 / THE ARGUMENTS");
   const workspace = page.indexOf('<section className="workspace"');
+  const argumentsSection = page.slice(theories, workspace);
 
   assert.ok(theories > -1 && workspace > -1 && theories < workspace);
   assert.match(page, /<span>Defense<\/span>/);
@@ -281,8 +282,20 @@ test("places the arguments above the timeline in a full-width section", async ()
   assert.doesNotMatch(page, /THE PARTIES&apos; THEORIES|Defense theory · attorney argument|Commonwealth theory · attorney argument/);
   assert.doesNotMatch(page, /The central dispute is mental state|No retained criminal-responsibility expert had testified/);
   assert.doesNotMatch(page, /Three evidentiary separations/);
+  assert.match(page, /<h3>Psychotic illness overwhelmed legal capacity\.<\/h3>/);
+  assert.match(page, /<h3>Deliberate conduct with retained capacity\.<\/h3>/);
+  assert.match(page, /characterized as postpartum or bipolar psychosis and exacerbated by profound insomnia and medication exposure/);
+  assert.match(page, /deliberately created an opportunity to kill her children/);
+  assert.match(page, /<strong>Evidence introduced through Day 13:<\/strong>/);
+  assert.match(page, /Patrick&apos;s testimony regarding earlier thoughts of harming the children and severe sleep deprivation, together with Clancy&apos;s contemporaneous reports of impaired maternal bonding/);
+  assert.match(page, /Patrick&apos;s later account that Clancy described hearing a male voice tell her this was her “last chance”/);
+  assert.match(page, /What prosecutors characterize as a deliberate sequence of killings followed by locking of a bedroom door/);
+  assert.match(page, /<strong>Important points:<\/strong>/);
+  assert.match(page, /potential insanity\/lack of capacity is raised/);
   assert.match(css, /\.reading-guide \{[^}]*padding: 44px 40px 48px;\s*\}/);
-  assert.match(css, /\.argument-grid article small \{[^}]*font-size: 13px/);
+  assert.match(css, /\.argument-evidence \{[^}]*font-size: 14px/);
+  assert.match(css, /\.argument-boundary \{[^}]*font-size: 14px/);
+  assert.doesNotMatch(argumentsSection, /<small>/);
 });
 
 test("moves every event-card subtext into the existing drawer summary", async () => {
