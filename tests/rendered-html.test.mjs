@@ -62,7 +62,7 @@ test("compresses the inactive post-offense year and renders the revised orientat
   assert.match(css, /\.filter-chip \{[^}]*height: 34px;[^}]*font-size: 11\.5px/);
 });
 
-test("renders a noninteractive monthly provider and medication orientation map", async () => {
+test("renders a noninteractive three-period provider and medication background map", async () => {
   const [response, page, css] = await Promise.all([
     render(),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
@@ -74,7 +74,7 @@ test("renders a noninteractive monthly provider and medication orientation map",
   assert.match(html, /01 \/ BACKGROUND/);
   assert.doesNotMatch(html, /01 \/ ORIENTATION/);
   assert.match(html, /Background summary only/);
-  for (const month of ["September-October", "November", "December", "January"]) assert.match(html, new RegExp(`>${month}<`));
+  for (const month of ["September-November", "December", "January"]) assert.match(html, new RegExp(`>${month}<`));
   assert.match(html, /Jennifer Tufts, MD/);
   assert.match(html, /Rebecca H\. Jollotta, CNP/);
   assert.match(html, /Alia Goodheart, MD/);
@@ -89,14 +89,18 @@ test("renders a noninteractive monthly provider and medication orientation map",
   assert.doesNotMatch(page.slice(page.indexOf("const orientationCareMap"), page.indexOf("const events")), /Letitia Dukes|ASPIRE|Jennifer McAllister/);
   assert.doesNotMatch(page.slice(page.indexOf("const orientationCareMap"), page.indexOf("const events")), /date: "[^"]*(?:&|–)[^"]*"/);
   const careMapSource = page.slice(page.indexOf("const orientationCareMap"), page.indexOf("const events"));
-  assert.match(careMapSource, /month: "September-October"[\s\S]*date: "Sep 15"[\s\S]*date: "Sep 28"[\s\S]*date: "Oct 3"[\s\S]*date: "Oct 20"[\s\S]*date: "Oct 21"[\s\S]*date: "Oct 26"/);
-  assert.equal((html.match(/class="care-month"/g) ?? []).length, 4);
+  assert.match(careMapSource, /month: "September-November"[\s\S]*date: "Sep 15"[\s\S]*date: "Sep 28"[\s\S]*date: "Oct 3"[\s\S]*date: "Oct 20"[\s\S]*date: "Oct 21"[\s\S]*date: "Oct 26"[\s\S]*date: "Nov 2"[\s\S]*date: "Nov 30"/);
+  assert.equal((html.match(/class="care-month"/g) ?? []).length, 3);
   assert.doesNotMatch(html, /class="care-month-continuation"/);
   assert.match(css, /\.care-map-scroll \{[^}]*overflow-x: hidden/);
-  assert.match(css, /\.care-map \{[^}]*width: 100%;[^}]*min-width: 0;[^}]*grid-template-columns: 1\.12fr 1\.22fr 1\.43fr 1\.17fr/);
+  assert.match(css, /\.care-map \{[^}]*width: 100%;[^}]*min-width: 0;[^}]*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/);
   assert.match(css, /\.care-month > header span \{[^}]*white-space: nowrap/);
   assert.match(css, /@media \(max-width: 900px\)[\s\S]*\.care-map \{ width: auto; min-width: 1000px; \}/);
-  assert.match(css, /\.care-group li \{[^}]*font-size: 12px/);
+  assert.match(css, /\.care-group time \{[^}]*font: 750 11px/);
+  assert.match(css, /\.care-group strong \{[^}]*font-size: 15px/);
+  assert.match(css, /\.care-group small \{[^}]*font-size: 11px/);
+  assert.match(css, /\.care-group li \{[^}]*font-size: 14px/);
+  assert.match(css, /\.header-credit \{[^}]*font-size: 13px/);
   assert.match(css, /\.orientation \{[^}]*padding: 42px 40px 34px;/);
   assert.doesNotMatch(page, /care-group[^\n]*onClick/);
 });

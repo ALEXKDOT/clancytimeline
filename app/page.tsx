@@ -111,7 +111,7 @@ const views: Record<ViewKey, { label: string; eyebrow: string; start: string; en
 
 const orientationCareMap = [
   {
-    month: "September-October",
+    month: "September-November",
     groups: [
       { date: "Sep 15", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Sertraline 25 mg ×30 filled; planned increase from 25 to 50 mg."] },
       { date: "Sep 28", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Sertraline had not been started; medication plan deferred after reported improvement."] },
@@ -119,11 +119,6 @@ const orientationCareMap = [
       { date: "Oct 20", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Sertraline stopped after reported 25→50 mg trial."] },
       { date: "Oct 21", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Ativan (lorazepam) 0.5 mg ×7 filled for severe anxiety."] },
       { date: "Oct 26", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Ativan (lorazepam) 1 mg ×30 filled.", "Buspirone 5 mg ×30 filled.", "Hydroxyzine 25 mg ×30 filled."] },
-    ],
-  },
-  {
-    month: "November",
-    groups: [
       { date: "Nov 2", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Ativan (lorazepam) 0.5 mg ×40 filled; gradual taper planned.", "Buspirone had reportedly not been started."] },
       { date: "Nov 9", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Buspirone 5 mg ×30 refilled; later use remains unresolved."] },
       { date: "Nov 16", provider: "South Shore ED · Kayvon Izadpanah, MD", organization: "South Shore Health", items: ["Desyrel (trazodone) 50 mg ×30 filled after ED evaluation."] },
@@ -1245,7 +1240,7 @@ export default function Home() {
               <p>Background summary only. Prescribed or filled does not necessarily mean taken; the interactive timeline below preserves the evidentiary distinctions.</p>
             </div>
             <div className="care-map-scroll">
-              <div className="care-map" role="list" aria-label="Monthly summary of providers and medication trials">
+              <div className="care-map" role="list" aria-label="Provider and medication summary by period">
                 {orientationCareMap.map((month) => <article className="care-month" key={month.month} role="listitem">
                   <header><span>{month.month}</span><i /></header>
                   <div className="care-month-groups">

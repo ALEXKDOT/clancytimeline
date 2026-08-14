@@ -29,7 +29,7 @@ button { color: inherit; }
 .kicker, .section-number { margin: 0 0 7px; color: var(--teal); font: 700 11px/1.2 var(--font-geist-mono), monospace; letter-spacing: .16em; text-transform: uppercase; }
 .topbar h1 { margin: 0; font-size: clamp(19px, 2vw, 26px); letter-spacing: -.04em; font-weight: 620; }
 .topbar h1 em { font-family: Georgia, serif; font-weight: 400; color: #92a6b1; }
-.header-credit { margin: 5px 0 0; color: #778a94; font-size: 11px; line-height: 1.25; }
+.header-credit { margin: 6px 0 0; color: #778a94; font-size: 13px; line-height: 1.35; }
 .cutoff { display: flex; align-items: flex-end; flex-direction: column; gap: 4px; text-align: right; }
 .cutoff span { color: var(--muted); text-transform: uppercase; font: 700 10px/1 var(--font-geist-mono), monospace; letter-spacing: .12em; }
 .cutoff strong { font-size: 13px; font-weight: 570; }
@@ -52,21 +52,21 @@ button { color: inherit; }
 .orientation-care-heading h2 { margin: 0; font-size: 20px; line-height: 1.15; letter-spacing: -.025em; }
 .orientation-care-heading p { max-width: 450px; margin: 0; color: #899ba4; font-size: 11px; line-height: 1.5; }
 .care-map-scroll { overflow-x: hidden; }
-.care-map { width: 100%; min-width: 0; display: grid; grid-template-columns: 1.12fr 1.22fr 1.43fr 1.17fr; align-items: stretch; }
+.care-map { width: 100%; min-width: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; }
 .care-month { min-width: 0; border-right: 1px solid rgba(104,143,158,.23); background: rgba(9,22,28,.72); }
 .care-month:last-child { border-right: 0; }
-.care-month > header { height: 44px; padding: 0 16px; display: flex; align-items: center; gap: 11px; border-bottom: 1px solid rgba(104,143,158,.22); color: #dbe6e9; font: 800 12px/1 var(--font-geist-mono), monospace; text-transform: uppercase; letter-spacing: .09em; }
+.care-month > header { height: 48px; padding: 0 18px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(104,143,158,.22); color: #dbe6e9; font: 800 14px/1 var(--font-geist-mono), monospace; text-transform: uppercase; letter-spacing: .08em; }
 .care-month > header span { min-width: 0; white-space: nowrap; }
 .care-month > header i { height: 1px; flex: 1; background: linear-gradient(90deg, var(--teal), transparent); opacity: .55; }
-.care-month-groups { padding: 5px 15px 15px; }
-.care-group { position: relative; padding: 13px 0 13px 14px; border-bottom: 1px solid rgba(104,143,158,.16); }
+.care-month-groups { padding: 6px 18px 18px; }
+.care-group { position: relative; padding: 15px 0 15px 16px; border-bottom: 1px solid rgba(104,143,158,.16); }
 .care-group:last-child { border-bottom: 0; }
 .care-group:before { content: ""; position: absolute; top: 17px; left: -1px; width: 7px; height: 7px; border: 2px solid #08151b; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 1px var(--teal); }
-.care-group time { display: block; margin-bottom: 6px; color: #6edfd4; font: 750 9px/1 var(--font-geist-mono), monospace; text-transform: uppercase; letter-spacing: .06em; }
-.care-group strong { display: block; color: #eef5f7; font-size: 13px; line-height: 1.28; }
-.care-group small { display: block; margin-top: 3px; color: #71858e; font-size: 9px; line-height: 1.3; }
+.care-group time { display: block; margin-bottom: 7px; color: #6edfd4; font: 750 11px/1 var(--font-geist-mono), monospace; text-transform: uppercase; letter-spacing: .06em; }
+.care-group strong { display: block; color: #eef5f7; font-size: 15px; line-height: 1.3; }
+.care-group small { display: block; margin-top: 4px; color: #71858e; font-size: 11px; line-height: 1.35; }
 .care-group ul { margin: 10px 0 0; padding: 0; list-style: none; }
-.care-group li { position: relative; margin: 7px 0; padding-left: 12px; color: #b7c3c8; font-size: 12px; line-height: 1.45; }
+.care-group li { position: relative; margin: 8px 0; padding-left: 13px; color: #b7c3c8; font-size: 14px; line-height: 1.5; }
 .care-group li:before { content: "–"; position: absolute; left: 0; color: #667d86; }
 
 .workspace { border-top: 1px solid rgba(112,151,166,.23); border-bottom: 1px solid rgba(112,151,166,.23); background: #081218; }
