@@ -1,6 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+
+import {
+  AudienceFollowControl,
+  PresentationInteractionShield,
+  PresenterPanel,
+  type AudienceFollowState,
+  type PresentationConnectionState,
+  type PresenterAuthState,
+} from "./presentation";
+import { usePresentationSync } from "./presentation/usePresentationSync";
+import {
+  PRESENTATION_CATEGORY_KEYS,
+  type PresentationCategoryState,
+  type PresentationControlState,
+  type PresentationSelection,
+} from "./presentation/types";
+import { PRESENTATION_MAX_SEARCH_LENGTH } from "./presentation/config";
 
 type Category = "clinical" | "symptom" | "hospital" | "medication" | "collateral" | "digital" | "event" | "post";
 type Evidence = "Contemporaneous record" | "Treating testimony" | "Reported to clinician" | "Collateral testimony" | "Objective record" | "Mixed evidence" | "Retrospective report" | "Civil allegation";
@@ -164,6 +181,72 @@ const orientationCareMap = [
       { date: "Jan 19", provider: "Prescriber unresolved", organization: "Pharmacy record", items: ["Diazepam 2 mg ×14 filled; prescriber attribution remains disputed."] },
       { date: "Jan 23", provider: "Jennifer Tufts, MD", organization: "Aster Mental Health", items: ["Final pre-offense telehealth follow-up.", "Amitriptyline increase from 10 to 20 mg ordered; whether 20 mg was taken is not established.", "Diazepam 2 mg fill shown with an unclear quantity."] },
     ],
+  },
+];
+
+const commonQuestions = [
+  {
+    id: "coordinated-care",
+    question: "Did Dr. Jennifer Tufts and Rebecca Jollotta know Clancy was seeing both of them?",
+    answer: [
+      "Partially, but not in the sense of a fully coordinated treatment plan. By November 22, Tufts knew Clancy had sought care at South Shore's perinatal clinic and had named Julie Paul. By December 1, Tufts understood that Clancy had transferred there, but she had no South Shore records and relied largely on Clancy's reports.",
+      "Jollotta knew Tufts had treated Clancy previously and knew by December 16 that Clancy had returned to her “original psychiatrist.” Jollotta testified, however, that she had not known Clancy was still seeing Tufts in November. She never spoke directly with Tufts or reviewed Tufts's records. The evidence therefore supports parallel care with incomplete information exchange—not a shared, formally coordinated treatment plan.",
+    ],
+    evidence: "Evidence basis: Tufts testimony, Trial Day 10 (SRC-0091); Jollotta testimony, Trial Day 11 (SRC-0096).",
+  },
+  {
+    id: "return-to-tufts",
+    question: "Why did Clancy return to Tufts after switching to Julie Paul and Rebecca Jollotta?",
+    answer: [
+      "The available record does not establish one definitive reason. The Paul-to-Jollotta change was an internal South Shore handoff: Paul was leaving the clinic and wanted Clancy to have a clinician available five days per week. The broader move from Tufts to South Shore never became a clean, exclusive transfer.",
+      "On December 16, Clancy described Tufts as her “original psychiatrist,” obtained Tufts's lamotrigine recommendation after an emergency-department visit, and then asked Jollotta whether she agreed; Jollotta endorsed the plan. This supports continuity and overlapping help-seeking during an unstable course, but it does not establish “doctor shopping” or intentional concealment.",
+    ],
+    evidence: "Evidence basis: Julie Paul and Tufts testimony, Trial Day 10 (SRC-0091); Jollotta testimony, Trial Day 11 (SRC-0096).",
+  },
+  {
+    id: "aspire-crisis-service",
+    question: "What was the “virtual Aspire crisis evaluation,” and what is Aspire?",
+    answer: [
+      "Jollotta described Aspire as the community mental-health program operating the local 24-hour psychiatric emergency service. A “virtual” evaluation was a remote encounter with an Aspire crisis clinician—not a hospital admission or a continuing outpatient relationship.",
+      "Clancy later told Latiesha Dukes that, during a difficult weekend with continuing thoughts of wanting to die or not be present, she met remotely with an Aspire clinician. According to Clancy's report, inpatient care was not recommended because she had no suicidal plan, and a day program was recommended. The underlying Aspire record and the crisis evaluator's testimony are not in the public corpus, so the disposition and its reasoning remain secondhand; saying Aspire simply “turned her away” would overstate the evidence.",
+    ],
+    evidence: "Evidence basis: Jollotta testimony, Trial Day 11 (SRC-0096); Dukes testimony, Trial Day 12 (SRC-0098).",
+  },
+  {
+    id: "bipolar-differential",
+    question: "Did Jollotta diagnose Clancy with bipolar disorder?",
+    answer: [
+      "No. Jollotta placed bipolar disorder in the differential after hearing about a reported sertraline-associated “activating response” and a period of very little sleep without fatigue. She held a proposed fluoxetine trial and used quetiapine in a mood-targeted strategy.",
+      "Jollotta also testified that the earlier Mood Disorder Questionnaire was negative, the available information did not meet bipolar diagnostic criteria at the December 6 visit, and she observed no mania or psychosis during that encounter. Those time-limited observations neither establish bipolar disorder nor rule out a later or intermittently expressed mood episode.",
+    ],
+    evidence: "Evidence basis: Jollotta testimony, Trial Day 11 (SRC-0096).",
+  },
+  {
+    id: "child-harm-disclosure",
+    question: "Were thoughts of harming the children disclosed to treating clinicians?",
+    answer: [
+      "Not in the contemporaneous treating encounters presented through Trial Day 13. Jollotta testified that the intrusive thoughts disclosed to her concerned wanting to die, not harming the children; the pre-offense Tufts testimony likewise did not establish disclosure of a child-harm plan.",
+      "Patrick separately testified that, between Thanksgiving and December 6, Clancy described distressing thoughts involving harm to the children without a specific method, plan, or external voice. That later family collateral is important, but it is not the same evidentiary category as contemporaneous clinician documentation.",
+    ],
+    evidence: "Evidence basis: Patrick testimony, Trial Day 1 (SRC-0065); Tufts and Jollotta testimony, Trial Days 10–11 (SRC-0091, SRC-0096).",
+  },
+  {
+    id: "command-voice-timing",
+    question: "Was the alleged male command voice documented before January 24?",
+    answer: [
+      "Not in the treating evidence presented through Trial Day 13. The pre-offense clinical encounters introduced at trial did not document a command hallucination, and Jollotta testified that Clancy did not describe hearing voices to her.",
+      "Patrick testified that approximately one week after the killings, Clancy told him she had heard a man's voice saying that if she did not act then, she would lose her chance. The voice account is therefore retrospective evidence and should be attributed to Clancy's later report rather than presented as a contemporaneous clinical finding.",
+    ],
+    evidence: "Evidence basis: Patrick testimony, Trial Day 2 (SRC-0068); treating testimony, Trial Days 9–11 (SRC-0087, SRC-0091, SRC-0096).",
+  },
+  {
+    id: "prescription-versus-exposure",
+    question: "Does a prescription or pharmacy fill prove that a medication was taken?",
+    answer: [
+      "No. A prescription shows that a clinician ordered a medication; a fill shows that a pharmacy dispensed it. Actual exposure requires different evidence, such as a contemporaneous patient report, an inpatient medication-administration record, or later toxicologic detection.",
+      "Even toxicologic detection does not by itself establish the prescribed dose, timing, clinical effect, or causation. This distinction is especially important here because the record contains short trials, proposed titrations, overlapping strengths, tapers, and uncertain adherence.",
+    ],
+    evidence: "Evidence basis: pharmacy exhibits and medication testimony summarized in the 100-source corpus through Trial Day 13.",
   },
 ];
 
@@ -920,18 +1003,28 @@ function monthTicks(start: string, end: string) {
   return result;
 }
 
+const subscribeClientReady = () => () => undefined;
+
+function useClientReady() {
+  return useSyncExternalStore(subscribeClientReady, () => true, () => false);
+}
+
 export default function Home() {
   const [view, setView] = useState<ViewKey>("course");
   const [zoom, setZoom] = useState(1);
   const [activeCategories, setActiveCategories] = useState<Set<Category>>(new Set(Object.keys(categoryMeta) as Category[]));
   const [query, setQuery] = useState("");
-  const [selection, setSelection] = useState<{ kind: "event"; index: number } | { kind: "cluster"; eventIds: string[] } | { kind: "medication"; medication: Medication } | null>(null);
+  const [selection, setSelection] = useState<{ kind: "event"; eventId: string } | { kind: "cluster"; eventIds: string[] } | { kind: "medication"; medicationId: string } | null>(null);
   const [showMedicationOverlay, setShowMedicationOverlay] = useState(false);
   const [showScrollCoach, setShowScrollCoach] = useState(true);
+  const [openFaqIds, setOpenFaqIds] = useState<Set<string>>(new Set([commonQuestions[0].id]));
+  const presentationMounted = useClientReady();
   const scroller = useRef<HTMLDivElement>(null);
   const lastUserScrollLeft = useRef(0);
   const range = views[view];
   const canvasWidth = Math.round(range.baseWidth * zoom);
+  const presenterMode = typeof window !== "undefined"
+    && new URLSearchParams(window.location.search).get("presenter") === "1";
 
   const visibleEvents = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -940,13 +1033,87 @@ export default function Home() {
       .filter((event) => !q || [event.title, event.short, event.summary, event.details.join(" "), event.caution, event.clinician, event.institution, event.medication, event.source, event.sequence?.map((step) => `${step.time} ${step.title} ${step.detail} ${step.evidence}`).join(" "), event.civilClaims?.map((item) => `${item.claim} ${item.context ?? ""} ${item.source}`).join(" ")].filter(Boolean).join(" ").toLowerCase().includes(q))
       .sort((a, b) => stamp(a.date) - stamp(b.date));
   }, [view, activeCategories, query]);
-  const selectedEventIndex = selection?.kind === "event" ? selection.index : -1;
+  const selectedEventIndex = selection?.kind === "event"
+    ? visibleEvents.findIndex((event) => event.id === selection.eventId)
+    : -1;
   const selectedEvent = selectedEventIndex >= 0 ? visibleEvents[selectedEventIndex] ?? null : null;
-  const selectedMedication = selection?.kind === "medication" ? selection.medication : null;
+  const selectedMedication = selection?.kind === "medication"
+    ? medications.find((medication) => medication.generic === selection.medicationId) ?? null
+    : null;
   const selectedClusterEvents = selection?.kind === "cluster"
     ? selection.eventIds.map((id) => visibleEvents.find((event) => event.id === id)).filter((event): event is TimelineEvent => Boolean(event))
     : [];
   const selected = selectedEvent ?? selectedMedication;
+
+  const presentationCategories = useMemo(() => {
+    const state = {} as PresentationCategoryState;
+    PRESENTATION_CATEGORY_KEYS.forEach((category) => {
+      state[category] = activeCategories.has(category as Category);
+    });
+    return state;
+  }, [activeCategories]);
+
+  const presentationSelection = useMemo<PresentationSelection>(() => {
+    if (!selection) return { kind: "none", id: "" };
+    if (selection.kind === "event") return { kind: "event", id: selection.eventId };
+    if (selection.kind === "medication") return { kind: "medication", id: selection.medicationId };
+    return { kind: "cluster", id: selection.eventIds.join("|") };
+  }, [selection]);
+
+  const presentationLocalState = useMemo<PresentationControlState>(() => ({
+    view,
+    zoom,
+    categories: presentationCategories,
+    searchQuery: query.slice(0, PRESENTATION_MAX_SEARCH_LENGTH),
+    medicationOverlayOpen: showMedicationOverlay,
+    openFaqIds: [...openFaqIds].sort().join(","),
+    selection: presentationSelection,
+  }), [openFaqIds, presentationCategories, presentationSelection, query, showMedicationOverlay, view, zoom]);
+
+  const applyRemoteControls = useCallback((controls: Omit<PresentationControlState, "selection">) => {
+    setView(controls.view);
+    setZoom(Math.min(2.1, Math.max(.72, controls.zoom)));
+    setActiveCategories(new Set(
+      PRESENTATION_CATEGORY_KEYS.filter((category) => controls.categories[category]) as Category[],
+    ));
+    setQuery(controls.searchQuery);
+    setShowMedicationOverlay(controls.medicationOverlayOpen);
+    const validFaqIds = new Set(commonQuestions.map((item) => item.id));
+    setOpenFaqIds(new Set(
+      controls.openFaqIds.split(",").filter((id) => validFaqIds.has(id)),
+    ));
+    setShowScrollCoach(false);
+  }, []);
+
+  const applyRemoteSelection = useCallback((remoteSelection: PresentationSelection) => {
+    if (remoteSelection.kind === "none") {
+      setSelection(null);
+      return;
+    }
+    if (remoteSelection.kind === "event") {
+      setSelection(allEvents.some((event) => event.id === remoteSelection.id)
+        ? { kind: "event", eventId: remoteSelection.id }
+        : null);
+      return;
+    }
+    if (remoteSelection.kind === "medication") {
+      setSelection(medications.some((medication) => medication.generic === remoteSelection.id)
+        ? { kind: "medication", medicationId: remoteSelection.id }
+        : null);
+      return;
+    }
+    const eventIds = remoteSelection.id
+      .split("|")
+      .filter((id) => allEvents.some((event) => event.id === id));
+    setSelection(eventIds.length ? { kind: "cluster", eventIds } : null);
+  }, []);
+
+  const presentation = usePresentationSync({
+    presenterMode,
+    localState: presentationLocalState,
+    applyRemoteControls,
+    applyRemoteSelection,
+  });
 
   const toggleCategory = (category: Category) => {
     const next = new Set(activeCategories);
@@ -968,13 +1135,14 @@ export default function Home() {
     if (!visibleEvents.length) return;
     const normalized = (index + visibleEvents.length) % visibleEvents.length;
     const event = visibleEvents[normalized];
-    setSelection({ kind: "event", index: normalized });
+    setSelection({ kind: "event", eventId: event.id });
     const position = timelinePct(event.date, view, range.start, range.end) / 100;
     scroller.current?.scrollTo({ left: Math.max(0, canvasWidth * position - window.innerWidth * 0.43), behavior: "smooth" });
   };
 
   useEffect(() => {
     const escape = (event: KeyboardEvent) => {
+      if (!presenterMode && presentation.isFollowing) return;
       if (event.key === "Escape") setSelection(null);
       if (event.key === "ArrowRight" && selectedEventIndex !== -1) showStoryEvent(selectedEventIndex + 1);
       if (event.key === "ArrowLeft" && selectedEventIndex !== -1) showStoryEvent(selectedEventIndex - 1);
@@ -1010,9 +1178,47 @@ export default function Home() {
     [timelineCards, view, range.start, range.end, canvasWidth],
   );
 
+  const setFaqOpen = useCallback((id: string, isOpen: boolean) => {
+    setOpenFaqIds((current) => {
+      if (current.has(id) === isOpen) return current;
+      const next = new Set(current);
+      if (isOpen) next.add(id); else next.delete(id);
+      return next;
+    });
+  }, []);
+
+  const presentationConnection: PresentationConnectionState =
+    presentation.connection === "connected" ? "online"
+      : presentation.connection === "disconnected" ? "offline"
+        : presentation.connection === "disabled" ? "unconfigured"
+          : presentation.connection;
+  const presenterAuth: PresenterAuthState =
+    presentation.authorization === "checking" ? "signing-in"
+      : presentation.authorization;
+  const audienceFollowState: AudienceFollowState = presentation.isFollowing
+    ? "following"
+    : presentation.isExploring
+      ? "exploring"
+      : presentation.connection === "connecting"
+        || (presentation.connection === "connected" && presentation.liveSessionActive)
+        ? "connecting"
+        : "lost";
+  const audienceControlVisible = presentationMounted
+    && !presenterMode
+    && (presentation.liveSessionActive || presentation.isExploring || presentation.hadLiveSession);
+  const audienceUrl = presentationMounted
+    ? `${window.location.origin}${window.location.pathname}`
+    : "";
+  const lastPublishedLabel = presentation.lastPublishedAt
+    ? new Date(presentation.lastPublishedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" })
+    : null;
+  const lastReceivedLabel = presentation.lastReceivedAt
+    ? new Date(presentation.lastReceivedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" })
+    : null;
+
   return (
     <main className="app-shell">
-      <header className="topbar">
+      <header className="topbar" data-presentation-anchor="top">
         <div className="brand-lockup">
           <div className="brand-mark" aria-hidden="true"><span /><span /><span /></div>
           <div>
@@ -1024,7 +1230,7 @@ export default function Home() {
         <div className="cutoff"><span>Evidence cutoff</span><strong>Aug 13, 2026 · Trial Day 13</strong><p className="header-credit">Feedback: AKrawec@mednet.ucla.edu</p></div>
       </header>
 
-      <section className="orientation">
+      <section className="orientation" data-presentation-anchor="background">
         <p className="section-number orientation-label">01 / BACKGROUND</p>
         <div className="orientation-content">
           <div className="story-beats" aria-label="Clinical arc summary">
@@ -1057,7 +1263,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="reading-guide case-arguments">
+      <section className="reading-guide case-arguments" data-presentation-anchor="arguments">
         <p className="section-number argument-label">02 / THE ARGUMENTS</p>
         <div className="argument-grid">
           <article className="defense-argument">
@@ -1103,7 +1309,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="workspace" aria-label="Interactive evidence timeline">
+      <section className="workspace" aria-label="Interactive evidence timeline" data-presentation-anchor="workspace">
         <div className="control-deck">
           <div className="view-tabs" role="tablist" aria-label="Timeline views">
             {(Object.keys(views) as ViewKey[]).map((key) => (
@@ -1115,7 +1321,7 @@ export default function Home() {
           <div className="tools-row">
             <label className="search-control">
               <span className="search-icon" aria-hidden="true" />
-              <input value={query} onChange={(event) => { setSelection(null); setQuery(event.target.value); }} placeholder="Search symptoms, medications, clinicians…" aria-label="Search timeline" />
+              <input value={query} maxLength={PRESENTATION_MAX_SEARCH_LENGTH} onChange={(event) => { setSelection(null); setQuery(event.target.value); }} placeholder="Search symptoms, medications, clinicians…" aria-label="Search timeline" />
               {query && <button onClick={() => { setSelection(null); setQuery(""); }} aria-label="Clear search">×</button>}
             </label>
             <div className="zoom-control" aria-label="Timeline zoom">
@@ -1156,7 +1362,7 @@ export default function Home() {
           </div>
           {/* Keyboard focus is intentional: this labeled region is horizontally scrollable. */}
           {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
-          <div className="timeline-scroll" ref={scroller} role="region" tabIndex={0} aria-label={`Scrollable ${range.label} timeline`} onWheel={(event) => { if ((event.shiftKey && Math.abs(event.deltaY) > 1) || Math.abs(event.deltaX) > 1) setShowScrollCoach(false); }} onPointerDown={() => { lastUserScrollLeft.current = scroller.current?.scrollLeft ?? 0; }} onPointerUp={() => { const left = scroller.current?.scrollLeft ?? 0; if (Math.abs(left - lastUserScrollLeft.current) > 4) setShowScrollCoach(false); }}>
+          <div className="timeline-scroll" ref={scroller} data-presentation-timeline-scroll role="region" tabIndex={0} aria-label={`Scrollable ${range.label} timeline`} onWheel={(event) => { if ((event.shiftKey && Math.abs(event.deltaY) > 1) || Math.abs(event.deltaX) > 1) setShowScrollCoach(false); }} onPointerDown={() => { lastUserScrollLeft.current = scroller.current?.scrollLeft ?? 0; }} onPointerUp={() => { const left = scroller.current?.scrollLeft ?? 0; if (Math.abs(left - lastUserScrollLeft.current) > 4) setShowScrollCoach(false); }}>
           <div className={`timeline-canvas ${medicationVisible ? "with-meds" : "compact"} ${medicationVisible && showMedicationOverlay ? "overlay-open" : ""}`} style={{ width: canvasWidth, "--med-context-height": `${medicationContextHeight}px` } as React.CSSProperties}>
             <div className="time-ruler">
               <span className="range-start">{timelineDate(range.start, { month: "short", day: "numeric", year: "numeric" })}</span>
@@ -1172,12 +1378,12 @@ export default function Home() {
                 {detectedMedicationGroups.map(([date, group]) => <div className="med-overlay-row detected-row" key={date}>
                   <div className="med-detected-cluster" style={{ left: `${Math.min(99.5, Math.max(0, timelinePct(date, "course", views.course.start, views.course.end)))}%` }}>
                     <small>Detected {timelineDate(date, { month: "short", day: "numeric" })}</small>
-                    {group.map(({ medication, segment, segmentIndex }) => <button key={`${medication.generic}-${segmentIndex}`} style={{ "--med": medication.color } as React.CSSProperties} onClick={() => setSelection({ kind: "medication", medication })} title={`${medication.name} (${medication.generic}): ${segment.label}. ${segment.note}`}><i /><span>{medication.name}</span></button>)}
+                    {group.map(({ medication, segment, segmentIndex }) => <button key={`${medication.generic}-${segmentIndex}`} style={{ "--med": medication.color } as React.CSSProperties} onClick={() => setSelection({ kind: "medication", medicationId: medication.generic })} title={`${medication.name} (${medication.generic}): ${segment.label}. ${segment.note}`}><i /><span>{medication.name}</span></button>)}
                   </div>
                 </div>)}
                 {packedMedicationRows.map((row, rowIndex) => <div className="med-overlay-row" key={rowIndex}>
                   {row.map(({ medication, segment, segmentIndex, start, end }) => (
-                    <button key={`${medication.generic}-${segmentIndex}`} className={`med-overlay-segment ${segment.status}`} style={{ left: `${start}%`, width: `calc(${Math.max(.4, end - start)}% - 1px)`, "--med": medication.color } as React.CSSProperties} onClick={() => setSelection({ kind: "medication", medication })} title={`${medication.name} (${medication.generic}): ${segment.label}. ${segment.note}`}><span>{medication.name} · {segment.label}</span></button>
+                    <button key={`${medication.generic}-${segmentIndex}`} className={`med-overlay-segment ${segment.status}`} style={{ left: `${start}%`, width: `calc(${Math.max(.4, end - start)}% - 1px)`, "--med": medication.color } as React.CSSProperties} onClick={() => setSelection({ kind: "medication", medicationId: medication.generic })} title={`${medication.name} (${medication.generic}): ${segment.label}. ${segment.note}`}><span>{medication.name} · {segment.label}</span></button>
                   ))}
                 </div>)}
               </div>
@@ -1196,7 +1402,7 @@ export default function Home() {
                 const categories = [...new Set(item.events.map((member) => member.category))];
                 return (
                   <div className="event-anchor" key={item.id} style={{ left: `${x}%`, "--event": color } as React.CSSProperties}>
-                    <button className={`event-card ${isCluster ? "event-cluster" : ""} ${item.certainty.toLowerCase()}`} style={{ top, left: cardOffset }} onClick={() => isCluster ? setSelection({ kind: "cluster", eventIds: item.events.map((member) => member.id) }) : setSelection({ kind: "event", index: visibleEvents.findIndex((member) => member.id === event.id) })} aria-label={isCluster ? `${item.displayDate}: ${item.events.length} events. Open cluster.` : `${event.displayDate}: ${event.title}. Open details.`}>
+                    <button className={`event-card ${isCluster ? "event-cluster" : ""} ${item.certainty.toLowerCase()}`} style={{ top, left: cardOffset }} onClick={() => isCluster ? setSelection({ kind: "cluster", eventIds: item.events.map((member) => member.id) }) : setSelection({ kind: "event", eventId: event.id })} aria-label={isCluster ? `${item.displayDate}: ${item.events.length} events. Open cluster.` : `${event.displayDate}: ${event.title}. Open details.`}>
                       <span className="card-date">{item.displayDate}</span>
                       {isCluster ? <><strong>{item.events.length} events</strong><span className="cluster-kinds">{categories.map((category) => <i key={category} style={{ "--cluster-color": categoryMeta[category].color } as React.CSSProperties} />)}<small>Select to unpack</small></span></> : <strong>{event.title}</strong>}
                     </button>
@@ -1226,7 +1432,7 @@ export default function Home() {
                 <div className="med-grid">
                   {medications.map((medication) => (
                     <div className="med-row" key={medication.generic}>
-                      <button className="med-name" onClick={() => setSelection({ kind: "medication", medication })} style={{ "--med": medication.color } as React.CSSProperties}>
+                      <button className="med-name" onClick={() => setSelection({ kind: "medication", medicationId: medication.generic })} style={{ "--med": medication.color } as React.CSSProperties}>
                         <strong>{medication.name}</strong><span>{medication.generic}</span><small>{medication.className}</small>
                       </button>
                       <div className="med-track">
@@ -1236,11 +1442,11 @@ export default function Home() {
                           const width = segment.end ? Math.max(.4, end - start) : 0;
                           const level = segment.level ?? 0;
                           return segment.end ? (
-                            <button key={index} className={`med-segment ${segment.status}`} style={{ left: `${start}%`, width: `calc(${width}% - 2px)`, top: `${5 + level * 26}px`, "--med": medication.color } as React.CSSProperties} onClick={() => setSelection({ kind: "medication", medication })} title={`${medication.name}: ${segment.label}. ${segment.note}`}>
+                            <button key={index} className={`med-segment ${segment.status}`} style={{ left: `${start}%`, width: `calc(${width}% - 2px)`, top: `${5 + level * 26}px`, "--med": medication.color } as React.CSSProperties} onClick={() => setSelection({ kind: "medication", medicationId: medication.generic })} title={`${medication.name}: ${segment.label}. ${segment.note}`}>
                               <span>{segment.label}</span>
                             </button>
                           ) : (
-                            <button key={index} className={`med-marker ${segment.status}`} style={{ left: `${start}%`, top: `${11 + level * 26}px`, "--med": medication.color } as React.CSSProperties} onClick={() => setSelection({ kind: "medication", medication })} title={`${medication.name}: ${segment.label}. ${segment.note}`} aria-label={`${medication.name}: ${segment.label}`} />
+                            <button key={index} className={`med-marker ${segment.status}`} style={{ left: `${start}%`, top: `${11 + level * 26}px`, "--med": medication.color } as React.CSSProperties} onClick={() => setSelection({ kind: "medication", medicationId: medication.generic })} title={`${medication.name}: ${segment.label}. ${segment.note}`} aria-label={`${medication.name}: ${segment.label}`} />
                           );
                         })}
                       </div>
@@ -1254,21 +1460,44 @@ export default function Home() {
         </div>
       </section>
 
-      <footer>
+      <section className="common-questions" aria-labelledby="common-questions-title" data-presentation-anchor="common-questions">
+        <div className="faq-intro">
+          <p className="section-number">03 / COMMON QUESTIONS</p>
+          <h2 id="common-questions-title">Common questions</h2>
+          <p>Concise answers grounded in evidence introduced through August 13, 2026—Trial Day 13. Where the underlying primary record is unavailable, the answer says so.</p>
+        </div>
+        <div className="faq-list">
+          {commonQuestions.map((item, index) => (
+            <details className="faq-item" key={item.id} open={openFaqIds.has(item.id)} onToggle={(event) => setFaqOpen(item.id, event.currentTarget.open)}>
+              <summary>
+                <span className="faq-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                <span className="faq-question">{item.question}</span>
+                <span className="faq-toggle" aria-hidden="true" />
+              </summary>
+              <div className="faq-answer">
+                {item.answer.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+                <small><strong>Evidence basis</strong>{item.evidence.replace(/^Evidence basis:\s*/, "")}</small>
+              </div>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <footer data-presentation-anchor="footer">
         <p>Educational evidence visualization · not an independent diagnosis, malpractice opinion, criminal-responsibility opinion, or verdict recommendation.</p>
         <p>Source IDs correspond to the 100-source master corpus. Update before presenting.</p>
       </footer>
 
       {selectedClusterEvents.length > 0 && (
         <div className="drawer-layer" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setSelection(null); }}>
-          <aside key={`cluster-${selectedClusterEvents.map((event) => event.id).join("-")}`} className="detail-drawer cluster-drawer" role="dialog" aria-modal="true" aria-label={`${selectedClusterEvents.length} events on ${selectedClusterEvents[0].displayDate}`}>
+          <aside key={`cluster-${selectedClusterEvents.map((event) => event.id).join("-")}`} className="detail-drawer cluster-drawer" data-presentation-drawer role="dialog" aria-modal="true" aria-label={`${selectedClusterEvents.length} events on ${selectedClusterEvents[0].displayDate}`}>
             <button className="drawer-close" onClick={() => setSelection(null)} aria-label="Close event cluster">×</button>
             <div className="drawer-accent cluster-accent"><span>Local event cluster</span><i /></div>
             <p className="drawer-date">{timelineDate(selectedClusterEvents[0].date, { month: "long", day: "numeric", year: "numeric" })}</p>
             <h2>{selectedClusterEvents.length} events</h2>
             <p className="drawer-summary">Several separately documented events share this date. Select one to open its complete evidence panel.</p>
             <div className="cluster-event-list">
-              {selectedClusterEvents.map((clusterEvent) => <button key={clusterEvent.id} onClick={() => setSelection({ kind: "event", index: visibleEvents.findIndex((item) => item.id === clusterEvent.id) })} style={{ "--cluster-color": categoryMeta[clusterEvent.category].color } as React.CSSProperties}>
+              {selectedClusterEvents.map((clusterEvent) => <button key={clusterEvent.id} onClick={() => setSelection({ kind: "event", eventId: clusterEvent.id })} style={{ "--cluster-color": categoryMeta[clusterEvent.category].color } as React.CSSProperties}>
                 <span>{categoryMeta[clusterEvent.category].label}</span>
                 <strong>{clusterEvent.title}</strong>
                 <small>{clusterEvent.short}</small>
@@ -1281,7 +1510,7 @@ export default function Home() {
 
       {selected && (
         <div className="drawer-layer" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setSelection(null); }}>
-          <aside key={selectedEvent ? selectedEvent.id : `med-${selectedMedication?.generic}`} className="detail-drawer" role="dialog" aria-modal="true" aria-label={"title" in selected ? selected.title : `${selected.name} medication details`}>
+          <aside key={selectedEvent ? selectedEvent.id : `med-${selectedMedication?.generic}`} className="detail-drawer" data-presentation-drawer role="dialog" aria-modal="true" aria-label={"title" in selected ? selected.title : `${selected.name} medication details`}>
             <button className="drawer-close" onClick={() => setSelection(null)} aria-label="Close details">×</button>
             {"title" in selected ? (
               <>
@@ -1316,6 +1545,36 @@ export default function Home() {
           </aside>
         </div>
       )}
+
+      <PresenterPanel
+        visible={presentationMounted && presenterMode}
+        connection={presentationConnection}
+        auth={presenterAuth}
+        isLive={presentation.isPresenting}
+        audienceUrl={audienceUrl}
+        userName={presentation.user?.displayName}
+        userEmail={presentation.user?.email}
+        statusMessage={presentation.isPresenting ? "Presentation is live and publishing this complete view." : null}
+        errorMessage={presentation.error?.message}
+        lastPublishedLabel={lastPublishedLabel}
+        isBusy={presentation.isBusy}
+        onSignIn={presentation.signIn}
+        onSignOut={presentation.signOut}
+        onStart={presentation.startPresenting}
+        onStop={presentation.stopPresenting}
+      />
+      <AudienceFollowControl
+        visible={audienceControlVisible}
+        followState={audienceFollowState}
+        connection={presentationConnection}
+        statusMessage={audienceFollowState === "lost" ? "The live view is paused; the timeline is unlocked while the connection recovers." : null}
+        lastSyncedLabel={lastReceivedLabel}
+        onExplore={presentation.exploreLocally}
+        onRejoin={presentation.rejoinPresenter}
+      />
+      <PresentationInteractionShield
+        active={presentationMounted && !presenterMode && presentation.isFollowing}
+      />
     </main>
   );
 }

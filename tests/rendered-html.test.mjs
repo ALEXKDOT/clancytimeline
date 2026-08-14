@@ -239,7 +239,7 @@ test("includes care contacts recovered through the Day 12 review", async () => {
 test("derives the drawer event tracker from the selected event", async () => {
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
 
-  assert.match(page, /selection\?\.kind === "event" \? selection\.index : -1/);
+  assert.match(page, /selection\?\.kind === "event"[^]*?visibleEvents\.findIndex\(\(event\) => event\.id === selection\.eventId\)/);
   assert.match(page, /const selectedEvent = selectedEventIndex >= 0/);
   assert.match(page, /selectedEventIndex \+ 1} \/ \$\{visibleEvents\.length}/);
   assert.match(page, /showStoryEvent\(selectedEventIndex - 1\)/);
@@ -296,6 +296,28 @@ test("places the arguments above the timeline in a full-width section", async ()
   assert.match(css, /\.argument-evidence \{[^}]*font-size: 14px/);
   assert.match(css, /\.argument-boundary \{[^}]*font-size: 14px/);
   assert.doesNotMatch(argumentsSection, /<small>/);
+});
+
+test("renders an audience-ready common-questions section after the timeline", async () => {
+  const [response, page, css] = await Promise.all([
+    render(),
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+  const html = await response.text();
+
+  assert.match(html, /<h2 id="common-questions-title">Common questions<\/h2>/);
+  assert.match(html, /Did Dr\. Jennifer Tufts and Rebecca Jollotta know Clancy was seeing both of them\?/);
+  assert.match(html, /Why did Clancy return to Tufts after switching to Julie Paul and Rebecca Jollotta\?/);
+  assert.match(html, /What was the .*virtual Aspire crisis evaluation/);
+  assert.match(html, /Did Jollotta diagnose Clancy with bipolar disorder\?/);
+  assert.match(html, /Does a prescription or pharmacy fill prove that a medication was taken\?/);
+  assert.match(page, /<details className="faq-item"/);
+  assert.equal((page.match(/question: "/g) ?? []).length, 7);
+  assert.ok(html.indexOf('class="workspace"') < html.indexOf('class="common-questions"'));
+  assert.ok(html.indexOf('class="common-questions"') < html.indexOf("<footer"));
+  assert.match(css, /\.common-questions \{[^}]*grid-template-columns:/);
+  assert.match(css, /\.faq-item summary:focus-visible/);
 });
 
 test("moves every event-card subtext into the existing drawer summary", async () => {

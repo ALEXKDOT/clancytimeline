@@ -1,0 +1,537 @@
+.presentation-control-surface {
+  --presentation-bg: rgba(8, 22, 29, 0.97);
+  --presentation-panel: #102630;
+  --presentation-line: rgba(125, 165, 179, 0.28);
+  --presentation-text: #edf6f8;
+  --presentation-muted: #9baeb6;
+  --presentation-teal: #49e0d2;
+  --presentation-green: #71e3a3;
+  --presentation-amber: #f1b552;
+  --presentation-red: #ff827d;
+  color: var(--presentation-text);
+  font-family: var(--font-geist-sans), Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+.presentation-presenter-panel {
+  position: fixed;
+  z-index: 2147483001;
+  top: 18px;
+  right: 18px;
+  width: min(410px, calc(100vw - 36px));
+  max-height: calc(100dvh - 36px);
+  overflow: auto;
+  border: 1px solid var(--presentation-line);
+  border-radius: 16px;
+  background: var(--presentation-bg);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.025) inset;
+  backdrop-filter: blur(20px) saturate(125%);
+  overscroll-behavior: contain;
+}
+
+.presentation-presenter-panel.is-live {
+  border-color: color-mix(in srgb, var(--presentation-green) 52%, transparent);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55), 0 0 36px rgba(113, 227, 163, 0.08);
+}
+
+.presentation-panel-header {
+  min-height: 74px;
+  padding: 15px 17px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--presentation-line);
+  background: linear-gradient(135deg, rgba(73, 224, 210, 0.08), transparent 58%);
+}
+
+.presentation-panel-icon,
+.presentation-audience-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(73, 224, 210, 0.36);
+  border-radius: 11px;
+  background: rgba(73, 224, 210, 0.09);
+  color: var(--presentation-teal);
+}
+
+.presentation-panel-eyebrow,
+.presentation-audience-eyebrow {
+  margin: 0 0 4px;
+  color: var(--presentation-teal);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.presentation-panel-header h2,
+.presentation-audience-control h2 {
+  margin: 0;
+  color: var(--presentation-text);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+.presentation-connection-badge {
+  min-height: 27px;
+  padding: 0 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--presentation-line);
+  border-radius: 999px;
+  color: var(--presentation-muted);
+  font-size: 10px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.presentation-connection-badge i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.presentation-connection-badge.is-online { color: var(--presentation-green); }
+.presentation-connection-badge.is-connecting { color: var(--presentation-teal); }
+.presentation-connection-badge.is-offline,
+.presentation-connection-badge.is-unconfigured { color: var(--presentation-amber); }
+.presentation-connection-badge.is-error { color: var(--presentation-red); }
+
+.presentation-panel-body {
+  padding: 14px;
+}
+
+.presentation-notice,
+.presentation-auth-card,
+.presentation-identity,
+.presentation-session-card {
+  border: 1px solid var(--presentation-line);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.presentation-notice {
+  margin-bottom: 11px;
+  padding: 13px 14px;
+  border-left-width: 3px;
+}
+
+.presentation-notice strong,
+.presentation-notice span,
+.presentation-auth-card strong,
+.presentation-auth-card span {
+  display: block;
+}
+
+.presentation-notice strong,
+.presentation-auth-card strong {
+  margin-bottom: 5px;
+  color: var(--presentation-text);
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.presentation-notice span,
+.presentation-auth-card span {
+  color: var(--presentation-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.presentation-notice.is-setup,
+.presentation-notice.is-warning { border-left-color: var(--presentation-amber); }
+.presentation-notice.is-error { border-left-color: var(--presentation-red); }
+
+.presentation-notice .presentation-text-button {
+  margin-top: 10px;
+}
+
+.presentation-auth-card {
+  padding: 14px;
+}
+
+.presentation-auth-card.is-loading {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.presentation-button,
+.presentation-text-button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.presentation-button {
+  min-height: 40px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--presentation-line);
+  border-radius: 8px;
+  background: #16333d;
+  color: var(--presentation-text);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.1;
+  transition: border-color 150ms ease, background 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+.presentation-button:hover:not(:disabled) {
+  border-color: rgba(73, 224, 210, 0.58);
+  background: #1a3c47;
+  transform: translateY(-1px);
+}
+
+.presentation-button:focus-visible,
+.presentation-text-button:focus-visible {
+  outline: 2px solid var(--presentation-teal);
+  outline-offset: 2px;
+}
+
+.presentation-button:disabled,
+.presentation-text-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.presentation-button.is-google {
+  width: 100%;
+  margin-top: 13px;
+  background: #f5f8f9;
+  color: #14262d;
+}
+
+.presentation-button.is-start {
+  flex: 1 1 160px;
+  border-color: var(--presentation-green);
+  background: var(--presentation-green);
+  color: #06150e;
+}
+
+.presentation-button.is-stop {
+  flex: 1 1 160px;
+  border-color: color-mix(in srgb, var(--presentation-red) 68%, transparent);
+  background: rgba(255, 130, 125, 0.13);
+  color: #ffc0bc;
+}
+
+.presentation-button.is-copy {
+  flex: 1 1 150px;
+}
+
+.presentation-text-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--presentation-teal);
+  font-size: 11px;
+  font-weight: 750;
+  text-align: left;
+}
+
+.presentation-identity {
+  margin-bottom: 11px;
+  padding: 11px 12px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.presentation-avatar {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(73, 224, 210, 0.15);
+  color: var(--presentation-teal);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.presentation-identity small,
+.presentation-identity strong,
+.presentation-identity div > span {
+  display: block;
+}
+
+.presentation-identity small {
+  margin-bottom: 2px;
+  color: var(--presentation-muted);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.presentation-identity strong {
+  overflow: hidden;
+  color: var(--presentation-text);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.presentation-identity div > span {
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--presentation-muted);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.presentation-session-card {
+  padding: 14px;
+}
+
+.presentation-session-card.is-live {
+  border-color: rgba(113, 227, 163, 0.34);
+  background: linear-gradient(135deg, rgba(113, 227, 163, 0.08), rgba(255, 255, 255, 0.018));
+}
+
+.presentation-session-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+}
+
+.presentation-session-status strong,
+.presentation-session-status span {
+  display: block;
+}
+
+.presentation-session-status strong {
+  margin-bottom: 4px;
+  color: var(--presentation-text);
+  font-size: 14px;
+}
+
+.presentation-session-status div > span {
+  color: var(--presentation-muted);
+  font-size: 11px;
+  line-height: 1.42;
+}
+
+.presentation-live-mark {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.presentation-live-mark i:first-child {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--presentation-green);
+}
+
+.presentation-live-mark i:last-child {
+  position: absolute;
+  inset: 3px;
+  border: 1px solid var(--presentation-green);
+  border-radius: 50%;
+  animation: presentation-pulse 1.8s ease-out infinite;
+}
+
+.presentation-session-actions {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.presentation-session-meta,
+.presentation-inline-error {
+  margin: 10px 0 0;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.presentation-session-meta { color: var(--presentation-muted); }
+.presentation-inline-error { color: var(--presentation-red); }
+
+.presentation-spinner {
+  width: 22px;
+  height: 22px;
+  display: inline-block;
+  flex: 0 0 auto;
+  border: 2px solid rgba(73, 224, 210, 0.24);
+  border-top-color: var(--presentation-teal);
+  border-radius: 50%;
+  animation: presentation-spin 0.8s linear infinite;
+}
+
+.presentation-sr-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.presentation-audience-control {
+  position: fixed;
+  z-index: 2147483002;
+  left: 50%;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  width: min(680px, calc(100vw - 32px));
+  min-height: 76px;
+  padding: 12px 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border: 1px solid color-mix(in srgb, var(--presentation-teal) 46%, transparent);
+  border-radius: 15px;
+  background: var(--presentation-bg);
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.56), 0 0 28px rgba(73, 224, 210, 0.08);
+  backdrop-filter: blur(20px) saturate(125%);
+  transform: translateX(-50%);
+}
+
+.presentation-audience-control.is-lost,
+.presentation-audience-control.connection-offline {
+  border-color: color-mix(in srgb, var(--presentation-amber) 56%, transparent);
+}
+
+.presentation-audience-status {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.presentation-audience-status > div {
+  min-width: 0;
+}
+
+.presentation-audience-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.presentation-audience-eyebrow i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--presentation-green);
+  box-shadow: 0 0 0 4px rgba(113, 227, 163, 0.11);
+}
+
+.presentation-audience-control h2 {
+  font-size: 15px;
+}
+
+.presentation-audience-control h2 + span,
+.presentation-audience-control small {
+  display: block;
+  color: var(--presentation-muted);
+  font-size: 10.5px;
+  line-height: 1.35;
+}
+
+.presentation-audience-control small {
+  margin-top: 2px;
+  color: #71858e;
+  font-size: 9px;
+}
+
+.presentation-audience-control .presentation-button {
+  flex: 0 0 auto;
+  min-width: 126px;
+}
+
+.presentation-button.is-rejoin {
+  border-color: var(--presentation-teal);
+  background: var(--presentation-teal);
+  color: #061514;
+}
+
+.presentation-interaction-shield {
+  position: fixed;
+  z-index: 2147483000;
+  inset: 0;
+  background: transparent;
+  cursor: default;
+  touch-action: none;
+}
+
+@keyframes presentation-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes presentation-pulse {
+  0% { transform: scale(0.65); opacity: 0.9; }
+  80%, 100% { transform: scale(1.45); opacity: 0; }
+}
+
+@media (max-width: 620px) {
+  .presentation-presenter-panel {
+    top: 10px;
+    right: 10px;
+    width: calc(100vw - 20px);
+    max-height: calc(100dvh - 20px);
+  }
+
+  .presentation-panel-header {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .presentation-connection-badge {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .presentation-identity {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .presentation-identity .presentation-text-button {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .presentation-audience-control {
+    bottom: max(10px, env(safe-area-inset-bottom));
+    width: calc(100vw - 20px);
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .presentation-audience-control .presentation-button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .presentation-live-mark i:last-child,
+  .presentation-spinner {
+    animation: none;
+  }
+
+  .presentation-button {
+    transition: none;
+  }
+}

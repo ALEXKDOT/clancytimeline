@@ -1,0 +1,167 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "presentations": {
+      "main": {
+        ".read": false,
+        ".write": false,
+        "meta": {
+          ".read": true,
+          ".write": "auth != null && auth.token.email_verified == true && auth.token.email == 'akrawec1@gmail.com'",
+          ".validate": "newData.hasChildren(['schemaVersion', 'active', 'presenterClientId', 'startedAt', 'heartbeatAt', 'endedAt', 'disconnectedAt'])",
+          "schemaVersion": {
+            ".validate": "newData.isNumber() && newData.val() == 1"
+          },
+          "active": {
+            ".validate": "newData.isBoolean()"
+          },
+          "presenterClientId": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 128"
+          },
+          "startedAt": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "heartbeatAt": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "endedAt": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "disconnectedAt": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "state": {
+          ".read": true,
+          ".write": "auth != null && auth.token.email_verified == true && auth.token.email == 'akrawec1@gmail.com'",
+          ".validate": "newData.hasChildren(['schemaVersion', 'revision', 'clientId', 'updatedAt', 'view', 'zoom', 'categories', 'searchQuery', 'medicationOverlayOpen', 'openFaqIds', 'selection', 'horizontalRatio', 'vertical', 'drawerRatio'])",
+          "schemaVersion": {
+            ".validate": "newData.isNumber() && newData.val() == 1"
+          },
+          "revision": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 9007199254740991 && newData.val() % 1 == 0"
+          },
+          "clientId": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 128"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "view": {
+            ".validate": "newData.isString() && (newData.val() == 'course' || newData.val() == 'post')"
+          },
+          "zoom": {
+            ".validate": "newData.isNumber() && newData.val() >= 0.5 && newData.val() <= 2.5"
+          },
+          "categories": {
+            ".validate": "newData.hasChildren(['clinical', 'symptom', 'hospital', 'medication', 'collateral', 'digital', 'event', 'post'])",
+            "clinical": {
+              ".validate": "newData.isBoolean()"
+            },
+            "symptom": {
+              ".validate": "newData.isBoolean()"
+            },
+            "hospital": {
+              ".validate": "newData.isBoolean()"
+            },
+            "medication": {
+              ".validate": "newData.isBoolean()"
+            },
+            "collateral": {
+              ".validate": "newData.isBoolean()"
+            },
+            "digital": {
+              ".validate": "newData.isBoolean()"
+            },
+            "event": {
+              ".validate": "newData.isBoolean()"
+            },
+            "post": {
+              ".validate": "newData.isBoolean()"
+            },
+            "$other": {
+              ".validate": false
+            }
+          },
+          "searchQuery": {
+            ".validate": "newData.isString() && newData.val().length <= 240"
+          },
+          "medicationOverlayOpen": {
+            ".validate": "newData.isBoolean()"
+          },
+          "openFaqIds": {
+            ".validate": "newData.isString() && newData.val().length <= 500"
+          },
+          "selection": {
+            ".validate": "newData.hasChildren(['kind', 'id']) && newData.child('kind').isString() && newData.child('id').isString() && ((newData.child('kind').val() == 'none' && newData.child('id').val() == '') || ((newData.child('kind').val() == 'event' || newData.child('kind').val() == 'medication' || newData.child('kind').val() == 'cluster') && newData.child('id').val().length > 0 && newData.child('id').val().length <= 500))",
+            "kind": {
+              ".validate": "newData.isString() && (newData.val() == 'none' || newData.val() == 'event' || newData.val() == 'medication' || newData.val() == 'cluster')"
+            },
+            "id": {
+              ".validate": "newData.isString() && newData.val().length <= 500"
+            },
+            "$other": {
+              ".validate": false
+            }
+          },
+          "horizontalRatio": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1"
+          },
+          "vertical": {
+            ".validate": "newData.hasChildren(['anchorId', 'progress', 'fallbackRatio'])",
+            "anchorId": {
+              ".validate": "newData.isString() && (newData.val() == 'top' || newData.val() == 'background' || newData.val() == 'orientation' || newData.val() == 'arguments' || newData.val() == 'reading-guide' || newData.val() == 'workspace' || newData.val() == 'medication-timeline' || newData.val() == 'common-questions' || newData.val() == 'footer')"
+            },
+            "progress": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1"
+            },
+            "fallbackRatio": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1"
+            },
+            "$other": {
+              ".validate": false
+            }
+          },
+          "drawerRatio": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "authChecks": {
+          ".read": false,
+          ".write": false,
+          "$uid": {
+            ".write": "auth != null && auth.uid == $uid && auth.token.email_verified == true && auth.token.email == 'akrawec1@gmail.com'",
+            ".validate": "newData.hasChildren(['clientId', 'checkedAt'])",
+            "clientId": {
+              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 128"
+            },
+            "checkedAt": {
+              ".validate": "newData.isNumber() && newData.val() >= 0"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      },
+      "$other": {
+        ".read": false,
+        ".write": false
+      }
+    },
+    "$other": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}
