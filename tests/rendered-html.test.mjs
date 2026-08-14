@@ -23,9 +23,10 @@ test("server-renders the clinical timeline", async () => {
   assert.match(html, /<title>Clancy Case — Interactive Clinical Timeline<\/title>/i);
   assert.match(html, /Commonwealth/);
   assert.match(html, /Lindsay Clancy/);
-  assert.match(html, /86<\/strong> events shown/);
+  assert.match(html, /93<\/strong> events shown/);
   assert.match(html, /Show medication context/);
   assert.match(html, /MEDICATION TIMELINE/);
+  assert.match(html, /100-source master corpus/);
   assert.match(html, /event-card/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site|codex-preview/i);
 });
@@ -35,7 +36,7 @@ test("renders evidence-aware controls and chronology boundaries", async () => {
   const html = await response.text();
 
   assert.match(html, /Evidence cutoff/);
-  assert.match(html, /Aug 11, 2026 · Trial Day 11/);
+  assert.match(html, /Aug 13, 2026 · Trial Day 13/);
   assert.match(html, /Arranged by Alex Krawec, MS4/);
   assert.match(html, /Feedback: AKrawec@mednet\.ucla\.edu/);
   assert.match(html, /May 26, 2022 – January 24, 2023/);
@@ -52,6 +53,7 @@ test("compresses the inactive post-offense year and renders the revised orientat
 
   assert.match(page, /earlyEnd: "2023-05-01T00:00:00"/);
   assert.match(page, /lateStart: "2024-05-01T00:00:00"/);
+  assert.match(page, /onsetStart: "2022-08-23T00:00:00"/);
   assert.match(page, /~12 months omitted/);
   assert.match(page, /Anxiety emerges after 12 well weeks/);
   assert.match(page, /Sep–Nov/);
@@ -77,6 +79,7 @@ test("renders a noninteractive monthly provider and medication orientation map",
   assert.match(html, /Rebecca H\. Jollotta, CNP/);
   assert.match(html, /Alia Goodheart, MD/);
   assert.match(html, /Ativan \(lorazepam\) 0\.5 mg ×7/);
+  assert.match(html, /diazepam 2 mg was dispensed, but the original label quantity remains unresolved/);
   assert.match(html, /Prescribed or filled does not necessarily mean taken/);
   assert.match(page, /const orientationCareMap = \[/);
   assert.match(page, /className="section-number orientation-label"/);
@@ -162,12 +165,27 @@ test("collapses January 24 into one card with a provenance-preserving detail seq
 
   assert.match(page, /id: "jan24-sequence"/);
   assert.match(page, /<h3>January 24 timeline<\/h3>/);
-  assert.match(page, /time: "4:48 PM", title: "CVS telephone call"/);
-  assert.match(page, /time: "5:10 PM", title: "ThreeV telephone order"/);
+  assert.match(page, /time: "4:46–4:48 PM", title: "Constipation-product activity and CVS call"/);
+  assert.match(page, /time: "5:09–5:10 PM", title: "Calls associated with the food order"/);
   assert.match(page, /time: "5:33–5:34 PM", title: "Patrick and Lindsay speak from CVS"/);
   assert.match(page, /time: "By ~6:09 PM", title: "Quiet house and unanswered call"/);
   assert.match(page, /time: "~6:11 PM onward", title: "Discovery and emergency response"/);
   assert.doesNotMatch(page, /id: "jan24-day"|id: "cvs"|id: "threev"|id: "return"/);
+});
+
+test("integrates Day 13 digital evidence without converting searches into diagnoses or medication exposure", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+
+  assert.match(page, /digital: \{ label: "Digital evidence"/);
+  for (const id of ["surface-aug23", "phone-note-oct25", "phone-search-dec29", "mclean-text-jan3", "new-med-text-jan18", "phone-search-jan19"]) {
+    assert.match(page, new RegExp(`id: "${id}"`), `${id} should be present`);
+  }
+  assert.match(page, /could not identify the human user/);
+  assert.match(page, /not a clinician assessment/);
+  assert.match(page, /Do not relabel this as confirmed amitriptyline use/);
+  assert.match(page, /Searches can reflect distress, curiosity, self-assessment/);
+  assert.match(page, /event\.details\.join\(" "\)/);
+  assert.match(page, /SRC-0099/);
 });
 
 test("separates civil pleading allegations from established event evidence", async () => {
@@ -184,13 +202,13 @@ test("separates civil pleading allegations from established event evidence", asy
   assert.match(css, /\.civil-claims-box \{/);
 });
 
-test("includes care contacts recovered in the Day 11 bounded audit", async () => {
+test("includes care contacts recovered through the Day 12 review", async () => {
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  for (const id of ["oct3-therapy", "fluoxetine-start-report", "dec1-urgent-outreach", "dec2-dukes", "dec5-aspire", "dec12-dukes", "dec19-dukes", "jan7-party"]) {
+  for (const id of ["oct3-therapy", "fluoxetine-start-report", "dec1-urgent-outreach", "dec2-dukes", "dec5-aspire", "dec12-dukes", "dec19-dukes", "dec27-dukes", "jan7-party"]) {
     assert.match(page, new RegExp(`id: "${id}"`), `${id} should be present`);
   }
-  assert.match(page, /ASPIRE/);
-  assert.match(page, /Letitia Dukes/);
+  assert.match(page, /Aspire/);
+  assert.match(page, /Latiesha Dukes/);
 });
 
 test("derives the drawer event tracker from the selected event", async () => {
