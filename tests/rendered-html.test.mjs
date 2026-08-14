@@ -131,6 +131,31 @@ test("separates the October 20 encounter from its medication decision and identi
   assert.match(nov2Visit, /title: "Telehealth follow-up:/);
 });
 
+test("keeps event drawers self-contained and free of presenter instructions", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const eventData = page.slice(page.indexOf("const events:"), page.indexOf("const allEvents"));
+  const birth = page.slice(page.indexOf('id: "birth"'), page.indexOf('id: "late-aug"'));
+  const lateAugust = page.slice(page.indexOf('id: "late-aug"'), page.indexOf('id: "tufts-intake"'));
+
+  assert.match(birth, /title: "Childbirth"/);
+  assert.match(birth, /charged conduct occurred approximately eight months later/);
+  assert.doesNotMatch(birth, /243 days|classic postpartum psychosis/i);
+  assert.doesNotMatch(lateAugust, /caution:/);
+  assert.match(page, /Prescription\/fill: sertraline 25 mg daily for one week, then 50 mg planned; 25 mg ×30 filled/);
+  assert.match(page, /Medication decision: sertraline remained deferred; Clancy reported no doses taken/);
+  assert.match(page, /Clancy stated she did not feel ready to return to nursing/);
+  assert.match(page, /Medication decision: sertraline was stopped; an immediate replacement prescription was deferred/);
+
+  for (const forbidden of [
+    /separate (?:same-day )?medication card/i,
+    /shown in a separate (?:same-day )?medication card/i,
+    /appears? in a separate (?:same-day )?medication card/i,
+    /\bthis card\b/i,
+    /["'](?:do not|state only|keep this|never)\b/i,
+    /named medication lane/i,
+  ]) assert.doesNotMatch(eventData, forbidden);
+});
+
 test("labels the complete Tufts appointment series as video telehealth", async () => {
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
   const tuftsVisitIds = [
@@ -182,7 +207,7 @@ test("integrates Day 13 digital evidence without converting searches into diagno
   }
   assert.match(page, /could not identify the human user/);
   assert.match(page, /not a clinician assessment/);
-  assert.match(page, /Do not relabel this as confirmed amitriptyline use/);
+  assert.match(page, /attribution to amitriptyline remains unconfirmed/);
   assert.match(page, /Searches can reflect distress, curiosity, self-assessment/);
   assert.match(page, /event\.details\.join\(" "\)/);
   assert.match(page, /SRC-0099/);
