@@ -21,7 +21,21 @@ import {
 import { PRESENTATION_MAX_SEARCH_LENGTH } from "./presentation/config";
 
 type Category = "clinical" | "symptom" | "hospital" | "medication" | "collateral" | "digital" | "event" | "post";
-type Evidence = "Contemporaneous record" | "Treating testimony" | "Reported to clinician" | "Collateral testimony" | "Objective record" | "Mixed evidence" | "Retrospective report" | "Civil allegation";
+type Evidence =
+  | "Contemporaneous record"
+  | "Treating testimony"
+  | "Reported to clinician"
+  | "Collateral testimony"
+  | "Objective record"
+  | "Mixed evidence"
+  | "Retrospective report"
+  | "Civil allegation"
+  | "Messages + sworn testimony"
+  | "Sworn family testimony"
+  | "Contemporaneous messages"
+  | "Forensic-expert testimony"
+  | "Retained expert opinion"
+  | "Expert testimony";
 type ViewKey = "course" | "post";
 
 type TimelineEvent = {
@@ -34,6 +48,7 @@ type TimelineEvent = {
   evidence: Evidence;
   certainty: "High" | "Moderate" | "Contested";
   clinician?: string;
+  providerLabel?: string;
   institution?: string;
   side: "top" | "bottom";
   tier: number;
@@ -107,7 +122,7 @@ const categoryMeta: Record<Category, { label: string; color: string }> = {
 
 const views: Record<ViewKey, { label: string; eyebrow: string; start: string; end: string; baseWidth: number }> = {
   course: { label: "Clinical course", eyebrow: "May 26, 2022 – January 24, 2023", start: "2022-05-26T00:00:00", end: "2023-01-25T00:00:00", baseWidth: 9000 },
-  post: { label: "Post-offense", eyebrow: "January 26, 2023 – September 2024", start: "2023-01-25T00:00:00", end: "2024-09-15T00:00:00", baseWidth: 2500 },
+  post: { label: "Post-offense", eyebrow: "January 2023 – August 2026", start: "2023-01-25T00:00:00", end: "2026-08-31T00:00:00", baseWidth: 3200 },
 };
 
 const orientationCareMap = [
@@ -221,19 +236,19 @@ const commonQuestions = [
     id: "child-harm-disclosure",
     question: "Were thoughts of harming the children disclosed to treating clinicians?",
     answer: [
-      "Not in the contemporaneous treating encounters presented through Trial Day 13. Jollotta testified that the intrusive thoughts disclosed to her concerned wanting to die, not harming the children; the pre-offense Tufts testimony likewise did not establish disclosure of a child-harm plan.",
-      "Patrick separately testified that, between Thanksgiving and December 6, Clancy described distressing thoughts involving harm to the children without a specific method, plan, or external voice. That later family collateral is important, but it is not the same evidentiary category as contemporaneous clinician documentation.",
+      "Not in the contemporaneous treating encounters presented through Trial Day 18. Jollotta testified that the intrusive thoughts disclosed to her concerned wanting to die, not harming the children; the pre-offense Tufts testimony likewise did not establish disclosure of child-harm thoughts or a plan.",
+      "Patrick testified that, between Thanksgiving and December 6, Clancy described distressing thoughts involving harm to the children without a specific method, plan, or external voice. Paula Musgrove later testified independently that Clancy nervously told her and Patrick in early to mid-December that she had ‘thoughts of harming the children.’ This strengthens evidence that a family disclosure occurred, but still does not resolve whether the phenomenon was an ego-dystonic intrusion, homicidal intent, or psychosis.",
     ],
-    evidence: "Evidence basis: Patrick testimony, Trial Day 1 (SRC-0065); Tufts and Jollotta testimony, Trial Days 10–11 (SRC-0091, SRC-0096).",
+    evidence: "Evidence basis: Patrick testimony, Trial Day 1 (SRC-0065); Tufts and Jollotta testimony, Trial Days 10–11 (SRC-0091, SRC-0096); Musgrove testimony, Trial Day 14 (SRC-0101).",
   },
   {
     id: "command-voice-timing",
     question: "Was the alleged male command voice documented before January 24?",
     answer: [
-      "Not in the treating evidence presented through Trial Day 13. The pre-offense clinical encounters introduced at trial did not document a command hallucination, and Jollotta testified that Clancy did not describe hearing voices to her.",
-      "Patrick testified that approximately one week after the killings, Clancy told him she had heard a man's voice saying that if she did not act then, she would lose her chance. The voice account is therefore retrospective evidence and should be attributed to Clancy's later report rather than presented as a contemporaneous clinical finding.",
+      "Not in the treating evidence presented through Trial Day 18. The pre-offense clinical encounters introduced at trial did not document a command hallucination, and Jollotta testified that Clancy did not describe hearing voices to her.",
+      "Patrick testified that approximately one week later Clancy described a man's ‘last chance’ voice. Chaplain Sheila Cavanaugh testified to a January 31 safety-related male-voice account, and Paul Zeizel testified to a more explicit February 6 speakerphone report. Cavanaugh's contemporaneous notes did not record the voice. The experts later interpreted these retrospective accounts differently; their repetition does not make the voice a contemporaneous pre-offense finding.",
     ],
-    evidence: "Evidence basis: Patrick testimony, Trial Day 2 (SRC-0068); treating testimony, Trial Days 9–11 (SRC-0087, SRC-0091, SRC-0096).",
+    evidence: "Evidence basis: Patrick testimony, Trial Day 2 (SRC-0068); treating testimony, Trial Days 9–11 (SRC-0087, SRC-0091, SRC-0096); Zeizel testimony, Trial Days 15–16 (SRC-0105, SRC-0108); Cavanaugh testimony, Trial Day 17 (SRC-0111).",
   },
   {
     id: "prescription-versus-exposure",
@@ -242,7 +257,16 @@ const commonQuestions = [
       "No. A prescription shows that a clinician ordered a medication; a fill shows that a pharmacy dispensed it. Actual exposure requires different evidence, such as a contemporaneous patient report, an inpatient medication-administration record, or later toxicologic detection.",
       "Even toxicologic detection does not by itself establish the prescribed dose, timing, clinical effect, or causation. This distinction is especially important here because the record contains short trials, proposed titrations, overlapping strengths, tapers, and uncertain adherence.",
     ],
-    evidence: "Evidence basis: pharmacy exhibits and medication testimony summarized in the 100-source corpus through Trial Day 13.",
+    evidence: "Evidence basis: pharmacy exhibits and medication testimony summarized in the 117-source corpus through Trial Day 18.",
+  },
+  {
+    id: "expert-disagreement",
+    question: "What do the retained psychiatric experts actually disagree about?",
+    answer: [
+      "They agree on one important threshold point: Clancy had a mental disease or defect on January 24. They disagree about its diagnosis and legal effect. Defense experts Zeizel and Resnick described bipolar-spectrum illness and postpartum psychosis, interpreted the reported male voice and loss-of-agency account as psychotic, and concluded that both cognitive and volitional capacity were substantially impaired.",
+      "Commonwealth expert Avram Mack diagnosed a major depressive episode, probably major depressive disorder, found no mania or psychosis, and concluded that both capacities were retained. He relied in part on the organized sequence, communications, stated reasoning, and absence of contemporaneous psychosis documentation. These are competing forensic opinions—not established facts—and Mack's cross-examination was still unfinished when court adjourned on August 21.",
+    ],
+    evidence: "Evidence basis: Zeizel testimony, Trial Days 15–16 (SRC-0105, SRC-0108); Resnick and Mack testimony, Trial Day 18 (SRC-0113).",
   },
 ];
 
@@ -281,6 +305,12 @@ const events: TimelineEvent[] = [
     details: ["She denied suicidal and homicidal thoughts; her fear of someday developing suicidal thoughts was documented separately from current suicidal ideation.", "She reported a fear that something bad might happen and not wanting to be alone; her parents came to stay and help. Tufts did not speak with them and described seeking support as protective.", "Tufts observed depressed and anxious mood/affect but appropriate speech and thought process, excellent judgment, intact cognition, and normal psychomotor activity.", "Medication decision: sertraline was stopped; an immediate replacement prescription was deferred."], source: "SRC-0087, Trial Day 9, pp. 105–107, 05:52:52–05:59:25; SRC-0091, Trial Day 10, 02:55:00–03:03:03 and 05:35:15–05:36:38", caution: "The encounter establishes the reported temporal association; it does not by itself prove a bipolar switch, medication causation, or a delusion.", views: ["course"]
   },
   {
+    id: "oct20-mother-texts", date: "2022-10-20T08:00:00", displayDate: "October 19–20", title: "Texts to mother: scared to be alone", short: "Contemporaneous messages · mother comes to Duxbury", category: "collateral", evidence: "Messages + sworn testimony", certainty: "High", side: "top", tier: 2,
+    summary: "Clancy asked Paula Musgrove to come because she was ‘really sick,’ had ‘horrible insomnia,’ was scared, and did not want to be alone. Musgrove drove to Duxbury that day.",
+    details: ["The preceding day, Clancy had asked whether her mother could stay several days at a time to help with childcare so that she could work; she said therapy and her own thinking suggested that returning to work might help.", "On October 20 she wrote that an anxiety medication seemed to be making things worse and that she did not know how she would get through the day.", "Musgrove believed Clancy may also have gone to an emergency department that day, but no underlying hospital record was identified and the recollection does not establish a separate hospital encounter."],
+    source: "SRC-0101, Trial Day 14, 02:05:10–02:08:56 and 02:19:38–02:20:14", caution: "The messages and Musgrove's response are established; the possible emergency-department visit remains unconfirmed family recollection.", views: ["course"]
+  },
+  {
     id: "oct21", date: "2022-10-21T10:00:00", displayDate: "October 21", title: "Telehealth follow-up: acute insomnia and anxiety", short: "Next-day video visit with Dr. Tufts", category: "clinical", evidence: "Contemporaneous record", certainty: "High", clinician: "Jennifer Tufts, MD", institution: "Aster Mental Health", side: "top", tier: 0,
     summary: "Clancy reported no sleep the preceding night, severe anxiety and heart racing, worry about the children and sleep, GI symptoms, crying, and fogginess.",
     details: ["She described yawning without feeling drowsy.", "Tufts did not observe pressured speech, hyperactivity, mania, psychosis, suicidal ideation, homicidal ideation, or hallucinations.", "Prescription/fill: lorazepam 0.5 mg ×7 for short-term PRN treatment of severe anxiety."], source: "SRC-0087, Trial Day 9, pp. 107–109, 05:58:25–06:04:28; SRC-0091, Trial Day 10", caution: "‘Not drowsy’ is ambiguous within a broader picture of distressed insomnia.", views: ["course"]
@@ -303,7 +333,7 @@ const events: TimelineEvent[] = [
   {
     id: "ed", date: "2022-11-16T12:00:00", displayDate: "November 16", title: "Emergency department visit: South Shore", short: "Insomnia, anxiety and palpitations", category: "hospital", evidence: "Contemporaneous record", certainty: "High", institution: "South Shore ED", side: "top", tier: 1,
     summary: "Clancy presented to the emergency department for insomnia, anxiety, and palpitations. Patrick believed she had slept very little for approximately 48 hours.",
-    details: ["Patrick believed she had slept very little for approximately 48 hours.", "Clancy later told Paul that the treatment prescribed after the visit helped her fall asleep but did not maintain sleep.", "Prescription/fill after the visit: trazodone 50 mg ×30."], source: "SRC-0065; SRC-0091; Exhibit 222 described on Trial Day 11", caution: "The encounter is established; exact sleep duration and later treatment effect are patient/collateral reports.", views: ["course"]
+    details: ["Patrick believed she had slept very little for approximately 48 hours.", "Susan Clancy testified that Lindsay drove herself to the emergency department and drove home; Susan did not attend the evaluation. Lindsay reported insomnia, palpitations, anxiety, and sadness, and this was when Susan first learned the extent of the clinical concerns.", "Clancy later told Paul that the treatment prescribed after the visit helped her fall asleep but did not maintain sleep.", "Prescription/fill after the visit: trazodone 50 mg ×30."], source: "SRC-0065; SRC-0091; Exhibit 222 described on Trial Day 11; SRC-0105, Trial Day 15, 00:14:34–00:18:15", caution: "The encounter and trazodone fill are established; exact sleep duration, symptoms reported to Susan, and later treatment effect are patient/collateral reports rather than the complete ED chart.", views: ["course"]
   },
   {
     id: "paul-intake", date: "2022-11-21T10:00:00", displayDate: "November 21", title: "In-person intake: perinatal psychiatry", short: "Face-to-face · linear, goal-directed, engaged in planning", category: "clinical", evidence: "Treating testimony", certainty: "High", clinician: "Julie Paul, psychiatric NP", institution: "South Shore Perinatal Behavioral Health", side: "bottom", tier: 0,
@@ -331,11 +361,17 @@ const events: TimelineEvent[] = [
     details: ["She reported about two hours of sleep followed by several hours awake and sometimes used lorazepam to return to sleep.", "Jollotta offered zolpidem 10 mg/ER and hydroxyzine; Clancy declined and preferred mirtazapine 15 mg with PRN lorazepam.", "No SI/HI, mania, hallucinations, delusions, or psychosis were observed or reported in this encounter."], medication: "Continue mirtazapine 15 mg + PRN lorazepam", source: "SRC-0096, Trial Day 11, pp. 17–26", caution: "Negative findings apply to this encounter, not every moment outside it.", views: ["course"]
   },
   {
-    id: "child-thoughts", date: "2022-11-30T09:00:00", displayDate: "Late Nov.", title: "Child-harm thoughts disclosed to Patrick", short: "Distressing; no plan, intent, or external voice", category: "collateral", evidence: "Collateral testimony", certainty: "Moderate", side: "top", tier: 1,
-    summary: "Patrick later testified that over one or two nights Clancy described distressing thoughts involving harm or illness affecting the children.",
-    details: ["She appeared disturbed by the thoughts and gave no method, plan, or intent.", "Patrick said she did not describe an external voice. He asked whether she needed to be kept away from the children; she said no, and he observed no intent and did not then believe they were unsafe.", "Her parents came to support the family. Patrick later confirmed only that a disclosure of ‘horrible thoughts’ occurred in her mother's presence—not that her mother independently reported child-harm content."],
-    civilClaims: [{ claim: "The complaint alleges that Clancy also told her mother the thoughts involved harming the children and that she feared other people could hear her thoughts, she would be locked up, or the children would be taken.", source: "SRC-0032 ¶50", context: "No testimony from her mother or contemporaneous note had established those specifics through Trial Day 13. Patrick's sworn account establishes a more limited disclosure and her mother's presence." }],
-    source: "SRC-0065, Trial Day 1, 02:06:24–02:11:58; SRC-0068, Trial Day 2, 01:46:52–01:47:49; compare SRC-0032 ¶50", caution: "Patrick's collateral account, suicidal portal messages, pleaded thought-reading allegations, and the later command-voice account are distinct sources and phenomena.", views: ["course"]
+    id: "child-thoughts", date: "2022-12-04T09:00:00", displayDate: "Late Nov.–early Dec.", title: "Child-harm thoughts disclosed to family", short: "Patrick and Paula testify · phenomenology unresolved", category: "collateral", evidence: "Sworn family testimony", certainty: "Moderate", side: "top", tier: 1,
+    summary: "Patrick placed Clancy's disclosure after Thanksgiving and before December 6. Paula Musgrove separately recalled an early-to-mid-December conversation, probably toward the earlier part of that interval.",
+    details: ["Patrick described one or two nights of distressing internal thoughts involving harm or illness affecting the children. He said she supplied no method, plan, intent, or external voice and appeared disturbed by them.", "Musgrove independently recalled Clancy nervously telling both her and Patrick in early to mid-December that she had ‘thoughts of harming the children.’ Her testimony did not establish the exact content, frequency, images, urges, commands, intent, or plan.", "Patrick asked whether Clancy felt she could not be alone with the children; both witnesses recalled that she said no. Family came or remained present, and Musgrove recalled that Clancy was also afraid to be alone and slept in her bed around this period."],
+    civilClaims: [{ claim: "The complaint further alleges thought-reading fears, fear of being locked up, and fear that the children would be taken.", source: "SRC-0032 ¶50", context: "Those additional beliefs were not established by Musgrove's Day 14 testimony and remain pleading allegations rather than contemporaneous clinical documentation." }],
+    source: "SRC-0065, Trial Day 1, 02:06:24–02:11:58; SRC-0068, Trial Day 2, 01:46:52–01:47:49; SRC-0101, Trial Day 14, 02:09:34–02:10:50, 02:14:05–02:14:48, and 02:18:07–02:22:51; compare SRC-0032 ¶50", caution: "The testimony establishes a family disclosure but is insufficient to classify the thoughts retrospectively as OCD intrusions, homicidal intent, or psychosis.", views: ["course"]
+  },
+  {
+    id: "susan-medication-texts", date: "2022-11-30T08:00:00", displayDate: "November 29–30", title: "Texts to mother-in-law: fear of medications", short: "Perceived benzodiazepine dependence · severe depression", category: "collateral", evidence: "Contemporaneous messages", certainty: "High", side: "top", tier: 2,
+    summary: "In messages to Susan Clancy, Lindsay wrote that she feared she had developed benzodiazepine dependence after two weeks, could not sleep without it, and was terrified to take medication.",
+    details: ["On November 29 she wrote that she felt no one was hearing or addressing the dependence concern and that without the benzodiazepine she did not sleep.", "On November 30 she wrote that she was not okay and was terrified to take medication that night; the thread referenced Ativan and Remeron.", "She also wrote, ‘I was never ever this depressed. It was brought on by the medication.’ This is Clancy's contemporaneous causal attribution, not a clinician diagnosis or proof of causation."],
+    source: "SRC-0105, Trial Day 15, 00:24:21–00:28:01", caution: "A patient's concern about dependence is clinically important but does not itself establish a benzodiazepine-use disorder, physiologic dependence, or medication causation.", views: ["course"]
   },
   {
     id: "quetiapine-start", date: "2022-11-30T16:00:00", displayDate: "November 30", title: "MyChart message: asks to stop mirtazapine", short: "Worse depression; quetiapine discussed for sleep", category: "medication", evidence: "Contemporaneous record", certainty: "High", clinician: "Rebecca H. Jollotta, CNP", institution: "South Shore Perinatal Behavioral Health", side: "bottom", tier: 1,
@@ -380,7 +416,7 @@ const events: TimelineEvent[] = [
   {
     id: "dec15", date: "2022-12-15T15:00:00", displayDate: "December 15", title: "Phone call: “worst day”; higher care urged", short: "Persistent suicidal thoughts; no active plan", category: "symptom", evidence: "Contemporaneous record", certainty: "High", clinician: "Rebecca H. Jollotta, CNP", institution: "South Shore Perinatal Behavioral Health", side: "bottom", tier: 0,
     summary: "Clancy and Patrick described her worst day, with persistent intrusive thoughts of suicide but no active plan. Both agreed that a higher level of care might be needed.",
-    details: ["Patrick separately testified that the MGH visit followed Clancy telling her father she wanted suicide, then telling Patrick, ‘I told my dad I want to die and it didn't bother me at all.’ Her father had not testified through Day 13.", "Jollotta discussed MGH emergency evaluation, possible McLean care, and release-of-information needs.", "Clancy went to MGH and then chose outpatient Women & Infants follow-up."], source: "SRC-0065, 02:12:20–02:12:47; SRC-0096, pp. 63–66", caution: "No active plan was disclosed in the cited exchange; the statement to her father is Patrick's sworn account of what Clancy told him.", views: ["course"]
+    details: ["Patrick separately testified that the MGH visit followed Clancy telling her father she wanted suicide, then telling Patrick, ‘I told my dad I want to die and it didn't bother me at all.’ Her father had not testified through Day 18.", "Jollotta discussed MGH emergency evaluation, possible McLean care, and release-of-information needs.", "Later trial testimony established that MGH recommended or offered inpatient McLean care; Clancy did not accept it during that encounter and instead pursued outpatient Women & Infants follow-up."], source: "SRC-0065, 02:12:20–02:12:47; SRC-0096, pp. 63–66; SRC-0105, Trial Day 15, 01:55:13–01:56:16; SRC-0108, Trial Day 16, 01:09:59–01:11:24", caution: "No active plan was disclosed in the cited exchange, and the complete MGH chart is unavailable. The record supports an inpatient offer—not that MGH refused help.", views: ["course"]
   },
   {
     id: "dec16", date: "2022-12-16T15:00:00", displayDate: "December 16", title: "MyChart exchange: plan updated after MGH", short: "Jollotta messages · sleep restored, mood not improved", category: "medication", evidence: "Contemporaneous record", certainty: "High", clinician: "Rebecca H. Jollotta, CNP", institution: "South Shore Perinatal Behavioral Health", side: "top", tier: 1,
@@ -398,6 +434,12 @@ const events: TimelineEvent[] = [
     details: ["Nurse Nicole Heiden-Francis called to review risks of worsening mood and sleep, confirmed that Clancy still wished to taper while Jollotta was away, and provided DBT-group information.", "Quetiapine 100 mg ×14 and 25 mg ×14 were filled on December 21–22.", "The taper schedule is an intended regimen, not proof that every dose was taken."], medication: "Quetiapine taper", source: "SRC-0096, pp. 69–74, 04:02:09–04:04:08; SRC-0048", views: ["course"]
   },
   {
+    id: "allison-late-december", date: "2022-12-28T12:00:00", displayDate: "Late December", title: "Family collateral: numb, hopeless, suicidal", short: "Sister recalls daily SI for about a month", category: "collateral", evidence: "Sworn family testimony", certainty: "Moderate", side: "top", tier: 2,
+    summary: "Allison Ozga recalled Clancy describing worsening depression, insomnia, numbness, hopelessness, not feeling like herself, and suicidal ideation every day for approximately a month.",
+    details: ["Ozga lived out of state and communicated largely by text; this was retrospective family collateral rather than a continuous direct observation or treating assessment.", "Ozga understood that clinicians were changing medications and that Clancy reported an ‘awful reaction’ to sertraline, but Clancy did not identify the prescriber to her.", "After McLean, some January messages sounded somewhat better. Ozga nevertheless thought Clancy still appeared tired and to be ‘going through the motions’ at Cora's birthday party."],
+    source: "SRC-0101, Trial Day 14, 01:47:04–01:59:09", caution: "The approximate month-long duration is Ozga's recollection; it does not establish daily contemporaneous documentation or the severity at every moment.", views: ["course"]
+  },
+  {
     id: "mgh-dec30", date: "2022-12-30T12:00:00", displayDate: "December 30", title: "Hospital presentation: returns to MGH", short: "Seeks McLean-level treatment", category: "hospital", evidence: "Retrospective report", certainty: "Moderate", institution: "MGH", side: "bottom", tier: 1,
     summary: "The available record places an MGH presentation before the January 1 voluntary transfer to McLean, but the exact December 29–31 sequence is not fully resolved.",
     details: ["A South Shore record establishes that Patrick called on December 30 seeking McLean admission guidance and was directed to the emergency-department or 911 pathway because beds could not be held.", "Patrick testified that on December 31 he told Clancy it was time for McLean because suicidal thoughts continued and he was exhausted.", "Goodheart’s testimony establishes voluntary arrival at McLean from MGH on January 1."], civilClaims: [{ claim: "The complaint instead alleges that by December 29 Clancy told Patrick, ‘I can't tough it out anymore. I need to go to McLean.’", source: "SRC-0032 ¶59", context: "The pleading and Patrick's sworn testimony differ on the date and who initiated the McLean decision." }], source: "SRC-0096, p. 73, 04:04:35–04:05:42; SRC-0065, 02:16:48–02:17:18; SRC-0087; compare SRC-0032 ¶¶59–62", caution: "The record contains a date/initiator discrepancy; the civil chronology is not the underlying MGH chart.", views: ["course"]
@@ -405,17 +447,23 @@ const events: TimelineEvent[] = [
   {
     id: "mclean", date: "2023-01-01T12:00:00", displayDate: "January 1–5", title: "Inpatient admission: McLean", short: "Voluntary · severe depression · no psychosis observed", category: "hospital", evidence: "Treating testimony", certainty: "High", clinician: "Alia Goodheart, MD", institution: "McLean Hospital", side: "top", tier: 1,
     summary: "The provisional admitting formulation was severe major depression without psychotic features. Bipolarity was considered, but no firm diagnosis was established.",
-    details: ["January 1, about 4 a.m.: Jasmine Outlaw evaluated her for voluntary admission, documented low risk with 15-minute checks, and provisionally formulated severe MDD without psychotic features.", "Later January 1 and January 2: Elizabeth Madva documented numbness or mild hospital anxiety, sleep at a lower quetiapine dose, and denials of delusions, hallucinations, SI, and HI.", "January 3: Goodheart found anxiety but linear, goal-directed thought and no psychosis. She considered bipolar/peripartum illness but had insufficient information for a firm diagnosis.", "January 3 family texts said Clancy was all right but anxious about meeting the full psychiatry team and worried that she would not be sent home soon; the messages were patient-reported context rather than clinician observations.", "McLean tapered quetiapine approximately 75 → 50 → 25 → 0, switched diazepam to lorazepam, and used trazodone and melatonin for sleep.", "January 4: she reported hospital anxiety and asked to go home earlier than the Friday initially discussed. Goodheart conditioned January 5 discharge on arranging next-day psychiatry follow-up; Clancy did so within about an hour."], civilClaims: [{ claim: "The complaint alleges that McLean operated with a ‘skeleton crew’ and that she did not see a doctor until January 3.", source: "SRC-0032 ¶¶61–63", context: "Sworn testimony described physician evaluations by Outlaw on January 1 and Madva on January 1–2, contradicting the pleaded ‘no doctor until January 3’ claim." }], medication: "Quetiapine tapered off; diazepam → lorazepam; trazodone/melatonin", source: "SRC-0087, Trial Day 9, pp. 20–32, 01:16:19–01:49:34; SRC-0099, Trial Day 13, pp. 42–43; compare SRC-0032 ¶¶61–63", caution: "Time-limited inpatient observations and family messages do not decide symptoms outside those moments; the complete McLean chart remains unavailable.", views: ["course"]
+    details: ["January 1, about 4 a.m.: Jasmine Outlaw evaluated her for voluntary admission, documented low risk with 15-minute checks, and provisionally formulated severe MDD without psychotic features.", "Later January 1 and January 2: Elizabeth Madva documented numbness or mild hospital anxiety, sleep at a lower quetiapine dose, and denials of delusions, hallucinations, SI, and HI.", "January 3: Goodheart found anxiety but linear, goal-directed thought and no psychosis. She considered bipolar/peripartum illness but had insufficient information for a firm diagnosis.", "January 3 family texts said Clancy was all right but anxious about meeting the full psychiatry team and worried that she would not be sent home soon; the messages were patient-reported context rather than clinician observations.", "McLean tapered quetiapine approximately 75 → 50 → 25 → 0, switched diazepam to lorazepam, and used trazodone and melatonin for sleep.", "January 4: she reported hospital anxiety and asked to go home earlier than the Friday initially discussed. Goodheart conditioned January 5 discharge on arranging next-day psychiatry follow-up; Clancy did so within about an hour.", "In a January 4 message to her mother, Clancy said she had made a Friday appointment with ‘my other psychiatrist besides Rebecca.’ This contemporaneous phrasing supports overlapping care but does not establish what Tufts and Jollotta knew or exchanged."], civilClaims: [{ claim: "The complaint alleges that McLean operated with a ‘skeleton crew’ and that she did not see a doctor until January 3.", source: "SRC-0032 ¶¶61–63", context: "Sworn testimony described physician evaluations by Outlaw on January 1 and Madva on January 1–2, contradicting the pleaded ‘no doctor until January 3’ claim." }], medication: "Quetiapine tapered off; diazepam → lorazepam; trazodone/melatonin", source: "SRC-0087, Trial Day 9, pp. 20–32, 01:16:19–01:49:34; SRC-0099, Trial Day 13, pp. 42–43; SRC-0101, Trial Day 14, 02:22:55–02:24:16; compare SRC-0032 ¶¶61–63", caution: "Time-limited inpatient observations and family messages do not decide symptoms outside those moments; the complete McLean chart remains unavailable.", views: ["course"]
   },
   {
     id: "discharge", date: "2023-01-05T15:00:00", displayDate: "January 5", title: "Inpatient discharge: McLean", short: "Discharged home · next-day psychiatry follow-up required", category: "hospital", evidence: "Contemporaneous record", certainty: "High", clinician: "Alia Goodheart, MD", institution: "McLean Hospital", side: "bottom", tier: 0,
     summary: "Clancy requested an earlier voluntary discharge because she felt anxious in the hospital and wanted to be home with family and the children. Goodheart permitted January 5 discharge only after next-day psychiatric follow-up was arranged.",
-    details: ["At admission she had separately hoped to be home for Cora's birthday. She was not discharged against medical advice, and ‘demanded discharge’ is not supported by the sworn record.", "January 3 family texts documented anxiety about meeting the psychiatry team and worry that she would not be sent home soon; they do not show a demand or an against-medical-advice departure.", "Goodheart said she would have preferred more diagnostic time but identified no acute safety concern. She had Patrick collateral and considered the history consistent.", "Discharge planning included the next-day appointment, Psychology Today and Blue Cross case-management resources, a crisis plan, and after-visit information.", "Discharge prescriptions: trazodone 50 mg ×28 and lorazepam 1 mg ×14; melatonin was planned; no further quetiapine was planned."], civilClaims: [{ claim: "The complaint alleges a roughly ten-minute post-discharge Goodheart call offering antidepressant names and says Clancy left the ‘best hospital’ feeling there was little hope.", source: "SRC-0032 ¶¶65–66", context: "No independent post-discharge call record was located through Day 13. Goodheart's testimony placed discussion of Cymbalta during the admission, not necessarily in a later call." }], source: "SRC-0087, Trial Day 9, pp. 28–37 and 55–58, 01:36:58–02:04:00 and 03:22:34–03:30:15; SRC-0099, Trial Day 13, pp. 42–43; compare SRC-0032 ¶¶65–66", caution: "A discharge assessment is a time-limited clinical judgment, not proof of symptoms at later times.", views: ["course"]
+    details: ["At admission she had separately hoped to be home for Cora's birthday. She was not discharged against medical advice, and ‘demanded discharge’ is not supported by the sworn record.", "January 3 family texts documented anxiety about meeting the psychiatry team and worry that she would not be sent home soon; they do not show a demand or an against-medical-advice departure.", "Goodheart said she would have preferred more diagnostic time but identified no acute safety concern. She had Patrick collateral and considered the history consistent.", "Discharge planning included the next-day appointment, Psychology Today and Blue Cross case-management resources, a crisis plan, and after-visit information.", "Clancy's January 4 message described arranging a Friday appointment with ‘my other psychiatrist besides Rebecca,’ consistent with the next-day follow-up requirement.", "Discharge prescriptions: trazodone 50 mg ×28 and lorazepam 1 mg ×14; melatonin was planned; no further quetiapine was planned."], civilClaims: [{ claim: "The complaint alleges a roughly ten-minute post-discharge Goodheart call offering antidepressant names and says Clancy left the ‘best hospital’ feeling there was little hope.", source: "SRC-0032 ¶¶65–66", context: "No independent post-discharge call record was located through Day 18. Goodheart's testimony placed discussion of Cymbalta during the admission, not necessarily in a later call." }], source: "SRC-0087, Trial Day 9, pp. 28–37 and 55–58, 01:36:58–02:04:00 and 03:22:34–03:30:15; SRC-0099, Trial Day 13, pp. 42–43; SRC-0101, Trial Day 14, 02:22:55–02:24:16; compare SRC-0032 ¶¶65–66", caution: "A discharge assessment is a time-limited clinical judgment, not proof of symptoms at later times.", views: ["course"]
   },
   {
     id: "jan6", date: "2023-01-06T12:00:00", displayDate: "January 6", title: "Telehealth follow-up: after McLean discharge", short: "Video visit · full inpatient chart unavailable to Tufts", category: "clinical", evidence: "Contemporaneous record", certainty: "High", clinician: "Jennifer Tufts, MD", institution: "Aster Mental Health", side: "top", tier: 2,
     summary: "Clancy remained depressed and numb after the quetiapine taper and described rebound anxiety as lorazepam wore off. She reported trazodone 100 mg, lorazepam 1 mg, and melatonin 5 mg.",
     details: ["She denied SI, HI, and psychosis.", "Tufts planned trazodone 150 mg and monitoring off quetiapine before adding another antidepressant.", "Tufts had a discharge summary but not the complete McLean chart and had not spoken directly with the discharging psychiatrist.", "The chart's ‘deteriorating’ dropdown meant somewhat worse than December 16, not acute decompensation."], medication: "Trazodone 100 mg + lorazepam 1 mg + melatonin 5 mg reported", source: "SRC-0087, Trial Day 9, pp. 121–123, 06:37:35–06:44:04; SRC-0091", caution: "Medication use is patient report; this video assessment is a time-limited snapshot.", views: ["course"]
+  },
+  {
+    id: "january-family-messages", date: "2023-01-10T09:00:00", displayDate: "January 8–22", title: "Family messages: some improvement, still not herself", short: "Sleep and activity improve unevenly · depression persists", category: "collateral", evidence: "Contemporaneous messages", certainty: "High", side: "top", tier: 3,
+    summary: "Messages to Paula Musgrove recorded better sleep and organized family activity after McLean, alongside only partial improvement and continued statements that Clancy did not feel like herself.",
+    details: ["January 8: Clancy reported sleeping after taking ‘less Ativan’ and visiting the Museum of Science; the dose was not specified.", "January 10–12: she described reasonably good but imperfect sleep, gym and children's activities, and feeling a little better after stopping quetiapine.", "January 14–16: she said stopping quetiapine had helped only ‘a little’ and she was still waiting to wake up and feel like herself. Messages and family testimony described a water-park outing, childcare while Patrick took Cora skiing, and ordinary plans for food and play.", "Susan Clancy also recalled Lindsay interacting normally at Thanksgiving, a December 23 visit, Christmas, and later family gatherings. These were lay observations at particular times—not psychiatric examinations and not proof that serious symptoms were absent between them.", "January 18–20: she reported starting an unnamed medication two nights earlier, no clear effect yet, and feeling better than several weeks earlier. On January 22 Musgrove wrote that it was nice to see her ‘doing better,’ which Musgrove described as encouragement rather than a clinical assessment."],
+    medication: "‘Less Ativan’ reported January 8; unnamed new medication reported January 18", source: "SRC-0101, Trial Day 14, 02:25:05–02:40:00; SRC-0105, Trial Day 15, 00:18:27–00:23:36; SRC-0099, Trial Day 13, pp. 43–45", caution: "These messages and family observations document particular times; they neither establish recovery nor exclude severe depression or intermittent psychotic symptoms.", views: ["course"]
   },
   {
     id: "jan9", date: "2023-01-09T12:00:00", displayDate: "January 9", title: "Prescription change: lorazepam to diazepam", short: "Longer half-life for rebound anxiety/taper", category: "medication", evidence: "Contemporaneous record", certainty: "High", clinician: "Jennifer Tufts, MD", institution: "Aster Mental Health", side: "bottom", tier: 2,
@@ -435,7 +483,7 @@ const events: TimelineEvent[] = [
   {
     id: "jan16", date: "2023-01-16T12:00:00", displayDate: "January 16", title: "Telehealth visit: severe functional depression", short: "Video visit · very low mood, numbness, forced functioning", category: "clinical", evidence: "Contemporaneous record", certainty: "High", clinician: "Jennifer Tufts, MD", institution: "Aster Mental Health", side: "top", tier: 1,
     summary: "Clancy described very low mood, numbness, forcing herself out of bed, difficulty with basic care, and impaired bonding despite caring for the baby.",
-    details: ["She denied SI, HI, and psychotic symptoms.", "She said she could force herself out of bed, attend to hygiene and eating, and care for the baby, although bonding felt forced.", "Patrick's collateral described her encouraging brunch and sending photos on January 14, appearing ‘pretty good’ at a January 15 water park, and caring for two boys with texts/photos on January 16. These lay observations do not negate the symptoms she reported in treatment.", "Family texts introduced on Day 13 recorded sleep and ‘a little bit’ of daytime improvement on January 8–12, waiting to feel like herself on January 14, and a January 16 outing described as fun. These are contemporaneous communications, not mental-status examinations.", "Prescriptions/fills: amitriptyline 10 mg ×30; diazepam 2 mg was dispensed, but the original label quantity remains unresolved."], civilClaims: [{ claim: "The complaint alleges that within a week of McLean discharge she again heard commands including ‘You should harm the children’ and ‘You should kill yourself.’", source: "SRC-0032 ¶¶70–72", context: "No pre-offense chart or direct disclosure located through Day 13 documented these voices. The January 16 Tufts encounter recorded severe depression but denials of SI, HI, and psychotic symptoms." }], source: "SRC-0087, Trial Day 9, pp. 125–126, 06:49:47–06:53:44; SRC-0091, Trial Day 10, pp. 66–67; SRC-0065, 02:30:20–02:39:20; SRC-0099, Trial Day 13, pp. 43–45; compare SRC-0032 ¶¶70–72", caution: "Organized activity, family messages, and a normal-appearing video encounter neither prove nor exclude symptoms outside those observations.", views: ["course"]
+    details: ["She denied SI, HI, and psychotic symptoms.", "She said she could force herself out of bed, attend to hygiene and eating, and care for the baby, although bonding felt forced.", "Patrick's collateral described her encouraging brunch and sending photos on January 14, appearing ‘pretty good’ at a January 15 water park, and caring for two boys with texts/photos on January 16. These lay observations do not negate the symptoms she reported in treatment.", "Family texts introduced on Day 13 recorded sleep and ‘a little bit’ of daytime improvement on January 8–12, waiting to feel like herself on January 14, and a January 16 outing described as fun. These are contemporaneous communications, not mental-status examinations.", "Prescriptions/fills: amitriptyline 10 mg ×30; diazepam 2 mg was dispensed, but the original label quantity remains unresolved."], civilClaims: [{ claim: "The complaint alleges that within a week of McLean discharge she again heard commands including ‘You should harm the children’ and ‘You should kill yourself.’", source: "SRC-0032 ¶¶70–72", context: "No pre-offense chart or direct disclosure located through Day 18 documented these voices. The January 16 Tufts encounter recorded severe depression but denials of SI, HI, and psychotic symptoms; later expert testimony relied on retrospective accounts." }], source: "SRC-0087, Trial Day 9, pp. 125–126, 06:49:47–06:53:44; SRC-0091, Trial Day 10, pp. 66–67; SRC-0065, 02:30:20–02:39:20; SRC-0099, Trial Day 13, pp. 43–45; compare SRC-0032 ¶¶70–72", caution: "Organized activity, family messages, and a normal-appearing video encounter neither prove nor exclude symptoms outside those observations.", views: ["course"]
   },
   {
     id: "jan23", date: "2023-01-23T12:00:00", displayDate: "January 23", title: "Telehealth visit: final pre-offense encounter", short: "Video visit · depressed, flat; sleep “okay”; SI/HI denied", category: "clinical", evidence: "Contemporaneous record", certainty: "High", clinician: "Jennifer Tufts, MD", institution: "Aster Mental Health", side: "bottom", tier: 1,
@@ -452,14 +500,15 @@ const events: TimelineEvent[] = [
       { time: "4:46–4:48 PM", title: "Constipation-product activity and CVS call", detail: "Phone artifacts recorded Miralax-for-children activity at 4:46:55, CVS/Pedia-Lax activity at 4:47, and an outgoing CVS Kingston call at 4:48:21. CVS manager Angela Krause described a mutually understood question about a child constipation product and heard no slurring, impairment, or comprehension problem.", evidence: "Objective phone artifacts + independent sworn retail-witness testimony · SRC-0099, pp. 29–30; SRC-0068, 45:02–47:31" },
       { time: "4:53–5:15 PM", title: "Dinner, errand and family messages", detail: "At 4:53:09, Clancy texted that she had not cooked and it had been a long day; the exchange covered the ThreeV menu, Callan's short nap, meal selections, and the order. Searches continued around 5:06 and she texted ‘PediaLax liquid stool softener’ at 5:15. Patrick described her demeanor at departure as normal.", evidence: "Patrick testimony + admitted messages + phone extraction · SRC-0065, 02:45:37–02:49:03; SRC-0068, 00:06:02–00:07:12; SRC-0099, pp. 30–33" },
       { time: "5:09–5:10 PM", title: "Calls associated with the food order", detail: "The extraction recorded calls lasting 11 seconds at 5:09 and 47 seconds at 5:10; the forensic witness recalled the latter as the ThreeV number. Hostess Saria Sweeney separately recalled a routine order for risotto and a Mediterranean power bowl, with coherent answers to order questions.", evidence: "Objective phone artifacts + independent sworn retail-witness testimony · SRC-0099, pp. 32–33; SRC-0068, 49:57–52:40" },
+      { time: "5:13–5:24 PM", title: "Last phone unlock and last watch heart-rate record", detail: "The phone's last unlock began at 5:13:16 and ended when it locked at 5:15:12 after the Pedia-Lax search and message; it was not unlocked again. The final synchronized watch heart-rate record was 5:23:52 at 57 bpm.", evidence: "Digital-forensics testimony · SRC-0101, Trial Day 14, 00:17:02–00:18:31 and 00:41:10–00:45:37" },
       { time: "5:32–5:37 PM", title: "Patrick at CVS", detail: "Sworn investigator testimony and the warrant chronology place Patrick inside CVS from 5:32:32 until 5:37:08.", evidence: "Investigator testimony + objective timestamp chronology · SRC-0084, 02:16:24–02:18:21; SRC-0010, pp. 168–169" },
-      { time: "5:33–5:34 PM", title: "Patrick and Lindsay speak from CVS", detail: "Phone evidence recorded further calls in this interval. Patrick testified that his first call went unanswered and Lindsay called back about a minute later; when he asked whether a generic substitute was acceptable, she said yes. He described her as quiet and sounding busy, while saying they understood each other and she remembered what he was seeking.", evidence: "Objective phone artifacts + Patrick sworn percipient/collateral testimony · SRC-0099, p. 33; SRC-0068, 00:08:56–00:10:15" },
+      { time: "5:33–5:38 PM", title: "CVS callback and phone-recorded stair activity", detail: "Patrick testified that his first call went unanswered and Lindsay called back about a minute later; when he asked whether a generic substitute was acceptable, she said yes. The extraction recorded the outgoing callback as approximately 14 seconds and showed that it could be initiated from the lock screen. Phone-only data recognized completed flight climbs at about 5:33:34 and 5:38:33.", evidence: "Objective phone artifacts + Patrick sworn percipient/collateral testimony · SRC-0101, Trial Day 14, 00:18:47–00:27:21, 00:37:42–00:49:39; SRC-0068, 00:08:56–00:10:15" },
       { time: "5:54–5:55 PM", title: "Patrick at ThreeV", detail: "Objective chronology places Patrick entering at 5:54:14 and paying/leaving at 5:55:01.", evidence: "Investigator testimony + objective timestamp chronology · SRC-0084, 02:16:24–02:18:21; SRC-0010, pp. 168–169" },
       { time: "By ~6:09 PM", title: "Quiet house and unanswered call", detail: "Patrick returned to an unusually quiet house, called out and yelled down the basement stairs, telephoned Clancy without an answer, and checked upstairs before finding the locked bedroom.", evidence: "Patrick sworn testimony · SRC-0068, 00:19:49–00:22:42" },
       { time: "~6:11 PM onward", title: "Discovery and emergency response", detail: "After finding Clancy outside, Patrick testified that she said, ‘I tried to kill myself’ and ‘They're in the basement.’ He had difficulty connecting to 911, stayed on the call, and first responders arrived about four to five minutes later.", evidence: "Patrick testimony + officer dispatch time · SRC-0068, 00:28:19–00:32:02; SRC-0071, 00:04:12–00:04:37" },
     ],
-    details: ["Each encounter is a narrow observation, not a psychiatric examination; coherent calls and organized behavior at particular moments do not exclude psychosis or establish criminal responsibility.", "The pediatrician's ‘very normal visit’ describes a brief pediatric encounter in the morning, not mental state later in the day.", "The new extraction corroborates specific phone activity and timing; it does not determine why an action occurred, who was present during every interaction, or what Clancy's mental state was.", "Patrick's inference that she was ‘probably giving baths’ was not something he directly observed.", "The investigator's claim that the errands created an opportunity is a probable-cause allegation, not a judicial finding.", "The suicide attempt is evidence of acute distress but does not by itself establish diagnosis, psychosis, or legal insanity."], civilClaims: [{ claim: "The complaint alleges nonstop suicidal and later child-harm commands that day; checking a map to avoid being alone and obtain help; a final demanding male voice after Patrick left; compulsion, dreamlike dissociation, and ingestion of an unspecified quantity of medication during the attempt.", source: "SRC-0032 ¶¶75–83", context: "These are retrospective plaintiff allegations. Through Day 13, partial sworn corroboration remained limited to Patrick's report that about a week later Clancy described a male voice saying she would lose her chance if she did not act then; his account did not include children in that disclosure. The phone extraction establishes the map, call, and message artifacts—not the complaint's claimed motive or voice account." }],
-    source: "SRC-0065; SRC-0068; SRC-0071; SRC-0084; SRC-0010; SRC-0099, Trial Day 13, pp. 29–33 and 52–54; compare SRC-0032 ¶¶75–83", caution: "The evidence derives from different sources: family collateral, brief clinical or retail observations, phone artifacts, objective timestamps, attorney theories, and civil allegations are not interchangeable.", views: ["course"]
+    details: ["Each encounter is a narrow observation, not a psychiatric examination; coherent calls and organized behavior at particular moments do not exclude psychosis or establish criminal responsibility.", "The pediatrician's ‘very normal visit’ describes a brief pediatric encounter in the morning, not mental state later in the day.", "The digital extraction corroborates specific device activity and timing; it does not determine why an action occurred, who performed every action, or what Clancy's mental state was.", "The forensic examiner did not physically examine the Apple Watch. Missing later heart-rate or stair records could reflect removal, loss of power, lack of detection, or other technical causes; absence of data is not an act or a timestamp for loss of consciousness.", "Patrick's inference that she was ‘probably giving baths’ was not something he directly observed.", "The investigator's claim that the errands created an opportunity is a probable-cause allegation, not a judicial finding.", "The suicide attempt is evidence of acute distress but does not by itself establish diagnosis, psychosis, or legal insanity."], civilClaims: [{ claim: "The complaint alleges nonstop suicidal and later child-harm commands that day; checking a map to avoid being alone and obtain help; a final demanding male voice after Patrick left; compulsion, dreamlike dissociation, and ingestion of an unspecified quantity of medication during the attempt.", source: "SRC-0032 ¶¶75–83", context: "These remain retrospective plaintiff allegations. By Trial Day 18, several witnesses and experts had recounted later command-voice statements, but those accounts are retrospective, differ in detail, and do not convert the pleaded sequence into contemporaneous observation. The phone extraction establishes device artifacts—not the complaint's asserted motive, compulsion, or mental state." }],
+    source: "SRC-0065; SRC-0068; SRC-0071; SRC-0084; SRC-0010; SRC-0099, Trial Day 13, pp. 29–33 and 52–54; SRC-0101, Trial Day 14, 00:14:22–00:49:39; compare SRC-0032 ¶¶75–83", caution: "The evidence derives from different sources: family collateral, brief clinical or retail observations, phone artifacts, objective timestamps, attorney theories, expert opinions, and civil allegations are not interchangeable.", views: ["course"]
   },
   {
     id: "jan26", date: "2023-01-26T12:00:00", displayDate: "January 26", title: "Brigham psychiatric consultation", short: "Horrified but linear; no psychosis in snapshot", category: "post", evidence: "Treating testimony", certainty: "High", clinician: "Jhilam Biswas, MD", institution: "Brigham and Women’s Hospital", side: "top", tier: 0,
@@ -477,9 +526,14 @@ const events: TimelineEvent[] = [
     details: ["The delirium cleared by the following day.", "This postoperative delirium occurred days later and does not establish Clancy's mental state on January 24."], source: "SRC-0078, 1:29:04–1:32:45", views: ["post"]
   },
   {
-    id: "voice", date: "2023-01-31T12:00:00", displayDate: "~1 week later", title: "Male command voice first disclosed", short: "Retrospective statement to Patrick", category: "post", evidence: "Retrospective report", certainty: "Contested", side: "top", tier: 1,
-    summary: "Patrick testified that Clancy told him she heard a male voice saying that if she did not act then, she would lose her chance.",
-    details: ["This is the first positive voice account located in the trial record.", "No located pre-offense clinician note documents the voice.", "The more elaborate command/compulsion account appears later in the civil complaint."], source: "SRC-0068, 37:13–38:25", caution: "Moderate confidence that the statement was made; contested as proof of an offense-time hallucination.", views: ["post"]
+    id: "voice", date: "2023-01-31T12:00:00", displayDate: "~1 week later", title: "Retrospective reports of a male voice", short: "Accounts to Patrick and hospital chaplain", category: "post", evidence: "Retrospective patient report", certainty: "Contested", side: "top", tier: 1,
+    summary: "Patrick and Brigham chaplain Sheila Cavanaugh testified to separate post-offense conversations in which Clancy reportedly described a male voice connected to the acts.",
+    details: ["Patrick recalled Clancy saying that a male voice told her that if she did not act then, she would lose her chance.", "Cavanaugh testified that on January 31 Clancy first said, ‘I am so glad my children are safe,’ then alluded to a persistent male voice saying that, unless she obeyed, neither she nor the children would be safe.", "Cavanaugh—not Clancy—supplied the theological response that the children were safe in heaven with God.", "None of Cavanaugh's detailed contemporaneous Brigham notes documented the voice or its content, although the notes did quote other statements. No located pre-offense clinician note documents a command voice."], source: "SRC-0068, Trial Day 2, 37:13–38:25; SRC-0111, Trial Day 17, 12:43–26:19", caution: "The testimony supports that later statements were reported; it remains contested whether they accurately establish an offense-time hallucination, its exact wording, or its causal effect.", views: ["post"]
+  },
+  {
+    id: "zeizel-hospital", date: "2023-02-04T12:00:00", displayDate: "February 4–6", title: "Defense psychologist's first hospital contacts", short: "Postsurgical evaluation · retrospective speakerphone account", category: "post", evidence: "Forensic-expert testimony", certainty: "Contested", clinician: "Paul Zeizel, PsyD", providerLabel: "Forensic evaluator", institution: "Brigham and Women's Hospital", side: "bottom", tier: 2,
+    summary: "Under a court order, Zeizel first met Clancy 11 days after the acts and facilitated later calls with Patrick; he became a defense forensic evaluator rather than a treating clinician.",
+    details: ["On February 4 Clancy was postsurgical, immobile, receiving substantial pain medication, and described by Zeizel as fuzzy or foggy, though oriented to identity and able to recall Patrick's phone number.", "She left Patrick a voicemail that day. On February 6 Zeizel facilitated a speakerphone conversation and testified that Clancy said a male voice ordered her to kill the children and then herself and that she had no choice.", "Zeizel did not witness the alleged hallucination or the acts. His clinical/forensic role, extensive later contact, compensation, record review, and early public comments were explored on cross."], source: "SRC-0105, Trial Day 15, 03:15:02–03:23:31; SRC-0108, Trial Day 16", caution: "This is a retrospective patient account relayed by a retained defense expert approximately 13 days later, not contemporaneous pre-offense documentation.", views: ["post"]
   },
   {
     id: "feb", date: "2023-02-20T12:00:00", displayDate: "February 19–21", title: "Rehabilitation-oriented follow-up", short: "SI/HI/AH/VH denied", category: "post", evidence: "Treating testimony", certainty: "High", clinician: "Sejal Shah, MD", side: "bottom", tier: 1,
@@ -492,9 +546,29 @@ const events: TimelineEvent[] = [
     details: ["The corrected report lists January 24 as the collection date but gives no collection time.", "The detected list did not cleanly match the intended outpatient medication list.", "Detection does not establish prescribed dose, exact ingestion time, adherence, impairment, psychiatric effect, or causation."], source: "SRC-0008; SRC-0039; SRC-0082", caution: "The civil complaint alleges unspecified event-day ingestion, further limiting inference about routine use.", views: ["post"]
   },
   {
+    id: "resnick-evaluation", date: "2023-05-15T12:00:00", displayDate: "May 2023", title: "Defense forensic evaluation: Phillip Resnick, MD", short: "Three-hour interview · parent collateral · report September 2023", category: "post", evidence: "Retained expert opinion", certainty: "Contested", clinician: "Phillip Resnick, MD", providerLabel: "Forensic evaluator", institution: "Tewksbury Hospital", side: "bottom", tier: 1,
+    summary: "Resnick evaluated Clancy approximately four months after the acts, interviewed her parents, and later opined that she had bipolar II disorder, severe depression, and postpartum psychosis on January 24.",
+    details: ["At trial he described a command hallucination and delusion of influence or puppet-like loss of agency; he said organized behavior can coexist with waxing and waning psychosis.", "He opined that she lacked both substantial appreciation of wrongfulness and substantial capacity to conform her conduct, relying on a reported altruistic belief, command, loss of control, and the suicide attempt.", "On cross he acknowledged the late timing, lack of pre-offense clinician documentation of the voice, that command hallucinations can be fabricated or resisted, and selected Tewksbury records showing later stability and no observed psychosis."], source: "SRC-0113, Trial Day 18, 24:19–01:18:36", caution: "The diagnoses and criminal-responsibility conclusions are Resnick's retained defense opinions. Statements made during the evaluation were admitted as bases for opinion, not proof that the historical statements were true.", views: ["post"]
+  },
+  {
     id: "spinelli", date: "2024-06-11T12:00:00", displayDate: "June & September 2024", title: "Spinelli forensic evaluations", short: "Bipolar/psychosis opinion attributed in civil pleading", category: "post", evidence: "Civil allegation", certainty: "Contested", clinician: "Margaret Spinelli, MD", side: "bottom", tier: 0,
     summary: "The civil complaint says Spinelli conducted a five-hour evaluation in June and a three-hour telephone evaluation in September, with collateral interviews.",
     details: ["The complaint attributes a bipolar-I/psychosis/postpartum-onset formulation and antidepressant-activation opinions to her.", "The complete report, testing, raw interviews, and testimony are not publicly available."], source: "SRC-0032 ¶¶84–88", caution: "Selected pleading quotations are not the expert report and are not adjudicated findings.", views: ["post"]
+  },
+  {
+    id: "mack-evaluation", date: "2026-04-10T12:00:00", displayDate: "April 2026", title: "Commonwealth forensic evaluation: Mack and Heilbrun", short: "Two joint interviews · second date unresolved", category: "post", evidence: "Retained expert opinion", certainty: "Contested", clinician: "Avram Mack, MD; Kirk Heilbrun, PhD", providerLabel: "Forensic evaluators", institution: "Tewksbury Hospital", side: "top", tier: 1,
+    summary: "Mack and Heilbrun jointly evaluated Clancy in April 2026. Mack did not personally interview collateral witnesses and later testified for the Commonwealth.",
+    details: ["The first interview date was April 10. The public Rev transcript renders the second as April 12, while multiple same-day reports say April 16; the certified transcript or expert report is needed to resolve it.", "Mack diagnosed a major depressive episode, probably within major depressive disorder, with possible generalized anxiety; he found no mania, hypomania, postpartum psychosis, or psychosis.", "He agreed that a mental disease or defect was present but opined that Clancy retained both cognitive and volitional capacities, relying on her retrospective wording, organized conduct, day-of interactions, and the absence of a reported command about method."], source: "SRC-0113, Trial Day 18, 01:22:03–03:57:35", caution: "These are retained Commonwealth expert opinions based partly on retrospective statements and record review. Mack's cross-examination was unfinished at the August 21 adjournment.", views: ["post"]
+  },
+  {
+    id: "defense-experts-day15-16", date: "2026-08-19T12:00:00", displayDate: "August 18–19, 2026", title: "Defense experts: medication, psychosis and capacity", short: "Condie, Laposata and Zeizel · Trial Days 15–16", category: "post", evidence: "Expert testimony", certainty: "Contested", side: "bottom", tier: 2,
+    summary: "Defense experts addressed psychopharmacology, physical injuries, psychosis, and criminal responsibility; their scopes and evidentiary limits differed substantially.",
+    details: ["Donald Condie, MD, reviewed records and discussed possible medication activation but never examined Clancy and gave no criminal-responsibility opinion. Cross clarified that sertraline 50-mg exposure was unresolved, quetiapine 400 mg was only a target, and lamotrigine was reportedly not taken.", "Elisabeth Laposata, MD, offered forensic-pathology opinions about self-inflicted wounds, the fall, and ligature physiology—not psychiatric diagnosis or criminal responsibility.", "Paul Zeizel, PsyD, opined that Clancy had bipolar disorder with postpartum psychosis and lacked both cognitive and volitional capacity. Cross challenged retrospective voice evidence, medication and date errors, record completeness, and his evolving clinical/forensic role.", "Emily Thorndike was examined only on voir dire outside the jury and was excluded from testifying before the jury; limited McLean staffing/program records were allowed instead."], source: "SRC-0105, Trial Day 15; SRC-0108, Trial Day 16", caution: "The Rev Day 16 transcript incorrectly labels Zeizel as Donald Condie. Audio, context, and other sources establish Zeizel as the Day 16 witness.", views: ["post"]
+  },
+  {
+    id: "dueling-psychiatrists-day18", date: "2026-08-21T12:00:00", displayDate: "August 21, 2026", title: "Forensic psychiatrists disagree on criminal responsibility", short: "Resnick for defense · Mack for Commonwealth · Trial Day 18", category: "post", evidence: "Expert testimony", certainty: "Contested", side: "top", tier: 0,
+    summary: "Resnick and Mack agreed that Clancy had a mental disease or defect but reached opposite conclusions about diagnosis, psychosis, and both branches of Massachusetts criminal responsibility.",
+    details: ["Resnick: bipolar II disorder with severe depression; acute postpartum psychosis, command hallucination, and delusion of influence; both cognitive and volitional capacities substantially impaired.", "Mack: major depressive episode, probably major depressive disorder, with possible anxiety; no mania or psychosis; both capacities retained.", "Resnick treated organized behavior as compatible with intermittent psychosis. Mack treated the communications, sequence, stated reasoning, and organized conduct as supporting retained capacities in this case.", "The defense rested after Resnick. Mack's cross-examination was still in progress when court adjourned, so no Day 18 cross point is presented as his final concession."], source: "SRC-0113, Trial Day 18", caution: "These are opposing forensic opinions, not established facts or a verdict. Planning does not exclude psychosis, and psychosis alone does not establish lack of criminal responsibility.", views: ["post"]
   },
 ];
 
@@ -676,8 +750,8 @@ const additionalCourseEvents: TimelineEvent[] = [
     summary: "Diazepam 2 mg quantity 7 was filled as the taper continued.", details: ["The associated plan was 2 mg nightly; compliance is not independently established."], medication: "Valium (diazepam) 2 mg ×7 filled", source: "SRC-0048, Dec. 13 row; SRC-0096, pp. 57–62", caution: "Planned dose and actual ingestion remain distinct.", views: ["course"]
   },
   {
-    id: "mgh-dec15", date: "2022-12-15T19:00:00", displayDate: "December 15", title: "Hospital encounter: MGH evaluation", short: "Emergency assessment after higher-care discussion", category: "hospital", evidence: "Treating testimony", certainty: "High", institution: "Massachusetts General Hospital", side: "top", tier: 3,
-    summary: "Clancy went to the MGH emergency department after the December 15 higher-level-of-care discussion.", details: ["She then chose outpatient Women & Infants follow-up."], source: "SRC-0096, pp. 63–67", caution: "The complete MGH record is not publicly available; this sequence derives from treating testimony.", views: ["course"]
+    id: "mgh-dec15", date: "2022-12-15T19:00:00", displayDate: "December 15", title: "Hospital encounter: MGH evaluation", short: "Emergency assessment after higher-care discussion", category: "hospital", evidence: "Mixed evidence", certainty: "High", institution: "Massachusetts General Hospital", side: "top", tier: 3,
+    summary: "Clancy went to the MGH emergency department after the December 15 higher-level-of-care discussion.", details: ["Condie and Zeizel, testifying from records they had reviewed, each agreed on cross that MGH recommended or offered inpatient McLean care and that the offer was not accepted during this encounter.", "Clancy and Patrick then pursued outpatient Women & Infants follow-up, which occurred on December 20—not December 15."], source: "SRC-0096, pp. 63–67; SRC-0105, Trial Day 15, 01:55:13–01:56:16; SRC-0108, Trial Day 16, 01:09:59–01:11:24", caution: "The complete MGH chart is not publicly available. The inpatient-offer account entered through later record-review testimony, so the chart would control its exact wording, options, and disposition.", views: ["course"]
   },
   {
     id: "rx-dec16", date: "2022-12-16T18:00:00", displayDate: "December 16", title: "Prescription: lamotrigine", short: "25 mg ×30 · Jollotta endorsed; ingestion unknown", category: "medication", evidence: "Objective record", certainty: "High", clinician: "Jennifer Tufts, MD", institution: "Aster Mental Health", side: "bottom", tier: 3,
@@ -743,7 +817,8 @@ const medications: Medication[] = [
     { start: "2022-10-26", end: "2022-11-02", label: "1 mg", status: "prescribed", note: "1 mg ×30 prescribed and filled; actual frequency is unknown." },
     { start: "2022-11-02", end: "2022-12-05", label: "0.5 mg", status: "reported", note: "0.5 mg ×40 filled; Clancy reported benefit and a taper was planned, but PRN dose and frequency varied." },
     { start: "2023-01-01", end: "2023-01-05", label: "1 mg", status: "inpatient", note: "McLean changed diazepam to lorazepam; the discharge strength was 1 mg." },
-    { start: "2023-01-05", end: "2023-01-09", label: "1 mg", status: "reported", note: "1 mg ×14 at discharge; Clancy reported 1 mg use on January 6." },
+    { start: "2023-01-05", end: "2023-01-08", label: "1 mg", status: "reported", note: "1 mg ×14 was dispensed at discharge; Clancy specifically reported 1 mg use at the January 6 follow-up. This interval is schematic rather than proof of daily use." },
+    { start: "2023-01-08", end: "2023-01-09", label: "dose unknown", status: "reported", note: "Clancy reported sleeping after taking ‘less Ativan’ on January 8, without identifying the dose." },
     { start: "2023-01-24", label: "detected", status: "detected", note: "Lorazepam detected in case specimens; timing and clinical meaning unresolved." },
   ]},
   { name: "Buspar", generic: "buspirone", color: "#9f8cff", className: "anxiolytic", summary: "Daily non-benzodiazepine alternative; filled twice but initially not started.", segments: [
@@ -828,12 +903,16 @@ const courseBreak = {
   breakEndPct: 2.3,
 };
 
-const postBreak = {
-  earlyEnd: "2023-05-01T00:00:00",
-  lateStart: "2024-05-01T00:00:00",
-  breakStartPct: 59,
-  breakEndPct: 63,
-};
+const postBreaks = [
+  { earlyEnd: "2023-06-01T00:00:00", lateStart: "2024-05-01T00:00:00", breakStartPct: 43, breakEndPct: 48, label: "~11 months omitted" },
+  { earlyEnd: "2024-10-01T00:00:00", lateStart: "2026-04-01T00:00:00", breakStartPct: 65, breakEndPct: 71, label: "~18 months omitted" },
+];
+
+const postSegments = [
+  { start: views.post.start, end: postBreaks[0].earlyEnd, startPct: 0, endPct: postBreaks[0].breakStartPct },
+  { start: postBreaks[0].lateStart, end: postBreaks[1].earlyEnd, startPct: postBreaks[0].breakEndPct, endPct: postBreaks[1].breakStartPct },
+  { start: postBreaks[1].lateStart, end: views.post.end, startPct: postBreaks[1].breakEndPct, endPct: 100 },
+];
 
 function timelinePct(value: string, view: ViewKey, start: string, end: string) {
   const time = stamp(value);
@@ -845,11 +924,18 @@ function timelinePct(value: string, view: ViewKey, start: string, end: string) {
     return courseBreak.breakEndPct + ((time - onsetStart) / (stamp(end) - onsetStart)) * (100 - courseBreak.breakEndPct);
   }
 
-  const earlyEnd = stamp(postBreak.earlyEnd);
-  const lateStart = stamp(postBreak.lateStart);
-  if (time <= earlyEnd) return ((time - stamp(start)) / (earlyEnd - stamp(start))) * postBreak.breakStartPct;
-  if (time < lateStart) return (postBreak.breakStartPct + postBreak.breakEndPct) / 2;
-  return postBreak.breakEndPct + ((time - lateStart) / (stamp(end) - lateStart)) * (100 - postBreak.breakEndPct);
+  for (const segment of postSegments) {
+    const segmentStart = stamp(segment.start);
+    const segmentEnd = stamp(segment.end);
+    if (time >= segmentStart && time <= segmentEnd) {
+      const fraction = (time - segmentStart) / (segmentEnd - segmentStart);
+      return segment.startPct + fraction * (segment.endPct - segment.startPct);
+    }
+  }
+  for (const gap of postBreaks) {
+    if (time > stamp(gap.earlyEnd) && time < stamp(gap.lateStart)) return (gap.breakStartPct + gap.breakEndPct) / 2;
+  }
+  return time < stamp(postSegments[0].start) ? 0 : 100;
 }
 
 function packMedicationContext(canvasWidth: number) {
@@ -1171,13 +1257,14 @@ export default function Home() {
     return () => window.removeEventListener("keydown", escape);
   });
 
-  const ticks = view === "course"
-    ? monthTicks(courseBreak.onsetStart, range.end)
-    : [
-        ...monthTicks(range.start, postBreak.earlyEnd),
-        { date: postBreak.lateStart, label: "May 2024" },
-        ...monthTicks(postBreak.lateStart, range.end),
-      ];
+  const postTicks = [
+    ...monthTicks(postSegments[0].start, postSegments[0].end),
+    { date: postSegments[1].start, label: "May 2024" },
+    ...monthTicks(postSegments[1].start, postSegments[1].end),
+    { date: postSegments[2].start, label: "Apr 2026" },
+    ...monthTicks(postSegments[2].start, postSegments[2].end),
+  ].filter((tick, index, items) => items.findIndex((candidate) => candidate.date === tick.date) === index);
+  const ticks = view === "course" ? monthTicks(courseBreak.onsetStart, range.end) : postTicks;
   const medicationTicks = monthTicks(courseBreak.onsetStart, range.end);
   const medicationVisible = view === "course";
   const packedMedicationRows = useMemo(() => packMedicationContext(canvasWidth), [canvasWidth]);
@@ -1247,7 +1334,7 @@ export default function Home() {
             <p className="header-credit">Arranged by Alex Krawec, MS4</p>
           </div>
         </div>
-        <div className="cutoff"><span>Evidence cutoff</span><strong>Aug 13, 2026 · Trial Day 13</strong><p className="header-credit">Feedback: AKrawec@mednet.ucla.edu</p></div>
+        <div className="cutoff"><span>Evidence cutoff</span><strong>Aug 21, 2026 · Trial Day 18</strong><p className="header-credit">Feedback: AKrawec@mednet.ucla.edu</p></div>
       </header>
 
       <section className="orientation" data-presentation-anchor="background">
@@ -1291,13 +1378,14 @@ export default function Home() {
             <h3>Psychotic illness overwhelmed legal capacity.</h3>
             <p>The defense argues that severe perinatal mental illness—characterized as postpartum or bipolar psychosis and exacerbated by profound insomnia and medication exposure—culminated in a command hallucination and a genuine suicide attempt, leaving Clancy without criminal responsibility for her actions.</p>
             <div className="argument-evidence">
-              <strong>Evidence introduced through Day 13:</strong>
+              <strong>Evidence introduced through Day 18:</strong>
               <ul>
                 <li>Months of documented depression, anxiety, and sleep disturbance</li>
                 <li>Repeated efforts to seek treatment, including hospitalization</li>
-                <li>Patrick&apos;s testimony regarding earlier thoughts of harming the children and severe sleep deprivation, together with Clancy&apos;s contemporaneous reports of impaired maternal bonding</li>
+                <li>Patrick&apos;s and Paula Musgrove&apos;s testimony regarding an earlier disclosure of thoughts of harming the children, together with evidence of severe sleep deprivation and impaired maternal bonding</li>
                 <li>Clancy&apos;s mental-health-related internet searches</li>
-                <li>Patrick&apos;s later account that Clancy described hearing a male voice tell her this was her “last chance”</li>
+                <li>Retrospective accounts to Patrick, a hospital chaplain, and Zeizel describing a male command voice</li>
+                <li>Zeizel&apos;s and Resnick&apos;s opinions that bipolar/postpartum psychosis impaired both cognitive and volitional capacity</li>
               </ul>
             </div>
           </article>
@@ -1306,7 +1394,7 @@ export default function Home() {
             <h3>Deliberate conduct with retained capacity.</h3>
             <p>The Commonwealth argues that Clancy experienced depression and anxiety but was not psychotic, deliberately created an opportunity to kill her children, and retained the capacity to understand and control her actions.</p>
             <div className="argument-evidence">
-              <strong>Evidence introduced through Day 13:</strong>
+              <strong>Evidence introduced through Day 18:</strong>
               <ul>
                 <li>Apparently ordinary calls and messages on the day of the killings</li>
                 <li>Phone data documenting Clancy&apos;s search for a restaurant route</li>
@@ -1314,7 +1402,8 @@ export default function Home() {
                 <li>Sequence of food-ordering communications</li>
                 <li>What prosecutors characterize as a deliberate sequence of killings followed by locking of a bedroom door</li>
                 <li>Repeated clinical encounters before the killings without documented hallucinations, delusions, mania, or disorganization</li>
-                <li>The fact that the command-voice account was reported retrospectively</li>
+                <li>The retrospective timing of the command-voice account and its absence from contemporaneous chaplain notes</li>
+                <li>Mack&apos;s opinion that Clancy had major depression but was not psychotic and retained both cognitive and volitional capacity</li>
               </ul>
             </div>
           </article>
@@ -1387,7 +1476,7 @@ export default function Home() {
             <div className="time-ruler">
               <span className="range-start">{timelineDate(range.start, { month: "short", day: "numeric", year: "numeric" })}</span>
               {view === "course" && <div className="timeline-break ruler-break" style={{ left: `${courseBreak.breakStartPct}%`, width: `${courseBreak.breakEndPct - courseBreak.breakStartPct}%` }}><span>~11 weeks omitted</span></div>}
-              {view === "post" && <div className="timeline-break ruler-break" style={{ left: `${postBreak.breakStartPct}%`, width: `${postBreak.breakEndPct - postBreak.breakStartPct}%` }}><span>~12 months omitted</span></div>}
+              {view === "post" && postBreaks.map((gap) => <div className="timeline-break ruler-break" key={gap.earlyEnd} style={{ left: `${gap.breakStartPct}%`, width: `${gap.breakEndPct - gap.breakStartPct}%` }}><span>{gap.label}</span></div>)}
               {ticks.map((tick) => <div className="tick" key={tick.date} style={{ left: `${timelinePct(tick.date, view, range.start, range.end)}%` }}><span>{tick.label}</span></div>)}
               <span className="range-end">{timelineDate(range.end, { month: "short", day: "numeric", year: "numeric" })}</span>
             </div>
@@ -1411,7 +1500,7 @@ export default function Home() {
 
             <div className="event-field">
               {view === "course" && <div className="timeline-break field-break" style={{ left: `${courseBreak.breakStartPct}%`, width: `${courseBreak.breakEndPct - courseBreak.breakStartPct}%` }} aria-hidden="true" />}
-              {view === "post" && <div className="timeline-break field-break" style={{ left: `${postBreak.breakStartPct}%`, width: `${postBreak.breakEndPct - postBreak.breakStartPct}%` }} aria-hidden="true" />}
+              {view === "post" && postBreaks.map((gap) => <div className="timeline-break field-break" key={gap.earlyEnd} style={{ left: `${gap.breakStartPct}%`, width: `${gap.breakEndPct - gap.breakStartPct}%` }} aria-hidden="true" />)}
               <div className="main-axis" />
               <div className="connector-layer" aria-hidden="true">
                 {positionedEvents.map(({ item, x, connectorTop, connectorHeight, color }) => <span className="connector" key={item.id} style={{ left: `${x}%`, top: connectorTop, height: Math.max(10, connectorHeight), "--event": color } as React.CSSProperties} />)}
@@ -1484,7 +1573,7 @@ export default function Home() {
         <div className="faq-intro">
           <p className="section-number">03 / COMMON QUESTIONS</p>
           <h2 id="common-questions-title">Common questions</h2>
-          <p>Concise answers grounded in evidence introduced through August 13, 2026—Trial Day 13. Where the underlying primary record is unavailable, the answer says so.</p>
+          <p>Concise answers grounded in evidence introduced through August 21, 2026—Trial Day 18. Where the underlying primary record is unavailable, the answer says so.</p>
         </div>
         <div className="faq-list">
           {commonQuestions.map((item, index) => (
@@ -1505,7 +1594,7 @@ export default function Home() {
 
       <footer data-presentation-anchor="footer">
         <p>Educational evidence visualization · not an independent diagnosis, malpractice opinion, criminal-responsibility opinion, or verdict recommendation.</p>
-        <p>Source IDs correspond to the 100-source master corpus. Update before presenting.</p>
+        <p>Source IDs correspond to the 117-source master corpus through Trial Day 18.</p>
       </footer>
 
       {selectedClusterEvents.length > 0 && (
@@ -1538,7 +1627,7 @@ export default function Home() {
                 <p className="drawer-date">{selected.displayDate}</p>
                 <h2>{selected.title}</h2>
                 <p className="drawer-summary"><span className="drawer-context">{selected.short}</span>{selected.summary}</p>
-                {(selected.clinician || selected.institution) && <div className="provider-card"><span>{selected.clinician ? "Clinician" : "Institution"}</span><strong>{selected.clinician || selected.institution}</strong>{selected.clinician && selected.institution && <small>{selected.institution}</small>}</div>}
+                {(selected.clinician || selected.institution) && <div className="provider-card"><span>{selected.providerLabel || (selected.clinician ? "Clinician" : "Institution")}</span><strong>{selected.clinician || selected.institution}</strong>{selected.clinician && selected.institution && <small>{selected.institution}</small>}</div>}
                 {selected.medication && <div className="med-callout"><span>Medication action</span><strong>{selected.medication}</strong></div>}
                 {selected.sequence && <div className="drawer-section sequence-section"><h3>January 24 timeline</h3><div className="sequence-list">{selected.sequence.map((step) => <article key={`${step.time}-${step.title}`}><time>{step.time}</time><div><strong>{step.title}</strong><p>{step.detail}</p><small>{step.evidence}</small></div></article>)}</div></div>}
                 <div className="drawer-section"><h3>What the evidence supports</h3><ul>{selected.details.map((detail) => <li key={detail}>{detail}</li>)}</ul></div>

@@ -1,6 +1,6 @@
 # Clancy Interactive Clinical Timeline
 
-Interactive visualization built from the 100-source corpus, with an evidence cutoff of August 13, 2026 after Trial Day 13.
+Interactive visualization built from the 117-source corpus, with an evidence cutoff of August 21, 2026 after Trial Day 18.
 
 ## View online
 

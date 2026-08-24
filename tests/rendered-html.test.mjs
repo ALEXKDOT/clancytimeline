@@ -23,10 +23,10 @@ test("server-renders the clinical timeline", async () => {
   assert.match(html, /<title>Clancy Case — Interactive Clinical Timeline<\/title>/i);
   assert.match(html, /Commonwealth/);
   assert.match(html, /Lindsay Clancy/);
-  assert.match(html, /93<\/strong> events shown/);
+  assert.match(html, /97<\/strong> events shown/);
   assert.match(html, /Show medication context/);
   assert.match(html, /MEDICATION TIMELINE/);
-  assert.match(html, /100-source master corpus/);
+  assert.match(html, /117-source master corpus/);
   assert.match(html, /event-card/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site|codex-preview/i);
 });
@@ -36,7 +36,7 @@ test("renders evidence-aware controls and chronology boundaries", async () => {
   const html = await response.text();
 
   assert.match(html, /Evidence cutoff/);
-  assert.match(html, /Aug 13, 2026 · Trial Day 13/);
+  assert.match(html, /Aug 21, 2026 · Trial Day 18/);
   assert.match(html, /Arranged by Alex Krawec, MS4/);
   assert.match(html, /Feedback: AKrawec@mednet\.ucla\.edu/);
   assert.match(html, /May 26, 2022 – January 24, 2023/);
@@ -45,16 +45,19 @@ test("renders evidence-aware controls and chronology boundaries", async () => {
   assert.match(html, /Fit chronology at default zoom/);
 });
 
-test("compresses the inactive post-offense year and renders the revised orientation arc", async () => {
+test("compresses both inactive post-offense periods and renders the revised orientation arc", async () => {
   const [page, css] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
 
-  assert.match(page, /earlyEnd: "2023-05-01T00:00:00"/);
+  assert.match(page, /earlyEnd: "2023-06-01T00:00:00"/);
   assert.match(page, /lateStart: "2024-05-01T00:00:00"/);
+  assert.match(page, /earlyEnd: "2024-10-01T00:00:00"/);
+  assert.match(page, /lateStart: "2026-04-01T00:00:00"/);
   assert.match(page, /onsetStart: "2022-08-23T00:00:00"/);
-  assert.match(page, /~12 months omitted/);
+  assert.match(page, /~11 months omitted/);
+  assert.match(page, /~18 months omitted/);
   assert.match(page, /Anxiety emerges after 12 well weeks/);
   assert.match(page, /Sep–Nov/);
   assert.match(page, /Severe depression persists, offense on January 24/);
@@ -83,7 +86,7 @@ test("renders a noninteractive three-period provider and medication background m
   assert.match(html, /Prescribed or filled does not necessarily mean taken/);
   assert.match(page, /const orientationCareMap = \[/);
   assert.match(page, /className="section-number orientation-label"/);
-  assert.match(page, /displayDate: "Late Nov\."/);
+  assert.match(page, /displayDate: "Late Nov\.–early Dec\."/);
   assert.match(page, /displayDate: "~1 week later"/);
   assert.doesNotMatch(page, /className="orientation-copy"/);
   assert.doesNotMatch(page.slice(page.indexOf("const orientationCareMap"), page.indexOf("const events")), /Letitia Dukes|ASPIRE|Jennifer McAllister/);
@@ -196,7 +199,8 @@ test("collapses January 24 into one card with a provenance-preserving detail seq
   assert.match(page, /<h3>January 24 timeline<\/h3>/);
   assert.match(page, /time: "4:46–4:48 PM", title: "Constipation-product activity and CVS call"/);
   assert.match(page, /time: "5:09–5:10 PM", title: "Calls associated with the food order"/);
-  assert.match(page, /time: "5:33–5:34 PM", title: "Patrick and Lindsay speak from CVS"/);
+  assert.match(page, /time: "5:13–5:24 PM", title: "Last phone unlock and last watch heart-rate record"/);
+  assert.match(page, /time: "5:33–5:38 PM", title: "CVS callback and phone-recorded stair activity"/);
   assert.match(page, /time: "By ~6:09 PM", title: "Quiet house and unanswered call"/);
   assert.match(page, /time: "~6:11 PM onward", title: "Discovery and emergency response"/);
   assert.doesNotMatch(page, /id: "jan24-day"|id: "cvs"|id: "threev"|id: "return"/);
@@ -215,6 +219,27 @@ test("integrates Day 13 digital evidence without converting searches into diagno
   assert.match(page, /Searches can reflect distress, curiosity, self-assessment/);
   assert.match(page, /event\.details\.join\(" "\)/);
   assert.match(page, /SRC-0099/);
+});
+
+test("integrates Trial Days 14–18 with source posture and no invented medication band", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+
+  for (const id of [
+    "oct20-mother-texts", "susan-medication-texts", "allison-late-december", "january-family-messages",
+    "zeizel-hospital", "resnick-evaluation", "mack-evaluation", "defense-experts-day15-16", "dueling-psychiatrists-day18",
+  ]) assert.match(page, new RegExp(`id: "${id}"`), `${id} should be present`);
+
+  assert.match(page, /Patrick placed Clancy's disclosure after Thanksgiving and before December 6/);
+  assert.match(page, /Paula Musgrove separately recalled an early-to-mid-December conversation/);
+  assert.match(page, /Susan Clancy testified that Lindsay drove herself to the emergency department/);
+  assert.match(page, /MGH recommended or offered inpatient McLean care/);
+  assert.match(page, /providerLabel: "Forensic evaluator"/);
+  assert.match(page, /start: "2023-01-08", end: "2023-01-09", label: "dose unknown"/);
+  assert.match(page, /Cavanaugh—not Clancy—supplied the theological response/);
+  assert.match(page, /Rev Day 16 transcript incorrectly labels Zeizel as Donald Condie/);
+  assert.match(page, /Mack's cross-examination was still in progress/);
+  for (const sourceId of ["SRC-0101", "SRC-0105", "SRC-0108", "SRC-0111", "SRC-0113"]) assert.match(page, new RegExp(sourceId));
+  assert.doesNotMatch(page, /start: "2026-[^"]+"[^\n]+status: "(?:prescribed|reported|inpatient|detected)"/);
 });
 
 test("separates civil pleading allegations from established event evidence", async () => {
@@ -290,9 +315,10 @@ test("places the arguments above the timeline in a full-width section", async ()
   assert.match(page, /<h3>Deliberate conduct with retained capacity\.<\/h3>/);
   assert.match(page, /characterized as postpartum or bipolar psychosis and exacerbated by profound insomnia and medication exposure/);
   assert.match(page, /deliberately created an opportunity to kill her children/);
-  assert.match(page, /<strong>Evidence introduced through Day 13:<\/strong>/);
-  assert.match(page, /Patrick&apos;s testimony regarding earlier thoughts of harming the children and severe sleep deprivation, together with Clancy&apos;s contemporaneous reports of impaired maternal bonding/);
-  assert.match(page, /Patrick&apos;s later account that Clancy described hearing a male voice tell her this was her “last chance”/);
+  assert.match(page, /<strong>Evidence introduced through Day 18:<\/strong>/);
+  assert.match(page, /Patrick&apos;s and Paula Musgrove&apos;s testimony regarding an earlier disclosure of thoughts of harming the children/);
+  assert.match(page, /Retrospective accounts to Patrick, a hospital chaplain, and Zeizel describing a male command voice/);
+  assert.match(page, /Mack&apos;s opinion that Clancy had major depression but was not psychotic/);
   assert.match(page, /What prosecutors characterize as a deliberate sequence of killings followed by locking of a bedroom door/);
   assert.match(page, /<strong>Important points:<\/strong>/);
   assert.match(page, /potential insanity\/lack of capacity is raised/);
@@ -317,7 +343,8 @@ test("renders an audience-ready common-questions section after the timeline", as
   assert.match(html, /Did Jollotta diagnose Clancy with bipolar disorder\?/);
   assert.match(html, /Does a prescription or pharmacy fill prove that a medication was taken\?/);
   assert.match(page, /<details className="faq-item"/);
-  assert.equal((page.match(/question: "/g) ?? []).length, 7);
+  assert.match(html, /What do the retained psychiatric experts actually disagree about\?/);
+  assert.equal((page.match(/question: "/g) ?? []).length, 8);
   assert.ok(html.indexOf('class="workspace"') < html.indexOf('class="common-questions"'));
   assert.ok(html.indexOf('class="common-questions"') < html.indexOf("<footer"));
   assert.match(css, /\.common-questions \{[^}]*grid-template-columns:/);
