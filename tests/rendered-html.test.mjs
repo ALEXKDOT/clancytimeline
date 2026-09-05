@@ -26,7 +26,7 @@ test("server-renders the clinical timeline", async () => {
   assert.match(html, /97<\/strong> events shown/);
   assert.match(html, /Show medication context/);
   assert.match(html, /MEDICATION TIMELINE/);
-  assert.match(html, /117-source master corpus/);
+  assert.match(html, /final-trial corpus/);
   assert.match(html, /event-card/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site|codex-preview/i);
 });
@@ -35,8 +35,9 @@ test("renders evidence-aware controls and chronology boundaries", async () => {
   const response = await render();
   const html = await response.text();
 
-  assert.match(html, /Evidence cutoff/);
-  assert.match(html, /Aug 21, 2026 · Trial Day 18/);
+  assert.match(html, /Most recent update/);
+  assert.match(html, /Sep 5, 2026 · Final trial update/);
+  assert.match(html, /Evidence through the September 4 mistrial/);
   assert.match(html, /Arranged by Alex Krawec, MS4/);
   assert.match(html, /Feedback: AKrawec@mednet\.ucla\.edu/);
   assert.match(html, /May 26, 2022 – January 24, 2023/);
@@ -45,7 +46,7 @@ test("renders evidence-aware controls and chronology boundaries", async () => {
   assert.match(html, /Fit chronology at default zoom/);
 });
 
-test("compresses both inactive post-offense periods and renders the revised orientation arc", async () => {
+test("compresses three inactive post-offense periods and renders the revised orientation arc", async () => {
   const [page, css] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
@@ -55,9 +56,13 @@ test("compresses both inactive post-offense periods and renders the revised orie
   assert.match(page, /lateStart: "2024-05-01T00:00:00"/);
   assert.match(page, /earlyEnd: "2024-10-01T00:00:00"/);
   assert.match(page, /lateStart: "2026-04-01T00:00:00"/);
+  assert.match(page, /earlyEnd: "2026-06-10T00:00:00"/);
+  assert.match(page, /lateStart: "2026-08-17T00:00:00"/);
   assert.match(page, /onsetStart: "2022-08-23T00:00:00"/);
   assert.match(page, /~11 months omitted/);
   assert.match(page, /~18 months omitted/);
+  assert.match(page, /~2 months omitted/);
+  assert.match(page, /"Aug 2026"/);
   assert.match(page, /Anxiety emerges after 12 well weeks/);
   assert.match(page, /Sep–Nov/);
   assert.match(page, /Severe depression persists, offense on January 24/);
@@ -196,7 +201,7 @@ test("collapses January 24 into one card with a provenance-preserving detail seq
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
 
   assert.match(page, /id: "jan24-sequence"/);
-  assert.match(page, /<h3>January 24 timeline<\/h3>/);
+  assert.match(page, /selected\.sequenceTitle \?\? "January 24 timeline"/);
   assert.match(page, /time: "4:46–4:48 PM", title: "Constipation-product activity and CVS call"/);
   assert.match(page, /time: "5:09–5:10 PM", title: "Calls associated with the food order"/);
   assert.match(page, /time: "5:13–5:24 PM", title: "Last phone unlock and last watch heart-rate record"/);
@@ -237,7 +242,7 @@ test("integrates Trial Days 14–18 with source posture and no invented medicati
   assert.match(page, /start: "2023-01-08", end: "2023-01-09", label: "dose unknown"/);
   assert.match(page, /Cavanaugh—not Clancy—supplied the theological response/);
   assert.match(page, /Rev Day 16 transcript incorrectly labels Zeizel as Donald Condie/);
-  assert.match(page, /Mack's cross-examination was still in progress/);
+  assert.match(page, /Mack's cross-examination concluded August 24/);
   for (const sourceId of ["SRC-0101", "SRC-0105", "SRC-0108", "SRC-0111", "SRC-0113"]) assert.match(page, new RegExp(sourceId));
   assert.doesNotMatch(page, /start: "2026-[^"]+"[^\n]+status: "(?:prescribed|reported|inpatient|detected)"/);
 });
@@ -296,7 +301,7 @@ test("renders bulk filters, larger controls, and user-dismissed horizontal-scrol
   assert.match(css, /\.scroll-coach\.dismissed/);
 });
 
-test("places the arguments above the timeline in a full-width section", async () => {
+test("places the final-trial arguments above the timeline in a full-width section", async () => {
   const [page, css] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
@@ -315,13 +320,14 @@ test("places the arguments above the timeline in a full-width section", async ()
   assert.match(page, /<h3>Deliberate conduct with retained capacity\.<\/h3>/);
   assert.match(page, /characterized as postpartum or bipolar psychosis and exacerbated by profound insomnia and medication exposure/);
   assert.match(page, /deliberately created an opportunity to kill her children/);
-  assert.match(page, /<strong>Evidence introduced through Day 18:<\/strong>/);
+  assert.match(page, /<strong>Evidence presented at trial:<\/strong>/);
   assert.match(page, /Patrick&apos;s and Paula Musgrove&apos;s testimony regarding an earlier disclosure of thoughts of harming the children/);
   assert.match(page, /Retrospective accounts to Patrick, a hospital chaplain, and Zeizel describing a male command voice/);
-  assert.match(page, /Mack&apos;s opinion that Clancy had major depression but was not psychotic/);
+  assert.match(page, /Mack, Heilbrun, and Saathoff each opined that Clancy retained criminal responsibility/);
   assert.match(page, /What prosecutors characterize as a deliberate sequence of killings followed by locking of a bedroom door/);
   assert.match(page, /<strong>Important points:<\/strong>/);
   assert.match(page, /potential insanity\/lack of capacity is raised/);
+  assert.match(page, /A hung jury is not a verdict/);
   assert.match(css, /\.reading-guide \{[^}]*padding: 44px 40px 48px;\s*\}/);
   assert.match(css, /\.argument-evidence \{[^}]*font-size: 14px/);
   assert.match(css, /\.argument-boundary \{[^}]*font-size: 14px/);
@@ -344,11 +350,28 @@ test("renders an audience-ready common-questions section after the timeline", as
   assert.match(html, /Does a prescription or pharmacy fill prove that a medication was taken\?/);
   assert.match(page, /<details className="faq-item"/);
   assert.match(html, /What do the retained psychiatric experts actually disagree about\?/);
-  assert.equal((page.match(/question: "/g) ?? []).length, 8);
+  assert.match(html, /What did the mistrial decide\?/);
+  assert.equal((page.match(/question: "/g) ?? []).length, 9);
   assert.ok(html.indexOf('class="workspace"') < html.indexOf('class="common-questions"'));
   assert.ok(html.indexOf('class="common-questions"') < html.indexOf("<footer"));
   assert.match(css, /\.common-questions \{[^}]*grid-template-columns:/);
   assert.match(css, /\.faq-item summary:focus-visible/);
+});
+
+test("integrates the Commonwealth rebuttal, closings, and mistrial without implying a verdict", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+
+  for (const id of ["saathoff-evaluation", "heilbrun-testimony", "saathoff-testimony", "closing-arguments", "hung-jury-mistrial"]) {
+    assert.match(page, new RegExp(`id: "${id}"`), `${id} should be present`);
+  }
+  assert.match(page, /evidence: "Attorney argument"/);
+  assert.match(page, /evidence: "Judicial proceeding"/);
+  assert.match(page, /Seven deliberation days/);
+  assert.match(page, /no conviction, acquittal, or binding finding about criminal responsibility/i);
+  assert.match(page, /The charges remain pending/);
+  assert.match(page, /September 29, 2026 at 9:00 a\.m\./);
+  assert.doesNotMatch(page, /cross-examination was (?:unfinished|still in progress)/i);
+  assert.doesNotMatch(page, /(?:vote|split)[^.\n]{0,40}11\s*[-–]\s*1|11\s*[-–]\s*1[^.\n]{0,40}(?:vote|split)/i);
 });
 
 test("moves every event-card subtext into the existing drawer summary", async () => {

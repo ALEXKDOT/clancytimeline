@@ -1,6 +1,6 @@
 # Clancy Interactive Clinical Timeline
 
-Interactive visualization built from the 117-source corpus, with an evidence cutoff of August 21, 2026 after Trial Day 18.
+Interactive visualization built from the final-trial corpus, updated September 5, 2026 with evidence through the September 4 mistrial. The jury returned no verdict, and the criminal case remained unresolved at the close of this update.
 
 ## View online
 

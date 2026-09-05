@@ -35,7 +35,9 @@ type Evidence =
   | "Contemporaneous messages"
   | "Forensic-expert testimony"
   | "Retained expert opinion"
-  | "Expert testimony";
+  | "Expert testimony"
+  | "Attorney argument"
+  | "Judicial proceeding";
 type ViewKey = "course" | "post";
 
 type TimelineEvent = {
@@ -65,6 +67,7 @@ type TimelineEvent = {
     detail: string;
     evidence: string;
   }[];
+  sequenceTitle?: string;
   medication?: string;
   source: string;
   caution?: string;
@@ -122,7 +125,7 @@ const categoryMeta: Record<Category, { label: string; color: string }> = {
 
 const views: Record<ViewKey, { label: string; eyebrow: string; start: string; end: string; baseWidth: number }> = {
   course: { label: "Clinical course", eyebrow: "May 26, 2022 – January 24, 2023", start: "2022-05-26T00:00:00", end: "2023-01-25T00:00:00", baseWidth: 9000 },
-  post: { label: "Post-offense", eyebrow: "January 2023 – August 2026", start: "2023-01-25T00:00:00", end: "2026-08-31T00:00:00", baseWidth: 3200 },
+  post: { label: "Post-offense", eyebrow: "January 2023 – September 2026", start: "2023-01-25T00:00:00", end: "2026-09-05T00:00:00", baseWidth: 3200 },
 };
 
 const orientationCareMap = [
@@ -236,7 +239,7 @@ const commonQuestions = [
     id: "child-harm-disclosure",
     question: "Were thoughts of harming the children disclosed to treating clinicians?",
     answer: [
-      "Not in the contemporaneous treating encounters presented through Trial Day 18. Jollotta testified that the intrusive thoughts disclosed to her concerned wanting to die, not harming the children; the pre-offense Tufts testimony likewise did not establish disclosure of child-harm thoughts or a plan.",
+      "Not in the contemporaneous treating encounters presented at trial. Jollotta testified that the intrusive thoughts disclosed to her concerned wanting to die, not harming the children; the pre-offense Tufts testimony likewise did not establish disclosure of child-harm thoughts or a plan.",
       "Patrick testified that, between Thanksgiving and December 6, Clancy described distressing thoughts involving harm to the children without a specific method, plan, or external voice. Paula Musgrove later testified independently that Clancy nervously told her and Patrick in early to mid-December that she had ‘thoughts of harming the children.’ This strengthens evidence that a family disclosure occurred, but still does not resolve whether the phenomenon was an ego-dystonic intrusion, homicidal intent, or psychosis.",
     ],
     evidence: "Evidence basis: Patrick testimony, Trial Day 1 (SRC-0065); Tufts and Jollotta testimony, Trial Days 10–11 (SRC-0091, SRC-0096); Musgrove testimony, Trial Day 14 (SRC-0101).",
@@ -245,7 +248,7 @@ const commonQuestions = [
     id: "command-voice-timing",
     question: "Was the alleged male command voice documented before January 24?",
     answer: [
-      "Not in the treating evidence presented through Trial Day 18. The pre-offense clinical encounters introduced at trial did not document a command hallucination, and Jollotta testified that Clancy did not describe hearing voices to her.",
+      "Not in the treating evidence presented at trial. The pre-offense clinical encounters introduced at trial did not document a command hallucination, and Jollotta testified that Clancy did not describe hearing voices to her.",
       "Patrick testified that approximately one week later Clancy described a man's ‘last chance’ voice. Chaplain Sheila Cavanaugh testified to a January 31 safety-related male-voice account, and Paul Zeizel testified to a more explicit February 6 speakerphone report. Cavanaugh's contemporaneous notes did not record the voice. The experts later interpreted these retrospective accounts differently; their repetition does not make the voice a contemporaneous pre-offense finding.",
     ],
     evidence: "Evidence basis: Patrick testimony, Trial Day 2 (SRC-0068); treating testimony, Trial Days 9–11 (SRC-0087, SRC-0091, SRC-0096); Zeizel testimony, Trial Days 15–16 (SRC-0105, SRC-0108); Cavanaugh testimony, Trial Day 17 (SRC-0111).",
@@ -257,16 +260,25 @@ const commonQuestions = [
       "No. A prescription shows that a clinician ordered a medication; a fill shows that a pharmacy dispensed it. Actual exposure requires different evidence, such as a contemporaneous patient report, an inpatient medication-administration record, or later toxicologic detection.",
       "Even toxicologic detection does not by itself establish the prescribed dose, timing, clinical effect, or causation. This distinction is especially important here because the record contains short trials, proposed titrations, overlapping strengths, tapers, and uncertain adherence.",
     ],
-    evidence: "Evidence basis: pharmacy exhibits and medication testimony summarized in the 117-source corpus through Trial Day 18.",
+    evidence: "Evidence basis: pharmacy exhibits and medication testimony summarized in the master corpus.",
   },
   {
     id: "expert-disagreement",
     question: "What do the retained psychiatric experts actually disagree about?",
     answer: [
-      "They agree on one important threshold point: Clancy had a mental disease or defect on January 24. They disagree about its diagnosis and legal effect. Defense experts Zeizel and Resnick described bipolar-spectrum illness and postpartum psychosis, interpreted the reported male voice and loss-of-agency account as psychotic, and concluded that both cognitive and volitional capacity were substantially impaired.",
-      "Commonwealth expert Avram Mack diagnosed a major depressive episode, probably major depressive disorder, found no mania or psychosis, and concluded that both capacities were retained. He relied in part on the organized sequence, communications, stated reasoning, and absence of contemporaneous psychosis documentation. These are competing forensic opinions—not established facts—and Mack's cross-examination was still unfinished when court adjourned on August 21.",
+      "The retained experts agreed that Clancy had a mental disease or defect on January 24, but disagreed about its diagnosis and legal effect. Defense experts Zeizel and Resnick described bipolar-spectrum illness and postpartum psychosis, interpreted the reported male voice and loss-of-agency account as psychotic, and concluded that both cognitive and volitional capacity were substantially impaired.",
+      "Commonwealth expert Avram Mack diagnosed a major depressive episode, probably major depressive disorder, and found no mania or psychosis. Commonwealth experts Kirk Heilbrun and Gregory Saathoff accepted bipolar-II formulations but did not find offense-time psychosis. All three Commonwealth experts concluded that both legal capacities were retained. Their competing interpretations of retrospective accounts, organized conduct, dissociation, and symptom history are expert opinions—not established facts.",
     ],
-    evidence: "Evidence basis: Zeizel testimony, Trial Days 15–16 (SRC-0105, SRC-0108); Resnick and Mack testimony, Trial Day 18 (SRC-0113).",
+    evidence: "Evidence basis: Zeizel testimony, Trial Days 15–16 (SRC-0105, SRC-0108); Resnick and Mack testimony, Trial Days 18–19 (SRC-0113, SRC-0118); Heilbrun and Saathoff testimony, Trial Days 19–21 (SRC-0118–SRC-0120).",
+  },
+  {
+    id: "mistrial-meaning",
+    question: "What did the mistrial decide?",
+    answer: [
+      "It produced no verdict. The jury did not acquit or convict Clancy and made no binding finding about psychosis or criminal responsibility. After seven days of deliberations, jurors reported that they could not reach a unanimous decision, and no verdict was recorded on any count. Judge William Sullivan declared a mistrial on September 4, 2026.",
+      "The charges therefore remain pending, and whether the Commonwealth will retry the case was unresolved when this final update was prepared. Accounts of the jury's numerical split or the direction of individual votes were not established through a public jury poll and should not be treated as a verdict.",
+    ],
+    evidence: "Evidence basis: September 4 proceeding and mistrial declaration (SRC-0127); emergency SJC petition and denial (SRC-0128); contemporaneous final-day reporting (SRC-0131).",
   },
 ];
 
@@ -416,7 +428,7 @@ const events: TimelineEvent[] = [
   {
     id: "dec15", date: "2022-12-15T15:00:00", displayDate: "December 15", title: "Phone call: “worst day”; higher care urged", short: "Persistent suicidal thoughts; no active plan", category: "symptom", evidence: "Contemporaneous record", certainty: "High", clinician: "Rebecca H. Jollotta, CNP", institution: "South Shore Perinatal Behavioral Health", side: "bottom", tier: 0,
     summary: "Clancy and Patrick described her worst day, with persistent intrusive thoughts of suicide but no active plan. Both agreed that a higher level of care might be needed.",
-    details: ["Patrick separately testified that the MGH visit followed Clancy telling her father she wanted suicide, then telling Patrick, ‘I told my dad I want to die and it didn't bother me at all.’ Her father had not testified through Day 18.", "Jollotta discussed MGH emergency evaluation, possible McLean care, and release-of-information needs.", "Later trial testimony established that MGH recommended or offered inpatient McLean care; Clancy did not accept it during that encounter and instead pursued outpatient Women & Infants follow-up."], source: "SRC-0065, 02:12:20–02:12:47; SRC-0096, pp. 63–66; SRC-0105, Trial Day 15, 01:55:13–01:56:16; SRC-0108, Trial Day 16, 01:09:59–01:11:24", caution: "No active plan was disclosed in the cited exchange, and the complete MGH chart is unavailable. The record supports an inpatient offer—not that MGH refused help.", views: ["course"]
+    details: ["Patrick separately testified that the MGH visit followed Clancy telling her father she wanted suicide, then telling Patrick, ‘I told my dad I want to die and it didn't bother me at all.’", "Jollotta discussed MGH emergency evaluation, possible McLean care, and release-of-information needs.", "Later trial testimony established that MGH recommended or offered inpatient McLean care; Clancy did not accept it during this encounter and instead pursued outpatient Women & Infants follow-up."], source: "SRC-0065, 02:12:20–02:12:47; SRC-0096, pp. 63–66; SRC-0105, Trial Day 15, 01:55:13–01:56:16; SRC-0108, Trial Day 16, 01:09:59–01:11:24", caution: "No active plan was disclosed in the cited exchange, and the complete MGH chart is unavailable. The record supports an inpatient offer—not that MGH refused help.", views: ["course"]
   },
   {
     id: "dec16", date: "2022-12-16T15:00:00", displayDate: "December 16", title: "MyChart exchange: plan updated after MGH", short: "Jollotta messages · sleep restored, mood not improved", category: "medication", evidence: "Contemporaneous record", certainty: "High", clinician: "Rebecca H. Jollotta, CNP", institution: "South Shore Perinatal Behavioral Health", side: "top", tier: 1,
@@ -452,7 +464,7 @@ const events: TimelineEvent[] = [
   {
     id: "discharge", date: "2023-01-05T15:00:00", displayDate: "January 5", title: "Inpatient discharge: McLean", short: "Discharged home · next-day psychiatry follow-up required", category: "hospital", evidence: "Contemporaneous record", certainty: "High", clinician: "Alia Goodheart, MD", institution: "McLean Hospital", side: "bottom", tier: 0,
     summary: "Clancy requested an earlier voluntary discharge because she felt anxious in the hospital and wanted to be home with family and the children. Goodheart permitted January 5 discharge only after next-day psychiatric follow-up was arranged.",
-    details: ["At admission she had separately hoped to be home for Cora's birthday. She was not discharged against medical advice, and ‘demanded discharge’ is not supported by the sworn record.", "January 3 family texts documented anxiety about meeting the psychiatry team and worry that she would not be sent home soon; they do not show a demand or an against-medical-advice departure.", "Goodheart said she would have preferred more diagnostic time but identified no acute safety concern. She had Patrick collateral and considered the history consistent.", "Discharge planning included the next-day appointment, Psychology Today and Blue Cross case-management resources, a crisis plan, and after-visit information.", "Clancy's January 4 message described arranging a Friday appointment with ‘my other psychiatrist besides Rebecca,’ consistent with the next-day follow-up requirement.", "Discharge prescriptions: trazodone 50 mg ×28 and lorazepam 1 mg ×14; melatonin was planned; no further quetiapine was planned."], civilClaims: [{ claim: "The complaint alleges a roughly ten-minute post-discharge Goodheart call offering antidepressant names and says Clancy left the ‘best hospital’ feeling there was little hope.", source: "SRC-0032 ¶¶65–66", context: "No independent post-discharge call record was located through Day 18. Goodheart's testimony placed discussion of Cymbalta during the admission, not necessarily in a later call." }], source: "SRC-0087, Trial Day 9, pp. 28–37 and 55–58, 01:36:58–02:04:00 and 03:22:34–03:30:15; SRC-0099, Trial Day 13, pp. 42–43; SRC-0101, Trial Day 14, 02:22:55–02:24:16; compare SRC-0032 ¶¶65–66", caution: "A discharge assessment is a time-limited clinical judgment, not proof of symptoms at later times.", views: ["course"]
+    details: ["At admission she had separately hoped to be home for Cora's birthday. She was not discharged against medical advice, and ‘demanded discharge’ is not supported by the sworn record.", "January 3 family texts documented anxiety about meeting the psychiatry team and worry that she would not be sent home soon; they do not show a demand or an against-medical-advice departure.", "Goodheart said she would have preferred more diagnostic time but identified no acute safety concern. She had Patrick collateral and considered the history consistent.", "Discharge planning included the next-day appointment, Psychology Today and Blue Cross case-management resources, a crisis plan, and after-visit information.", "Clancy's January 4 message described arranging a Friday appointment with ‘my other psychiatrist besides Rebecca,’ consistent with the next-day follow-up requirement.", "Discharge prescriptions: trazodone 50 mg ×28 and lorazepam 1 mg ×14; melatonin was planned; no further quetiapine was planned."], civilClaims: [{ claim: "The complaint alleges a roughly ten-minute post-discharge Goodheart call offering antidepressant names and says Clancy left the ‘best hospital’ feeling there was little hope.", source: "SRC-0032 ¶¶65–66", context: "No independent post-discharge call record was located in the public corpus. Goodheart's testimony placed discussion of Cymbalta during the admission, not necessarily in a later call." }], source: "SRC-0087, Trial Day 9, pp. 28–37 and 55–58, 01:36:58–02:04:00 and 03:22:34–03:30:15; SRC-0099, Trial Day 13, pp. 42–43; SRC-0101, Trial Day 14, 02:22:55–02:24:16; compare SRC-0032 ¶¶65–66", caution: "A discharge assessment is a time-limited clinical judgment, not proof of symptoms at later times.", views: ["course"]
   },
   {
     id: "jan6", date: "2023-01-06T12:00:00", displayDate: "January 6", title: "Telehealth follow-up: after McLean discharge", short: "Video visit · full inpatient chart unavailable to Tufts", category: "clinical", evidence: "Contemporaneous record", certainty: "High", clinician: "Jennifer Tufts, MD", institution: "Aster Mental Health", side: "top", tier: 2,
@@ -483,7 +495,7 @@ const events: TimelineEvent[] = [
   {
     id: "jan16", date: "2023-01-16T12:00:00", displayDate: "January 16", title: "Telehealth visit: severe functional depression", short: "Video visit · very low mood, numbness, forced functioning", category: "clinical", evidence: "Contemporaneous record", certainty: "High", clinician: "Jennifer Tufts, MD", institution: "Aster Mental Health", side: "top", tier: 1,
     summary: "Clancy described very low mood, numbness, forcing herself out of bed, difficulty with basic care, and impaired bonding despite caring for the baby.",
-    details: ["She denied SI, HI, and psychotic symptoms.", "She said she could force herself out of bed, attend to hygiene and eating, and care for the baby, although bonding felt forced.", "Patrick's collateral described her encouraging brunch and sending photos on January 14, appearing ‘pretty good’ at a January 15 water park, and caring for two boys with texts/photos on January 16. These lay observations do not negate the symptoms she reported in treatment.", "Family texts introduced on Day 13 recorded sleep and ‘a little bit’ of daytime improvement on January 8–12, waiting to feel like herself on January 14, and a January 16 outing described as fun. These are contemporaneous communications, not mental-status examinations.", "Prescriptions/fills: amitriptyline 10 mg ×30; diazepam 2 mg was dispensed, but the original label quantity remains unresolved."], civilClaims: [{ claim: "The complaint alleges that within a week of McLean discharge she again heard commands including ‘You should harm the children’ and ‘You should kill yourself.’", source: "SRC-0032 ¶¶70–72", context: "No pre-offense chart or direct disclosure located through Day 18 documented these voices. The January 16 Tufts encounter recorded severe depression but denials of SI, HI, and psychotic symptoms; later expert testimony relied on retrospective accounts." }], source: "SRC-0087, Trial Day 9, pp. 125–126, 06:49:47–06:53:44; SRC-0091, Trial Day 10, pp. 66–67; SRC-0065, 02:30:20–02:39:20; SRC-0099, Trial Day 13, pp. 43–45; compare SRC-0032 ¶¶70–72", caution: "Organized activity, family messages, and a normal-appearing video encounter neither prove nor exclude symptoms outside those observations.", views: ["course"]
+    details: ["She denied SI, HI, and psychotic symptoms.", "She said she could force herself out of bed, attend to hygiene and eating, and care for the baby, although bonding felt forced.", "Patrick's collateral described her encouraging brunch and sending photos on January 14, appearing ‘pretty good’ at a January 15 water park, and caring for two boys with texts/photos on January 16. These lay observations do not negate the symptoms she reported in treatment.", "Family texts introduced on Day 13 recorded sleep and ‘a little bit’ of daytime improvement on January 8–12, waiting to feel like herself on January 14, and a January 16 outing described as fun. These are contemporaneous communications, not mental-status examinations.", "Prescriptions/fills: amitriptyline 10 mg ×30; diazepam 2 mg was dispensed, but the original label quantity remains unresolved."], civilClaims: [{ claim: "The complaint alleges that within a week of McLean discharge she again heard commands including ‘You should harm the children’ and ‘You should kill yourself.’", source: "SRC-0032 ¶¶70–72", context: "No pre-offense chart or direct disclosure presented at trial documented these voices. The January 16 Tufts encounter recorded severe depression but denials of SI, HI, and psychotic symptoms; later expert testimony relied on retrospective accounts." }], source: "SRC-0087, Trial Day 9, pp. 125–126, 06:49:47–06:53:44; SRC-0091, Trial Day 10, pp. 66–67; SRC-0065, 02:30:20–02:39:20; SRC-0099, Trial Day 13, pp. 43–45; compare SRC-0032 ¶¶70–72", caution: "Organized activity, family messages, and a normal-appearing video encounter neither prove nor exclude symptoms outside those observations.", views: ["course"]
   },
   {
     id: "jan23", date: "2023-01-23T12:00:00", displayDate: "January 23", title: "Telehealth visit: final pre-offense encounter", short: "Video visit · depressed, flat; sleep “okay”; SI/HI denied", category: "clinical", evidence: "Contemporaneous record", certainty: "High", clinician: "Jennifer Tufts, MD", institution: "Aster Mental Health", side: "bottom", tier: 1,
@@ -507,7 +519,7 @@ const events: TimelineEvent[] = [
       { time: "By ~6:09 PM", title: "Quiet house and unanswered call", detail: "Patrick returned to an unusually quiet house, called out and yelled down the basement stairs, telephoned Clancy without an answer, and checked upstairs before finding the locked bedroom.", evidence: "Patrick sworn testimony · SRC-0068, 00:19:49–00:22:42" },
       { time: "~6:11 PM onward", title: "Discovery and emergency response", detail: "After finding Clancy outside, Patrick testified that she said, ‘I tried to kill myself’ and ‘They're in the basement.’ He had difficulty connecting to 911, stayed on the call, and first responders arrived about four to five minutes later.", evidence: "Patrick testimony + officer dispatch time · SRC-0068, 00:28:19–00:32:02; SRC-0071, 00:04:12–00:04:37" },
     ],
-    details: ["Each encounter is a narrow observation, not a psychiatric examination; coherent calls and organized behavior at particular moments do not exclude psychosis or establish criminal responsibility.", "The pediatrician's ‘very normal visit’ describes a brief pediatric encounter in the morning, not mental state later in the day.", "The digital extraction corroborates specific device activity and timing; it does not determine why an action occurred, who performed every action, or what Clancy's mental state was.", "The forensic examiner did not physically examine the Apple Watch. Missing later heart-rate or stair records could reflect removal, loss of power, lack of detection, or other technical causes; absence of data is not an act or a timestamp for loss of consciousness.", "Patrick's inference that she was ‘probably giving baths’ was not something he directly observed.", "The investigator's claim that the errands created an opportunity is a probable-cause allegation, not a judicial finding.", "The suicide attempt is evidence of acute distress but does not by itself establish diagnosis, psychosis, or legal insanity."], civilClaims: [{ claim: "The complaint alleges nonstop suicidal and later child-harm commands that day; checking a map to avoid being alone and obtain help; a final demanding male voice after Patrick left; compulsion, dreamlike dissociation, and ingestion of an unspecified quantity of medication during the attempt.", source: "SRC-0032 ¶¶75–83", context: "These remain retrospective plaintiff allegations. By Trial Day 18, several witnesses and experts had recounted later command-voice statements, but those accounts are retrospective, differ in detail, and do not convert the pleaded sequence into contemporaneous observation. The phone extraction establishes device artifacts—not the complaint's asserted motive, compulsion, or mental state." }],
+    details: ["Each encounter is a narrow observation, not a psychiatric examination; coherent calls and organized behavior at particular moments do not exclude psychosis or establish criminal responsibility.", "The pediatrician's ‘very normal visit’ describes a brief pediatric encounter in the morning, not mental state later in the day.", "The digital extraction corroborates specific device activity and timing; it does not determine why an action occurred, who performed every action, or what Clancy's mental state was.", "The forensic examiner did not physically examine the Apple Watch. Missing later heart-rate or stair records could reflect removal, loss of power, lack of detection, or other technical causes; absence of data is not an act or a timestamp for loss of consciousness.", "Patrick's inference that she was ‘probably giving baths’ was not something he directly observed.", "The investigator's claim that the errands created an opportunity is a probable-cause allegation, not a judicial finding.", "The suicide attempt is evidence of acute distress but does not by itself establish diagnosis, psychosis, or legal insanity."], civilClaims: [{ claim: "The complaint alleges nonstop suicidal and later child-harm commands that day; checking a map to avoid being alone and obtain help; a final demanding male voice after Patrick left; compulsion, dreamlike dissociation, and ingestion of an unspecified quantity of medication during the attempt.", source: "SRC-0032 ¶¶75–83", context: "These remain retrospective plaintiff allegations. At trial, several witnesses and experts recounted later command-voice statements, but those accounts are retrospective, differ in detail, and do not convert the pleaded sequence into contemporaneous observation. The phone extraction establishes device artifacts—not the complaint's asserted motive, compulsion, or mental state." }],
     source: "SRC-0065; SRC-0068; SRC-0071; SRC-0084; SRC-0010; SRC-0099, Trial Day 13, pp. 29–33 and 52–54; SRC-0101, Trial Day 14, 00:14:22–00:49:39; compare SRC-0032 ¶¶75–83", caution: "The evidence derives from different sources: family collateral, brief clinical or retail observations, phone artifacts, objective timestamps, attorney theories, expert opinions, and civil allegations are not interchangeable.", views: ["course"]
   },
   {
@@ -556,19 +568,53 @@ const events: TimelineEvent[] = [
     details: ["The complaint attributes a bipolar-I/psychosis/postpartum-onset formulation and antidepressant-activation opinions to her.", "The complete report, testing, raw interviews, and testimony are not publicly available."], source: "SRC-0032 ¶¶84–88", caution: "Selected pleading quotations are not the expert report and are not adjudicated findings.", views: ["post"]
   },
   {
-    id: "mack-evaluation", date: "2026-04-10T12:00:00", displayDate: "April 2026", title: "Commonwealth forensic evaluation: Mack and Heilbrun", short: "Two joint interviews · second date unresolved", category: "post", evidence: "Retained expert opinion", certainty: "Contested", clinician: "Avram Mack, MD; Kirk Heilbrun, PhD", providerLabel: "Forensic evaluators", institution: "Tewksbury Hospital", side: "top", tier: 1,
+    id: "mack-evaluation", date: "2026-04-10T12:00:00", displayDate: "April 10–12, 2026", title: "Commonwealth forensic evaluation: Mack and Heilbrun", short: "Two joint interviews · intervening psychological testing", category: "post", evidence: "Retained expert opinion", certainty: "Contested", clinician: "Avram Mack, MD; Kirk Heilbrun, PhD", providerLabel: "Forensic evaluators", institution: "Tewksbury Hospital", side: "top", tier: 1,
     summary: "Mack and Heilbrun jointly evaluated Clancy in April 2026. Mack did not personally interview collateral witnesses and later testified for the Commonwealth.",
-    details: ["The first interview date was April 10. The public Rev transcript renders the second as April 12, while multiple same-day reports say April 16; the certified transcript or expert report is needed to resolve it.", "Mack diagnosed a major depressive episode, probably within major depressive disorder, with possible generalized anxiety; he found no mania, hypomania, postpartum psychosis, or psychosis.", "He agreed that a mental disease or defect was present but opined that Clancy retained both cognitive and volitional capacities, relying on her retrospective wording, organized conduct, day-of interactions, and the absence of a reported command about method."], source: "SRC-0113, Trial Day 18, 01:22:03–03:57:35", caution: "These are retained Commonwealth expert opinions based partly on retrospective statements and record review. Mack's cross-examination was unfinished at the August 21 adjournment.", views: ["post"]
+    details: ["Mack and Heilbrun jointly interviewed Clancy on April 10 and April 12; Heilbrun conducted psychological testing on April 11.", "Mack diagnosed a major depressive episode, probably within major depressive disorder, with possible generalized anxiety; he found no mania, hypomania, postpartum psychosis, or psychosis.", "He agreed that a mental disease or defect was present but opined that Clancy retained both cognitive and volitional capacities, relying on her retrospective wording, organized conduct, day-of interactions, and the absence of a reported command about method.", "Cross-examination concluded August 24. The defense challenged Mack's limited criminal-responsibility trial experience, the nearly three-year delay before evaluation, and aspects of his record interpretation; Mack maintained his diagnostic and capacity opinions."], source: "SRC-0113, Trial Day 18, 01:22:03–03:57:35; SRC-0118, Trial Day 19", caution: "These are retained Commonwealth expert opinions based partly on retrospective statements and record review. Cross-examination tested their foundation but did not itself establish a competing fact.", views: ["post"]
   },
   {
-    id: "defense-experts-day15-16", date: "2026-08-19T12:00:00", displayDate: "August 18–19, 2026", title: "Defense experts: medication, psychosis and capacity", short: "Condie, Laposata and Zeizel · Trial Days 15–16", category: "post", evidence: "Expert testimony", certainty: "Contested", side: "bottom", tier: 2,
+    id: "saathoff-evaluation", date: "2026-05-29T12:00:00", displayDate: "May 29 & Jun. 4", title: "Saathoff forensic evaluation", short: "Two video interviews · approximately 11–11.5 hours", category: "post", evidence: "Retained expert opinion", certainty: "High", clinician: "Gregory Saathoff, MD", providerLabel: "Commonwealth psychiatrist / retained evaluator", institution: "Commonwealth evaluation", side: "bottom", tier: 1,
+    summary: "Saathoff interviewed Clancy by video on May 29 and June 4, 2026, more than three years after the acts, and separately interviewed Patrick as part of his retained evaluation.",
+    details: ["The first Clancy interview lasted approximately six to six-and-a-half hours; the second lasted about five hours.", "The interviews were retrospective forensic evaluations, not treatment encounters and not contemporaneous observations of her January 2023 condition.", "Saathoff later testified for the Commonwealth on August 25 and 26."], source: "SRC-0119–SRC-0120, Trial Days 20–21", caution: "The interview dates and duration are established by sworn testimony. Diagnostic, credibility, and criminal-responsibility conclusions drawn from them remain expert opinion.", views: ["post"]
+  },
+  {
+    id: "defense-experts-day15-16", date: "2026-08-19T12:00:00", displayDate: "Aug. 18–19", title: "Defense experts: medication, psychosis and capacity", short: "Condie, Laposata and Zeizel · Trial Days 15–16", category: "post", evidence: "Expert testimony", certainty: "Contested", side: "bottom", tier: 2,
     summary: "Defense experts addressed psychopharmacology, physical injuries, psychosis, and criminal responsibility; their scopes and evidentiary limits differed substantially.",
     details: ["Donald Condie, MD, reviewed records and discussed possible medication activation but never examined Clancy and gave no criminal-responsibility opinion. Cross clarified that sertraline 50-mg exposure was unresolved, quetiapine 400 mg was only a target, and lamotrigine was reportedly not taken.", "Elisabeth Laposata, MD, offered forensic-pathology opinions about self-inflicted wounds, the fall, and ligature physiology—not psychiatric diagnosis or criminal responsibility.", "Paul Zeizel, PsyD, opined that Clancy had bipolar disorder with postpartum psychosis and lacked both cognitive and volitional capacity. Cross challenged retrospective voice evidence, medication and date errors, record completeness, and his evolving clinical/forensic role.", "Emily Thorndike was examined only on voir dire outside the jury and was excluded from testifying before the jury; limited McLean staffing/program records were allowed instead."], source: "SRC-0105, Trial Day 15; SRC-0108, Trial Day 16", caution: "The Rev Day 16 transcript incorrectly labels Zeizel as Donald Condie. Audio, context, and other sources establish Zeizel as the Day 16 witness.", views: ["post"]
   },
   {
-    id: "dueling-psychiatrists-day18", date: "2026-08-21T12:00:00", displayDate: "August 21, 2026", title: "Forensic psychiatrists disagree on criminal responsibility", short: "Resnick for defense · Mack for Commonwealth · Trial Day 18", category: "post", evidence: "Expert testimony", certainty: "Contested", side: "top", tier: 0,
+    id: "dueling-psychiatrists-day18", date: "2026-08-21T12:00:00", displayDate: "Aug. 21 & 24", title: "Forensic psychiatrists disagree on criminal responsibility", short: "Resnick for defense · Mack for Commonwealth · Trial Days 18–19", category: "post", evidence: "Expert testimony", certainty: "Contested", side: "top", tier: 0,
     summary: "Resnick and Mack agreed that Clancy had a mental disease or defect but reached opposite conclusions about diagnosis, psychosis, and both branches of Massachusetts criminal responsibility.",
-    details: ["Resnick: bipolar II disorder with severe depression; acute postpartum psychosis, command hallucination, and delusion of influence; both cognitive and volitional capacities substantially impaired.", "Mack: major depressive episode, probably major depressive disorder, with possible anxiety; no mania or psychosis; both capacities retained.", "Resnick treated organized behavior as compatible with intermittent psychosis. Mack treated the communications, sequence, stated reasoning, and organized conduct as supporting retained capacities in this case.", "The defense rested after Resnick. Mack's cross-examination was still in progress when court adjourned, so no Day 18 cross point is presented as his final concession."], source: "SRC-0113, Trial Day 18", caution: "These are opposing forensic opinions, not established facts or a verdict. Planning does not exclude psychosis, and psychosis alone does not establish lack of criminal responsibility.", views: ["post"]
+    details: ["Resnick: bipolar II disorder with severe depression; acute postpartum psychosis, command hallucination, and delusion of influence; both cognitive and volitional capacities substantially impaired.", "Mack: major depressive episode, probably major depressive disorder, with possible anxiety; no mania or psychosis; both capacities retained.", "Resnick treated organized behavior as compatible with intermittent psychosis. Mack treated the communications, sequence, stated reasoning, and organized conduct as supporting retained capacities in this case.", "Mack's cross-examination concluded August 24. He acknowledged the long interval between the acts and his interviews and that bipolar II is a serious mental illness, while maintaining that the record did not establish bipolar disorder or psychosis in Clancy."], source: "SRC-0113, Trial Day 18; SRC-0118, Trial Day 19", caution: "These are opposing forensic opinions, not established facts or a verdict. Planning does not exclude psychosis, and psychosis alone does not establish lack of criminal responsibility.", views: ["post"]
+  },
+  {
+    id: "heilbrun-testimony", date: "2026-08-25T12:00:00", displayDate: "Aug. 24–25", title: "Heilbrun: bipolar II, not acute psychosis", short: "Commonwealth forensic psychologist · Trial Days 19–20", category: "post", evidence: "Expert testimony", certainty: "Contested", clinician: "Kirk Heilbrun, PhD", providerLabel: "Commonwealth forensic psychologist", institution: "Commonwealth rebuttal", side: "bottom", tier: 1,
+    summary: "Heilbrun accepted bipolar II disorder and a serious mental disease or defect, but interpreted the acts as suicide combined with altruistic filicide rather than conduct caused by an acute psychotic episode.",
+    details: ["He attributed the clinical picture to bipolar-II depressive symptoms worsened by sleep problems and probable continuing adverse medication reactions; he did not diagnose postpartum psychosis.", "He described Clancy's reported sense of watching herself as consistent with peritraumatic dissociation, which can resemble psychosis phenomenologically without establishing it.", "He opined that she retained awareness of illegality and moral wrongfulness and retained control over whether, when, and how to act, despite depression, hopelessness, and a serious suicide attempt.", "On cross he agreed that severe insomnia can lead to psychosis, that the reported experience was consistent with peritraumatic dissociation, and that some features could suggest psychosis. He had evaluated Clancy years later and had not listened to the 911 recording.", "After Heilbrun discussed Catholic doctrine, the judge struck that subject, denied a defense mistrial motion, and instructed jurors to disregard it; the stricken material was not evidence."], source: "SRC-0118–SRC-0119, Trial Days 19–20", caution: "‘Altruistic filicide,’ bipolar II, peritraumatic dissociation, and retained legal capacities are Heilbrun's forensic formulations, not adjudicated facts.", views: ["post"]
+  },
+  {
+    id: "saathoff-testimony", date: "2026-08-26T12:00:00", displayDate: "Aug. 25–26", title: "Saathoff: bipolar II with retained capacities", short: "Commonwealth psychiatrist / retained evaluator · Trial Days 20–21", category: "post", evidence: "Expert testimony", certainty: "Contested", clinician: "Gregory Saathoff, MD", providerLabel: "Commonwealth psychiatrist / retained evaluator", institution: "Commonwealth rebuttal", side: "top", tier: 1,
+    summary: "Saathoff diagnosed bipolar II disorder and a mental disease or defect, but rejected an offense-time command-psychosis explanation and opined that Clancy remained criminally responsible.",
+    details: ["Saathoff interviewed Clancy by video for roughly six to six-and-a-half hours on May 29 and about five hours on June 4, 2026—more than three years after the acts—and separately interviewed Patrick.", "He tied the bipolar-II formulation partly to marked insomnia after sertraline and said he would use the diagnosis to warn future clinicians about SSRI treatment, while acknowledging that the history did not satisfy all or many formal criteria.", "He interpreted the reported relief of intrusive thoughts with lorazepam as supporting internal anxiety-related thoughts rather than an external voice; that remains an expert inference, not a pharmacologic test of phenomenology.", "He relied on the day-of sequence, route and timing searches, avoidance of witnesses, concealment, and inconsistencies in retrospective accounts to support retained appreciation and behavioral control.", "He testified that psychosis or a command hallucination, even if present, would not automatically determine either legal capacity; he ultimately opined that both capacities were retained."], source: "SRC-0119–SRC-0120, Trial Days 20–21", caution: "Saathoff's diagnosis, interpretation of lorazepam response, credibility analysis, and criminal-responsibility conclusions are retained expert opinions. They do not establish medication ingestion beyond the underlying evidence.", views: ["post"]
+  },
+  {
+    id: "closing-arguments", date: "2026-08-27T12:00:00", displayDate: "August 27, 2026", title: "Closing arguments and jury instructions", short: "Competing theories submitted to jury · deliberations begin", category: "post", evidence: "Attorney argument", certainty: "High", side: "bottom", tier: 2,
+    summary: "The parties presented opposing interpretations of the same psychiatric and behavioral record, after which Judge Sullivan instructed the jury on criminal responsibility, homicide offenses, burden of proof, and unanimity.",
+    details: ["The defense argued that severe perinatal illness, psychosis, medication effects, and a genuine suicide attempt left Clancy without criminal responsibility.", "The Commonwealth argued that Clancy was depressed but not psychotic, created an opportunity to kill the children, and retained both appreciation and control.", "The judge instructed that the Commonwealth bore the burden beyond a reasonable doubt to prove criminal responsibility, and that lack of responsibility could rest on substantial impairment of either appreciation of wrongfulness or ability to conform conduct.", "Deliberations began after the final charge."], source: "SRC-0121, Trial Day 22", caution: "Closing statements are advocacy, not evidence. Jury instructions state the governing law; the later hung jury did not adopt either side's factual theory.", views: ["post"]
+  },
+  {
+    id: "hung-jury-mistrial", date: "2026-09-04T12:00:00", displayDate: "September 4, 2026", title: "Hung jury; mistrial declared", short: "Seven deliberation days · no verdict on any count", category: "post", evidence: "Judicial proceeding", certainty: "High", side: "top", tier: 0,
+    summary: "After seven days of deliberations, the jury reported that it could not reach a unanimous decision. Judge Sullivan declared a mistrial; no verdict was recorded on any count, and there was no conviction, acquittal, or binding finding about criminal responsibility.",
+    sequenceTitle: "Deliberation and mistrial sequence",
+    sequence: [
+      { time: "Aug 27", title: "Deliberations begin", detail: "The jury received final instructions and began considering the charges and criminal-responsibility issue.", evidence: "SRC-0121 · court proceeding" },
+      { time: "Aug 28", title: "Physical exhibits requested", detail: "According to counsel and contemporaneous reporting, jurors requested the knife and prescription-bottle evidence. The underlying jury note is not public, and the request does not reveal how jurors evaluated those exhibits.", evidence: "SRC-0122; SRC-0149 · counsel account in AP report" },
+      { time: "Sep 1", title: "First reported impasse", detail: "After many hours, jurors said they were unable to reach unanimity; the judge directed them to continue under the existing instructions.", evidence: "SRC-0124 · recorded proceeding" },
+      { time: "Sep 2", title: "Tuey–Rodriguez instruction", detail: "After another impasse, the judge delivered Massachusetts's supplemental deadlock instruction and deliberations continued.", evidence: "SRC-0125 · recorded proceeding" },
+      { time: "Sep 3", title: "Reasonable-doubt reinstruction", detail: "A foreperson note reported a dispute about one juror's application of reasonable doubt. After sidebar inquiry of all jurors, the judge said each affirmed following the law, re-instructed the jury, and declined a defense request to remove the juror or conduct further inquiry.", evidence: "SRC-0126 · recorded proceeding" },
+      { time: "Sep 4", title: "Final note, SJC petition, mistrial", detail: "The jury reported it would not reach unanimity. The defense unsuccessfully sought emergency SJC intervention and requested polling on lesser offenses; the trial judge then discharged the jury and declared a mistrial.", evidence: "SRC-0127–SRC-0128 · proceeding and petition" },
+    ],
+    details: ["The jury was not publicly polled on its vote or on lesser offenses. Claims about an exact numerical split or the direction of votes therefore are not a verdict and should not be treated as an adjudicated finding.", "The charges remain pending. As of this final update, the Commonwealth had not announced whether it would retry the case.", "The matter was continued to September 29, 2026 at 9:00 a.m. for status, trial assignment, and argument on a Rule 25 motion; that prospective hearing falls outside this final-trial evidence cutoff."], source: "SRC-0122–SRC-0128; SRC-0131; SRC-0149", caution: "A mistrial ends this jury trial without deciding the merits. It does not establish guilt, acquittal, psychosis, or lack of criminal responsibility.", views: ["post"]
   },
 ];
 
@@ -906,12 +952,14 @@ const courseBreak = {
 const postBreaks = [
   { earlyEnd: "2023-06-01T00:00:00", lateStart: "2024-05-01T00:00:00", breakStartPct: 43, breakEndPct: 48, label: "~11 months omitted" },
   { earlyEnd: "2024-10-01T00:00:00", lateStart: "2026-04-01T00:00:00", breakStartPct: 65, breakEndPct: 71, label: "~18 months omitted" },
+  { earlyEnd: "2026-06-10T00:00:00", lateStart: "2026-08-17T00:00:00", breakStartPct: 77, breakEndPct: 81, label: "~2 months omitted" },
 ];
 
 const postSegments = [
   { start: views.post.start, end: postBreaks[0].earlyEnd, startPct: 0, endPct: postBreaks[0].breakStartPct },
   { start: postBreaks[0].lateStart, end: postBreaks[1].earlyEnd, startPct: postBreaks[0].breakEndPct, endPct: postBreaks[1].breakStartPct },
-  { start: postBreaks[1].lateStart, end: views.post.end, startPct: postBreaks[1].breakEndPct, endPct: 100 },
+  { start: postBreaks[1].lateStart, end: postBreaks[2].earlyEnd, startPct: postBreaks[1].breakEndPct, endPct: postBreaks[2].breakStartPct },
+  { start: postBreaks[2].lateStart, end: views.post.end, startPct: postBreaks[2].breakEndPct, endPct: 100 },
 ];
 
 function timelinePct(value: string, view: ViewKey, start: string, end: string) {
@@ -1257,13 +1305,13 @@ export default function Home() {
     return () => window.removeEventListener("keydown", escape);
   });
 
-  const postTicks = [
-    ...monthTicks(postSegments[0].start, postSegments[0].end),
-    { date: postSegments[1].start, label: "May 2024" },
-    ...monthTicks(postSegments[1].start, postSegments[1].end),
-    { date: postSegments[2].start, label: "Apr 2026" },
-    ...monthTicks(postSegments[2].start, postSegments[2].end),
-  ].filter((tick, index, items) => items.findIndex((candidate) => candidate.date === tick.date) === index);
+  const postSegmentStartLabels = ["", "May 2024", "Apr 2026", "Aug 2026"];
+  const postTicks = postSegments.flatMap((segment, index) => [
+    ...(index > 0 ? [{ date: segment.start, label: postSegmentStartLabels[index] }] : []),
+    ...(index >= 2 ? [] : monthTicks(segment.start, segment.end)),
+  ])
+    .filter((tick, index, items) => items.findIndex((candidate) => candidate.date === tick.date) === index)
+    .filter((tick) => stamp(views.post.end) - stamp(tick.date) >= 10 * 24 * 60 * 60 * 1000);
   const ticks = view === "course" ? monthTicks(courseBreak.onsetStart, range.end) : postTicks;
   const medicationTicks = monthTicks(courseBreak.onsetStart, range.end);
   const medicationVisible = view === "course";
@@ -1334,7 +1382,7 @@ export default function Home() {
             <p className="header-credit">Arranged by Alex Krawec, MS4</p>
           </div>
         </div>
-        <div className="cutoff"><span>Evidence cutoff</span><strong>Aug 21, 2026 · Trial Day 18</strong><p className="header-credit">Feedback: AKrawec@mednet.ucla.edu</p></div>
+        <div className="cutoff"><span>Most recent update</span><strong>Sep 5, 2026 · Final trial update</strong><p className="header-credit">Evidence through the September 4 mistrial · Feedback: AKrawec@mednet.ucla.edu</p></div>
       </header>
 
       <section className="orientation" data-presentation-anchor="background">
@@ -1378,7 +1426,7 @@ export default function Home() {
             <h3>Psychotic illness overwhelmed legal capacity.</h3>
             <p>The defense argues that severe perinatal mental illness—characterized as postpartum or bipolar psychosis and exacerbated by profound insomnia and medication exposure—culminated in a command hallucination and a genuine suicide attempt, leaving Clancy without criminal responsibility for her actions.</p>
             <div className="argument-evidence">
-              <strong>Evidence introduced through Day 18:</strong>
+              <strong>Evidence presented at trial:</strong>
               <ul>
                 <li>Months of documented depression, anxiety, and sleep disturbance</li>
                 <li>Repeated efforts to seek treatment, including hospitalization</li>
@@ -1394,7 +1442,7 @@ export default function Home() {
             <h3>Deliberate conduct with retained capacity.</h3>
             <p>The Commonwealth argues that Clancy experienced depression and anxiety but was not psychotic, deliberately created an opportunity to kill her children, and retained the capacity to understand and control her actions.</p>
             <div className="argument-evidence">
-              <strong>Evidence introduced through Day 18:</strong>
+              <strong>Evidence presented at trial:</strong>
               <ul>
                 <li>Apparently ordinary calls and messages on the day of the killings</li>
                 <li>Phone data documenting Clancy&apos;s search for a restaurant route</li>
@@ -1403,7 +1451,7 @@ export default function Home() {
                 <li>What prosecutors characterize as a deliberate sequence of killings followed by locking of a bedroom door</li>
                 <li>Repeated clinical encounters before the killings without documented hallucinations, delusions, mania, or disorganization</li>
                 <li>The retrospective timing of the command-voice account and its absence from contemporaneous chaplain notes</li>
-                <li>Mack&apos;s opinion that Clancy had major depression but was not psychotic and retained both cognitive and volitional capacity</li>
+                <li>Mack, Heilbrun, and Saathoff each opined that Clancy retained criminal responsibility, despite differing diagnostic formulations</li>
               </ul>
             </div>
           </article>
@@ -1413,6 +1461,7 @@ export default function Home() {
               <li>Organized behavior can coexist with psychosis.</li>
               <li>Psychosis alone does not establish lack of criminal responsibility.</li>
               <li>Once the issue of potential insanity/lack of capacity is raised, Massachusetts requires the Commonwealth to prove criminal responsibility beyond a reasonable doubt.</li>
+              <li>A hung jury is not a verdict and resolves neither guilt nor criminal responsibility.</li>
             </ul>
           </div>
         </div>
@@ -1573,7 +1622,7 @@ export default function Home() {
         <div className="faq-intro">
           <p className="section-number">03 / COMMON QUESTIONS</p>
           <h2 id="common-questions-title">Common questions</h2>
-          <p>Concise answers grounded in evidence introduced through August 21, 2026—Trial Day 18. Where the underlying primary record is unavailable, the answer says so.</p>
+          <p>Concise answers grounded in evidence presented through the September 4, 2026 mistrial. Where the underlying primary record is unavailable, the answer says so.</p>
         </div>
         <div className="faq-list">
           {commonQuestions.map((item, index) => (
@@ -1594,7 +1643,7 @@ export default function Home() {
 
       <footer data-presentation-anchor="footer">
         <p>Educational evidence visualization · not an independent diagnosis, malpractice opinion, criminal-responsibility opinion, or verdict recommendation.</p>
-        <p>Source IDs correspond to the 117-source master corpus through Trial Day 18.</p>
+        <p>Source IDs correspond to the final-trial corpus through the September 4, 2026 mistrial.</p>
       </footer>
 
       {selectedClusterEvents.length > 0 && (
@@ -1629,7 +1678,7 @@ export default function Home() {
                 <p className="drawer-summary"><span className="drawer-context">{selected.short}</span>{selected.summary}</p>
                 {(selected.clinician || selected.institution) && <div className="provider-card"><span>{selected.providerLabel || (selected.clinician ? "Clinician" : "Institution")}</span><strong>{selected.clinician || selected.institution}</strong>{selected.clinician && selected.institution && <small>{selected.institution}</small>}</div>}
                 {selected.medication && <div className="med-callout"><span>Medication action</span><strong>{selected.medication}</strong></div>}
-                {selected.sequence && <div className="drawer-section sequence-section"><h3>January 24 timeline</h3><div className="sequence-list">{selected.sequence.map((step) => <article key={`${step.time}-${step.title}`}><time>{step.time}</time><div><strong>{step.title}</strong><p>{step.detail}</p><small>{step.evidence}</small></div></article>)}</div></div>}
+                {selected.sequence && <div className="drawer-section sequence-section"><h3>{selected.sequenceTitle ?? "January 24 timeline"}</h3><div className="sequence-list">{selected.sequence.map((step) => <article key={`${step.time}-${step.title}`}><time>{step.time}</time><div><strong>{step.title}</strong><p>{step.detail}</p><small>{step.evidence}</small></div></article>)}</div></div>}
                 <div className="drawer-section"><h3>What the evidence supports</h3><ul>{selected.details.map((detail) => <li key={detail}>{detail}</li>)}</ul></div>
                 {selected.civilClaims && selected.civilClaims.length > 0 && <div className="civil-claims-box"><span>Civil pleading allegations</span><p className="civil-claims-boundary">These are allegations in Lindsay Clancy&apos;s civil complaint—not findings—and do not substitute for the underlying medical record or sworn testimony.</p>{selected.civilClaims.map((item) => <article key={`${item.claim}-${item.source}`}><p>{item.claim}</p>{item.context && <p className="civil-claims-context">Record context: {item.context}</p>}<small>{item.source}</small></article>)}</div>}
                 <div className="evidence-card"><div><span>Evidence posture</span><strong>{selected.evidence}</strong></div><div><span>Certainty</span><strong className={`certainty ${selected.certainty.toLowerCase()}`}>{selected.certainty}</strong></div></div>
