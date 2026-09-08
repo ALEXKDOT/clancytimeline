@@ -23,7 +23,7 @@ test("server-renders the clinical timeline", async () => {
   assert.match(html, /<title>Clancy Case — Interactive Clinical Timeline<\/title>/i);
   assert.match(html, /Commonwealth/);
   assert.match(html, /Lindsay Clancy/);
-  assert.match(html, /97<\/strong> events shown/);
+  assert.match(html, /101<\/strong> events shown/);
   assert.match(html, /Show medication context/);
   assert.match(html, /MEDICATION TIMELINE/);
   assert.match(html, /final-trial corpus/);
@@ -36,7 +36,7 @@ test("renders evidence-aware controls and chronology boundaries", async () => {
   const html = await response.text();
 
   assert.match(html, /Most recent update/);
-  assert.match(html, /Sep 5, 2026 · Final trial update/);
+  assert.match(html, /Sep 8, 2026 · Final evidence audit/);
   assert.match(html, /Evidence through the September 4 mistrial/);
   assert.match(html, /Arranged by Alex Krawec, MS4/);
   assert.match(html, /Feedback: AKrawec@mednet\.ucla\.edu/);
@@ -218,9 +218,16 @@ test("integrates Day 13 digital evidence without converting searches into diagno
   const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
 
   assert.match(page, /digital: \{ label: "Digital evidence"/);
-  for (const id of ["surface-aug23", "phone-note-oct25", "phone-search-dec29", "mclean-text-jan3", "new-med-text-jan18", "phone-search-jan19"]) {
+  for (const id of ["surface-aug23", "phone-note-oct25", "phone-note-dec22", "phone-search-dec29", "mclean-text-jan3", "new-med-text-jan18", "phone-search-jan19", "phone-media-jan23"]) {
     assert.match(page, new RegExp(`id: "${id}"`), `${id} should be present`);
   }
+  assert.match(page, /Medication stole my motherhood and my life/);
+  assert.match(page, /id: "phone-note-dec22", date: "2022-12-22T12:00:00", displayDate: "December 22 \/ Jan\. 23"/);
+  assert.match(page, /id: "phone-note-dec22"[^]*?evidence: "Mixed evidence"/);
+  assert.match(page, /id: "phone-note-dec22"[^]*?SRC-0168/);
+  assert.match(page, /event\.id !== "phone-note-dec22"/);
+  assert.doesNotMatch(page, /id: "phone-note-dec22"[^]*?took 25 mg for one week[^]*?views: \["course"\]/);
+  assert.match(page, /more than 1,300 web records/);
   assert.match(page, /could not identify the human user/);
   assert.match(page, /not a clinician assessment/);
   assert.match(page, /attribution to amitriptyline remains unconfirmed/);
@@ -240,12 +247,17 @@ test("integrates Trial Days 14–18 with source posture and no invented medicati
   assert.match(page, /Patrick placed Clancy's disclosure after Thanksgiving and before December 6/);
   assert.match(page, /Paula Musgrove separately recalled an early-to-mid-December conversation/);
   assert.match(page, /Susan Clancy testified that Lindsay drove herself to the emergency department/);
+  assert.match(page, /Susan met her there after about 90 minutes/);
+  assert.doesNotMatch(page, /Susan did not attend the evaluation/);
   assert.match(page, /MGH recommended or offered inpatient McLean care/);
   assert.match(page, /providerLabel: "Forensic evaluator"/);
   assert.match(page, /start: "2023-01-08", end: "2023-01-09", label: "dose unknown"/);
   assert.match(page, /Cavanaugh—not Clancy—supplied the theological response/);
   assert.match(page, /Rev Day 16 transcript incorrectly labels Zeizel as Donald Condie/);
   assert.match(page, /Mack's cross-examination concluded August 24/);
+  assert.match(page, /Evaluated but not accepted · alternatives reviewed/);
+  assert.match(page, /Seven missing 25-mg tablets do not reconcile/);
+  assert.doesNotMatch(page, /id: "mgh-dec30-encounter"/);
   for (const sourceId of ["SRC-0101", "SRC-0105", "SRC-0108", "SRC-0111", "SRC-0113"]) assert.match(page, new RegExp(sourceId));
   assert.doesNotMatch(page, /start: "2026-[^"]+"[^\n]+status: "(?:prescribed|reported|inpatient|detected)"/);
 });
