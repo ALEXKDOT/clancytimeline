@@ -128,6 +128,9 @@ const views: Record<ViewKey, { label: string; eyebrow: string; start: string; en
   post: { label: "Post-offense", eyebrow: "January 2023 – September 2026", start: "2023-01-25T00:00:00", end: "2026-09-05T00:00:00", baseWidth: 3200 },
 };
 
+// Archived for now; set to true to restore the background care-and-medication map.
+const CARE_AND_MEDICATION_MAP_VISIBLE = false;
+
 const orientationCareMap = [
   {
     month: "September-November",
@@ -1394,7 +1397,7 @@ export default function Home() {
             <article><span>Nov–Dec</span><strong>Rapid treatment changes</strong><p>Sleep improves unevenly while depression and intrusive thoughts intensify.</p></article>
             <article><span>January</span><strong>Severe depression persists, offense on January 24</strong><p>McLean admission, medication transition, outpatient follow-up, offense.</p></article>
           </div>
-          <section className="orientation-care" aria-labelledby="orientation-care-title">
+          {CARE_AND_MEDICATION_MAP_VISIBLE && <section className="orientation-care" aria-labelledby="orientation-care-title">
             <div className="orientation-care-heading">
               <div><span>Care and medication map</span><h2 id="orientation-care-title">Providers seen and major medication trials</h2></div>
               <p>Background summary only. Prescribed or filled does not necessarily mean taken; the interactive timeline below preserves the evidentiary distinctions.</p>
@@ -1414,7 +1417,7 @@ export default function Home() {
                 </article>)}
               </div>
             </div>
-          </section>
+          </section>}
         </div>
       </section>
 

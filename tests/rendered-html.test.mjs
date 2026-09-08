@@ -70,7 +70,7 @@ test("compresses three inactive post-offense periods and renders the revised ori
   assert.match(css, /\.filter-chip \{[^}]*height: 34px;[^}]*font-size: 11\.5px/);
 });
 
-test("renders a noninteractive three-period provider and medication background map", async () => {
+test("archives the provider and medication background map without deleting its source", async () => {
   const [response, page, css] = await Promise.all([
     render(),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
@@ -78,18 +78,21 @@ test("renders a noninteractive three-period provider and medication background m
   ]);
   const html = await response.text();
 
-  assert.match(html, /Providers seen and major medication trials/);
+  assert.doesNotMatch(html, /Providers seen and major medication trials/);
+  assert.doesNotMatch(html, /Care and medication map/);
   assert.match(html, /01 \/ BACKGROUND/);
   assert.doesNotMatch(html, /01 \/ ORIENTATION/);
-  assert.match(html, /Background summary only/);
-  for (const month of ["September-November", "December", "January"]) assert.match(html, new RegExp(`>${month}<`));
-  assert.match(html, /Jennifer Tufts, MD/);
-  assert.match(html, /Rebecca H\. Jollotta, CNP/);
-  assert.match(html, /Alia Goodheart, MD/);
-  assert.match(html, /Ativan \(lorazepam\) 0\.5 mg ×7/);
-  assert.match(html, /diazepam 2 mg was dispensed, but the original label quantity remains unresolved/);
-  assert.match(html, /Prescribed or filled does not necessarily mean taken/);
+  assert.doesNotMatch(html, /Background summary only/);
+  assert.match(page, /const CARE_AND_MEDICATION_MAP_VISIBLE = false;/);
   assert.match(page, /const orientationCareMap = \[/);
+  assert.match(page, /\{CARE_AND_MEDICATION_MAP_VISIBLE && <section className="orientation-care"/);
+  for (const month of ["September-November", "December", "January"]) assert.match(page, new RegExp(`month: "${month}"`));
+  assert.match(page, /Jennifer Tufts, MD/);
+  assert.match(page, /Rebecca H\. Jollotta, CNP/);
+  assert.match(page, /Alia Goodheart, MD/);
+  assert.match(page, /Ativan \(lorazepam\) 0\.5 mg ×7/);
+  assert.match(page, /diazepam 2 mg was dispensed, but the original label quantity remains unresolved/);
+  assert.match(page, /Prescribed or filled does not necessarily mean taken/);
   assert.match(page, /className="section-number orientation-label"/);
   assert.match(page, /displayDate: "Late Nov\.–early Dec\."/);
   assert.match(page, /displayDate: "~1 week later"/);
@@ -98,7 +101,7 @@ test("renders a noninteractive three-period provider and medication background m
   assert.doesNotMatch(page.slice(page.indexOf("const orientationCareMap"), page.indexOf("const events")), /date: "[^"]*(?:&|–)[^"]*"/);
   const careMapSource = page.slice(page.indexOf("const orientationCareMap"), page.indexOf("const events"));
   assert.match(careMapSource, /month: "September-November"[\s\S]*date: "Sep 15"[\s\S]*date: "Sep 28"[\s\S]*date: "Oct 3"[\s\S]*date: "Oct 20"[\s\S]*date: "Oct 21"[\s\S]*date: "Oct 26"[\s\S]*date: "Nov 2"[\s\S]*date: "Nov 30"/);
-  assert.equal((html.match(/class="care-month"/g) ?? []).length, 3);
+  assert.equal((html.match(/class="care-month"/g) ?? []).length, 0);
   assert.doesNotMatch(html, /class="care-month-continuation"/);
   assert.match(css, /\.care-map-scroll \{[^}]*overflow-x: hidden/);
   assert.match(css, /\.care-map \{[^}]*width: 100%;[^}]*min-width: 0;[^}]*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/);
